@@ -22,4 +22,31 @@ while($r = $stmt->fetch()){
 }
 
 echo "Done.";
+
+// 2. أتمتة تصنيف أولويات الصيانة بناءً على التحليل الذكي
+$hasPriority = table_has_column($pdo, 'maintenance', 'priority');
+$hasAnalysis = table_has_column($pdo, 'maintenance', 'ai_analysis');
+
+if ($hasPriority || $hasAnalysis) {
+    $stmt = $pdo->query("SELECT id, description, cost FROM maintenance WHERE status = 'pending'");
+    while ($row = $stmt->fetch()) {
+        $analysis = $AI->analyzeMaintenance($row['description'], (float) $row['cost']);
+        $updates = [];
+        $params = [];
+
+        if ($hasPriority) {
+            $updates[] = "priority = ?";
+            $params[] = $analysis['priority'];
+        }
+        if ($hasAnalysis) {
+            $updates[] = "ai_analysis = ?";
+            $params[] = $analysis['analysis'];
+        }
+        if ($updates) {
+            $params[] = $row['id'];
+            $pdo->prepare("UPDATE maintenance SET ".implode(', ', $updates)." WHERE id = ?")->execute($params);
+        }
+    }
+    log_activity($pdo, 'تم تحديث أولويات الصيانة تلقائياً', 'automation');
+}
 ?>

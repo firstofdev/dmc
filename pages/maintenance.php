@@ -1,11 +1,33 @@
 <?php
 // معالجة الحفظ
+$hasPriority = isset($pdo) ? table_has_column($pdo, 'maintenance', 'priority') : false;
+$hasAnalysis = isset($pdo) ? table_has_column($pdo, 'maintenance', 'ai_analysis') : false;
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_maint'])) {
     $u = $pdo->query("SELECT property_id FROM units WHERE id=".$_POST['uid'])->fetch();
     $pid = $u ? $u['property_id'] : 0;
     
     try {
-        $pdo->prepare("INSERT INTO maintenance (property_id, unit_id, vendor_id, description, cost, request_date, status) VALUES (?,?,?,?,?, CURDATE(), 'pending')")->execute([$pid, $_POST['uid'], $_POST['vid'], $_POST['desc'], $_POST['cost']]);
+        $analysis = isset($AI) ? $AI->analyzeMaintenance($_POST['desc'], (float) $_POST['cost']) : ['priority' => 'medium', 'analysis' => 'تحليل ذكي افتراضي.'];
+        $columns = "property_id, unit_id, vendor_id, description, cost, request_date, status";
+        $placeholders = "?,?,?,?,?, CURDATE(), 'pending'";
+        $params = [$pid, $_POST['uid'], $_POST['vid'], $_POST['desc'], $_POST['cost']];
+
+        if ($hasPriority) {
+            $columns .= ", priority";
+            $placeholders .= ", ?";
+            $params[] = $analysis['priority'];
+        }
+        if ($hasAnalysis) {
+            $columns .= ", ai_analysis";
+            $placeholders .= ", ?";
+            $params[] = $analysis['analysis'];
+        }
+
+        $pdo->prepare("INSERT INTO maintenance ($columns) VALUES ($placeholders)")->execute($params);
+        if (isset($pdo)) {
+            log_activity($pdo, "إضافة طلب صيانة للوحدة #{$_POST['uid']} بالأولوية {$analysis['priority']}", 'maintenance');
+        }
         echo "<script>window.location='index.php?p=maintenance';</script>";
         exit;
     } catch(Exception $e) {
@@ -120,7 +142,13 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
                 <th style="padding:15px">#</th>
                 <th style="padding:15px">الوحدة</th>
                 <th style="padding:15px">الوصف</th>
+                <?php if ($hasPriority): ?>
+                    <th style="padding:15px">الأولوية الذكية</th>
+                <?php endif; ?>
                 <th style="padding:15px">المقاول</th>
+                <?php if ($hasAnalysis): ?>
+                    <th style="padding:15px">تحليل ذكي</th>
+                <?php endif; ?>
                 <th style="padding:15px">الحالة</th>
             </tr>
         </thead>
@@ -133,7 +161,19 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
                 <td style="padding:15px"><?= $r['id'] ?></td>
                 <td style="padding:15px"><?= $r['unit_name'] ?></td>
                 <td style="padding:15px"><?= $r['description'] ?></td>
+                <?php if ($hasPriority): ?>
+                    <td style="padding:15px">
+                        <span class="badge" style="background:#111827; border:1px solid #374151">
+                            <?= $r['priority'] ? htmlspecialchars($r['priority']) : 'medium' ?>
+                        </span>
+                    </td>
+                <?php endif; ?>
                 <td style="padding:15px"><?= $r['vname'] ?: '-' ?></td>
+                <?php if ($hasAnalysis): ?>
+                    <td style="padding:15px; color:#9ca3af; font-size:12px">
+                        <?= $r['ai_analysis'] ? htmlspecialchars($r['ai_analysis']) : 'تحليل قيد الإنشاء' ?>
+                    </td>
+                <?php endif; ?>
                 <td style="padding:15px">
                     <span class="badge" style="background:<?= $r['status']=='pending'?'#f59e0b':'#10b981' ?>"><?= $r['status'] ?></span>
                 </td>

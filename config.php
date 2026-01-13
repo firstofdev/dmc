@@ -63,4 +63,34 @@ function upload($f, array $allowedMime = ['image/jpeg', 'image/png', 'applicatio
     }
     return 'uploads/'.$n;
 }
+
+function log_activity(PDO $pdo, string $description, string $type = 'info'): void {
+    try {
+        $stmt = $pdo->prepare("INSERT INTO activity_log (description, type) VALUES (?, ?)");
+        $stmt->execute([$description, $type]);
+    } catch (Exception $e) {
+        // تجاهل الأخطاء في حال عدم وجود الجدول أو أي مشكلة في الاتصال
+    }
+}
+
+function get_recent_activity(PDO $pdo, int $limit = 5): array {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM activity_log ORDER BY created_at DESC, id DESC LIMIT ?");
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
+function table_has_column(PDO $pdo, string $table, string $column): bool {
+    try {
+        $stmt = $pdo->prepare("SHOW COLUMNS FROM `$table` LIKE ?");
+        $stmt->execute([$column]);
+        return (bool) $stmt->fetch();
+    } catch (Exception $e) {
+        return false;
+    }
+}
 ?>
