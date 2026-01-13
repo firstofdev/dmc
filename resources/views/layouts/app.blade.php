@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دار الميار للمقاولات</title>
+    <title>اسم الشركة غير محدد</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -58,7 +58,7 @@
 
     <div class="sidebar">
         <div class="brand">
-            <i class="fa-solid fa-building"></i> دار الميار
+            <i class="fa-solid fa-building"></i> اسم الشركة غير محدد
         </div>
         <a href="/" class="{{ request()->is('/') ? 'active' : '' }}"><i class="fa-solid fa-house ms-2"></i> لوحة التحكم</a>
         <a href="{{ route('properties.index') }}" class="{{ request()->is('properties*') ? 'active' : '' }}"><i class="fa-solid fa-city ms-2"></i> العقارات</a>

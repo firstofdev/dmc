@@ -23,7 +23,7 @@ $page_title = $page_titles[$p] ?? 'لوحة القيادة';
 $stmt = $pdo->prepare("SELECT v FROM settings WHERE k='logo'"); $stmt->execute();
 $db_logo = $stmt->fetchColumn();
 $logo_src = $db_logo && file_exists($db_logo) ? $db_logo : 'logo.png';
-$company_name = 'دار الميار للمقاولات';
+$company_name = 'اسم الشركة غير محدد';
 try {
     $stmt = $pdo->prepare("SELECT v FROM settings WHERE k='company_name'");
     $stmt->execute();

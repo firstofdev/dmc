@@ -76,7 +76,7 @@ try {
     }
     
     // إعدادات افتراضية
-    $defaults = ['company_name'=>'دار الميار للمقاولات', 'logo'=>'logo.png'];
+    $defaults = ['company_name'=>'', 'logo'=>'logo.png'];
     foreach($defaults as $k=>$v) $pdo->prepare("INSERT IGNORE INTO settings (k,v) VALUES (?,?)")->execute([$k,$v]);
     
     // إنشاء مدير

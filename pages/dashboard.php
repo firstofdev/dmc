@@ -468,8 +468,7 @@ document.addEventListener("DOMContentLoaded", function() {
             data: {
                 labels: ['مؤجر', 'شاغر'],
                 datasets: [{
-                    // ضمان عدم ظهور الرسم فارغاً
-                    data: [<?= $stats['rented'] ?: 1 ?>, <?= ($stats['units'] - $stats['rented']) ?: 1 ?>],
+                    data: [<?= $stats['rented'] ?>, <?= ($stats['units'] - $stats['rented']) ?>],
                     backgroundColor: ['#10b981', '#1f2937'],
                     borderWidth: 0
                 }]

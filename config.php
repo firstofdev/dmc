@@ -76,6 +76,28 @@ function log_activity(PDO $pdo, string $description, string $type = 'info'): voi
     }
 }
 
+function get_setting(string $key, string $default = ''): string {
+    if (!isset($GLOBALS['pdo'])) {
+        return $default;
+    }
+
+    try {
+        $stmt = $GLOBALS['pdo']->prepare("SELECT v FROM settings WHERE k = ?");
+        $stmt->execute([$key]);
+        $value = $stmt->fetchColumn();
+        if ($value === false || $value === null || $value === '') {
+            return $default;
+        }
+        return (string) $value;
+    } catch (Exception $e) {
+        return $default;
+    }
+}
+
+function getSet(string $key, string $default = ''): string {
+    return get_setting($key, $default);
+}
+
 function require_role(array $roles): void {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
