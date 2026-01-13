@@ -30,12 +30,16 @@ function send_security_headers(): void {
         "base-uri 'self'",
         "form-action 'self'",
         "frame-ancestors 'none'",
+        "object-src 'none'",
         "img-src 'self' data:",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
         "font-src 'self' https://fonts.gstatic.com",
         "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
         "connect-src 'self'",
     ];
+    if (is_https_request()) {
+        $csp[] = "upgrade-insecure-requests";
+    }
     header('Content-Security-Policy: ' . implode('; ', $csp));
 }
 
@@ -45,8 +49,17 @@ if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.cookie_httponly', '1');
     ini_set('session.cookie_secure', is_https_request() ? '1' : '0');
     ini_set('session.cookie_samesite', 'Lax');
+    ini_set('session.gc_maxlifetime', '28800');
     ini_set('session.sid_length', '48');
     ini_set('session.sid_bits_per_character', '6');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => is_https_request(),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
 
@@ -67,6 +80,9 @@ define('UPLOAD_MAX_BYTES', (int) (getenv('UPLOAD_MAX_BYTES') ?: 5 * 1024 * 1024)
 define('ADMIN_WHATSAPP', getenv('ADMIN_WHATSAPP') ?: '');
 define('PAYMENT_PORTAL_URL', getenv('PAYMENT_PORTAL_URL') ?: '');
 define('SMART_FEATURES_MODE', getenv('SMART_FEATURES_MODE') ?: 'force');
+define('SESSION_IDLE_TIMEOUT', (int) (getenv('SESSION_IDLE_TIMEOUT') ?: 1800));
+define('SESSION_MAX_LIFETIME', (int) (getenv('SESSION_MAX_LIFETIME') ?: 28800));
+define('SESSION_ROTATE_INTERVAL', (int) (getenv('SESSION_ROTATE_INTERVAL') ?: 900));
 
 try {
     $pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);
@@ -142,6 +158,57 @@ function get_client_ip(): string {
     }
 
     return '0.0.0.0';
+}
+
+function session_fingerprint(): string {
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $ip = get_client_ip();
+    return hash('sha256', $userAgent . '|' . $ip);
+}
+
+function initialize_session_security(): void {
+    $now = time();
+    if (empty($_SESSION['created_at'])) {
+        $_SESSION['created_at'] = $now;
+    }
+    $_SESSION['last_activity'] = $now;
+    $_SESSION['last_rotate'] = $now;
+    $_SESSION['fingerprint'] = session_fingerprint();
+}
+
+function enforce_session_security(): void {
+    if (session_status() === PHP_SESSION_NONE) {
+        return;
+    }
+    if (empty($_SESSION['uid'])) {
+        return;
+    }
+    $now = time();
+    $createdAt = (int) ($_SESSION['created_at'] ?? $now);
+    $lastActivity = (int) ($_SESSION['last_activity'] ?? $now);
+    if (($now - $lastActivity) > SESSION_IDLE_TIMEOUT || ($now - $createdAt) > SESSION_MAX_LIFETIME) {
+        session_unset();
+        session_destroy();
+        header('Location: login.php');
+        exit;
+    }
+    $currentFingerprint = session_fingerprint();
+    $storedFingerprint = (string) ($_SESSION['fingerprint'] ?? '');
+    if ($storedFingerprint !== '' && !hash_equals($storedFingerprint, $currentFingerprint)) {
+        session_unset();
+        session_destroy();
+        header('Location: login.php');
+        exit;
+    }
+    $_SESSION['last_activity'] = $now;
+    if ($storedFingerprint === '') {
+        $_SESSION['fingerprint'] = $currentFingerprint;
+    }
+    $lastRotate = (int) ($_SESSION['last_rotate'] ?? 0);
+    if ($lastRotate === 0 || ($now - $lastRotate) > SESSION_ROTATE_INTERVAL) {
+        session_regenerate_id(true);
+        $_SESSION['last_rotate'] = $now;
+    }
 }
 
 function rate_limit_check(string $key, int $maxAttempts, int $windowSeconds, int $blockSeconds = 900): array {

@@ -1,5 +1,6 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
+enforce_session_security();
 if(!isset($_SESSION['uid'])) { header("Location: login.php"); exit; }
 $user_name = $_SESSION['user_name'] ?? 'المدير';
 $role = $_SESSION['role'] ?? 'admin'; // نحتاج الصلاحية هنا
