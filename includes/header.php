@@ -15,7 +15,8 @@ $page_titles = [
     'vendors' => 'المقاولين',
     'users' => 'المستخدمين',
     'settings' => 'الإعدادات',
-    'smart_center' => 'مركز التمكين الذكي'
+    'smart_center' => 'مركز التمكين الذكي',
+    'competitive' => 'تحليل المنافسين'
 ];
 $page_title = $page_titles[$p] ?? 'لوحة القيادة';
 
@@ -176,6 +177,7 @@ $company_name_safe = htmlspecialchars($company_name);
         <a href="index.php?p=alerts" class="nav-link <?= $p=='alerts'?'active':'' ?>"><i class="fa-solid fa-bell"></i> <span>التنبيهات</span></a>
         <a href="index.php?p=maintenance" class="nav-link <?= $p=='maintenance'?'active':'' ?>"><i class="fa-solid fa-screwdriver-wrench"></i> <span>الصيانة</span></a>
         <a href="index.php?p=vendors" class="nav-link <?= $p=='vendors'?'active':'' ?>"><i class="fa-solid fa-helmet-safety"></i> <span>المقاولين</span></a>
+        <a href="index.php?p=competitive" class="nav-link <?= $p=='competitive'?'active':'' ?>"><i class="fa-solid fa-trophy"></i> <span>تحليل المنافسين</span></a>
         <a href="index.php?p=smart_center" class="nav-link <?= $p=='smart_center'?'active':'' ?>"><i class="fa-solid fa-brain"></i> <span>التمكين الذكي</span></a>
         <?php if($role === 'admin'): ?>
         <a href="index.php?p=users" class="nav-link <?= $p=='users'?'active':'' ?>"><i class="fa-solid fa-user-shield"></i> <span>المستخدمين</span></a>
