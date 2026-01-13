@@ -2,15 +2,30 @@
 require 'config.php';
 if($_POST){
     check_csrf();
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE username=?");
-    $stmt->execute([$_POST['user']]); $u = $stmt->fetch();
-    if($u && password_verify($_POST['pass'], $u['password'])){ 
-        $_SESSION['uid'] = $u['id'];
-        log_activity($pdo, "تسجيل دخول ناجح للمستخدم: ".$u['username'], 'auth_success');
-        header("Location: index.php"); exit; 
-    } 
-    log_activity($pdo, "فشل تسجيل الدخول للمستخدم: ".$_POST['user'], 'auth_failed');
-    $err="خطأ في البيانات";
+    $attempts = $_SESSION['login_attempts'] ?? ['count' => 0, 'time' => time()];
+    if (time() - $attempts['time'] > 600) {
+        $attempts = ['count' => 0, 'time' => time()];
+    }
+    if ($attempts['count'] >= 5) {
+        $err = "محاولات كثيرة، حاول لاحقاً.";
+    } else {
+        $attempts['count']++;
+        $_SESSION['login_attempts'] = $attempts;
+
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE username=?");
+        $stmt->execute([$_POST['user']]); $u = $stmt->fetch();
+        if($u && password_verify($_POST['pass'], $u['password'])){ 
+            session_regenerate_id(true);
+            $_SESSION['uid'] = $u['id'];
+            $_SESSION['user_name'] = $u['full_name'] ?: $u['username'];
+            $_SESSION['role'] = $u['role'] ?? 'staff';
+            unset($_SESSION['login_attempts']);
+            log_activity($pdo, "تسجيل دخول ناجح للمستخدم: ".$u['username'], 'auth_success');
+            header("Location: index.php"); exit; 
+        } 
+        log_activity($pdo, "فشل تسجيل الدخول للمستخدم: ".$_POST['user'], 'auth_failed');
+        $err="خطأ في البيانات";
+    }
 }
 ?>
 <!DOCTYPE html>

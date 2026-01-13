@@ -7,6 +7,27 @@ class SmartSystem {
         $this->pdo = $pdo;
     }
 
+    private function safeFetchColumn(string $sql, array $params = [], $default = 0) {
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            $value = $stmt->fetchColumn();
+            return $value !== false && $value !== null ? $value : $default;
+        } catch (Exception $e) {
+            return $default;
+        }
+    }
+
+    private function safeFetchAll(string $sql, array $params = []): array {
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
     private function postJson($url, array $payload, array $headers = []) {
         $ch = curl_init($url);
         $allHeaders = array_merge(['Content-Type: application/json'], $headers);
@@ -90,6 +111,129 @@ class SmartSystem {
         $stmt->execute(["تم إرسال رسالة لـ $phone: $message"]);
     }
 
+    public function getCashflowForecast(): array {
+        $today = date('Y-m-d');
+        $in30 = $this->safeFetchColumn(
+            "SELECT COALESCE(SUM(amount),0) FROM payments WHERE status != 'paid' AND due_date BETWEEN ? AND DATE_ADD(?, INTERVAL 30 DAY)",
+            [$today, $today],
+            0
+        );
+        $in60 = $this->safeFetchColumn(
+            "SELECT COALESCE(SUM(amount),0) FROM payments WHERE status != 'paid' AND due_date BETWEEN ? AND DATE_ADD(?, INTERVAL 60 DAY)",
+            [$today, $today],
+            0
+        );
+        $in90 = $this->safeFetchColumn(
+            "SELECT COALESCE(SUM(amount),0) FROM payments WHERE status != 'paid' AND due_date BETWEEN ? AND DATE_ADD(?, INTERVAL 90 DAY)",
+            [$today, $today],
+            0
+        );
+        $overdueAmount = $this->safeFetchColumn(
+            "SELECT COALESCE(SUM(amount),0) FROM payments WHERE status != 'paid' AND due_date < ?",
+            [$today],
+            0
+        );
+        $paidLast90 = $this->safeFetchColumn(
+            "SELECT COALESCE(SUM(amount),0) FROM payments WHERE status = 'paid' AND paid_date >= DATE_SUB(?, INTERVAL 90 DAY)",
+            [$today],
+            0
+        );
+        $billedLast90 = $this->safeFetchColumn(
+            "SELECT COALESCE(SUM(amount),0) FROM payments WHERE due_date >= DATE_SUB(?, INTERVAL 90 DAY)",
+            [$today],
+            0
+        );
+        $collectionTrend = $billedLast90 > 0 ? round(($paidLast90 / $billedLast90) * 100, 1) : 0;
+
+        return [
+            'in_30' => (float) $in30,
+            'in_60' => (float) $in60,
+            'in_90' => (float) $in90,
+            'overdue' => (float) $overdueAmount,
+            'collection_trend' => $collectionTrend,
+        ];
+    }
+
+    public function getMaintenancePulse(): array {
+        $pending = (int) $this->safeFetchColumn(
+            "SELECT COUNT(*) FROM maintenance WHERE status = 'pending'",
+            [],
+            0
+        );
+        $avgCost90 = (float) $this->safeFetchColumn(
+            "SELECT COALESCE(AVG(cost),0) FROM maintenance WHERE request_date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY) AND cost IS NOT NULL",
+            [],
+            0
+        );
+        $repeatUnits = (int) $this->safeFetchColumn(
+            "SELECT COUNT(*) FROM (
+                SELECT unit_id, COUNT(*) AS cnt
+                FROM maintenance
+                WHERE request_date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
+                GROUP BY unit_id
+                HAVING cnt >= 2
+            ) t",
+            [],
+            0
+        );
+        $emergencyCount = (int) $this->safeFetchColumn(
+            "SELECT COUNT(*) FROM maintenance WHERE status='pending' AND (description LIKE '%حريق%' OR description LIKE '%تماس%' OR description LIKE '%انفجار%' OR description LIKE '%ماس كهربائي%')",
+            [],
+            0
+        );
+
+        $riskScore = min(100, ($pending * 5) + ($repeatUnits * 10) + ($emergencyCount * 15));
+
+        return [
+            'pending' => $pending,
+            'avg_cost_90' => round($avgCost90, 2),
+            'repeat_units' => $repeatUnits,
+            'emergency' => $emergencyCount,
+            'risk_score' => $riskScore,
+        ];
+    }
+
+    public function getTenantRiskSnapshot(): array {
+        $rows = $this->safeFetchAll(
+            "SELECT t.id, t.full_name, t.phone,
+                COUNT(p.id) AS overdue_count,
+                COALESCE(SUM(p.amount),0) AS overdue_amount,
+                COALESCE(MAX(DATEDIFF(CURDATE(), p.due_date)),0) AS max_overdue_days
+            FROM payments p
+            JOIN contracts c ON p.contract_id = c.id
+            JOIN tenants t ON c.tenant_id = t.id
+            WHERE p.status != 'paid' AND p.due_date < CURDATE()
+            GROUP BY t.id",
+            []
+        );
+
+        $highRisk = 0;
+        $maxOverdueDays = 0;
+        foreach ($rows as &$row) {
+            $score = ($row['overdue_count'] * 10) + ($row['max_overdue_days'] * 0.5) + ($row['overdue_amount'] / 1000);
+            $row['risk_score'] = round($score, 1);
+            if ($score >= 40) {
+                $highRisk++;
+            }
+            $maxOverdueDays = max($maxOverdueDays, (int) $row['max_overdue_days']);
+        }
+        unset($row);
+
+        return [
+            'high_risk_count' => $highRisk,
+            'max_overdue_days' => $maxOverdueDays,
+            'items' => $rows,
+        ];
+    }
+
+    public function buildPaymentLink(?int $paymentId): ?string {
+        if (!PAYMENT_PORTAL_URL || !$paymentId) {
+            return null;
+        }
+        $separator = str_contains(PAYMENT_PORTAL_URL, '?') ? '&' : '?';
+        return PAYMENT_PORTAL_URL.$separator.'payment_id='.urlencode((string) $paymentId);
+    }
+
     public function analyzeMaintenance(string $description, ?float $cost = null): array {
         $text = mb_strtolower(trim($description), 'UTF-8');
         $priority = 'medium';
@@ -124,6 +268,16 @@ class SmartSystem {
             $signals[] = 'تكلفة منخفضة';
         }
 
+        $avgCost = (float) $this->safeFetchColumn(
+            "SELECT COALESCE(AVG(cost),0) FROM maintenance WHERE request_date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY) AND cost IS NOT NULL",
+            [],
+            0
+        );
+        if ($cost !== null && $avgCost > 0 && $cost >= ($avgCost * 1.4) && $priority !== 'emergency') {
+            $priority = 'high';
+            $signals[] = 'تكلفة أعلى من المتوسط';
+        }
+
         $analysis = $signals
             ? 'تحليل ذكي: '.$priority.' بناءً على '.implode('، ', $signals)
             : 'تحليل ذكي: حالة قياسية تتطلب متابعة دورية.';
@@ -132,6 +286,25 @@ class SmartSystem {
             'priority' => $priority,
             'analysis' => $analysis,
         ];
+    }
+
+    public function generateRecommendations(array $cashflow, array $maintenancePulse, array $tenantRisk): array {
+        $recommendations = [];
+
+        if ($cashflow['overdue'] > 0) {
+            $recommendations[] = 'إطلاق حملة تحصيل مركزة للدفعات المتأخرة مع خطط سداد مرنة.';
+        }
+        if ($cashflow['collection_trend'] < 80) {
+            $recommendations[] = 'رفع معدل التحصيل عبر تذكيرات واتساب قبل الاستحقاق بـ 7 أيام.';
+        }
+        if ($maintenancePulse['risk_score'] >= 60) {
+            $recommendations[] = 'تنفيذ صيانة وقائية للوحدات المتكررة الأعطال خلال 30 يوماً.';
+        }
+        if ($tenantRisk['high_risk_count'] > 0) {
+            $recommendations[] = 'تفعيل متابعة شخصية للمستأجرين مرتفعي المخاطر.';
+        }
+
+        return $recommendations;
     }
 }
 $AI = new SmartSystem($pdo);

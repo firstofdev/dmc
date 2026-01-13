@@ -1,5 +1,5 @@
 <?php
-if(isset($_SESSION['role']) && $_SESSION['role'] !== 'admin') { echo "<div class='alert alert-danger'>عفواً، هذه الصفحة للمدراء فقط.</div>"; exit; }
+require_role(['admin']);
 
 if(isset($_POST['add_user'])){
     check_csrf();

@@ -18,6 +18,8 @@ define('WHATSAPP_TOKEN', getenv('WHATSAPP_TOKEN') ?: 'your_token_here');
 define('OCR_API_URL', getenv('OCR_API_URL') ?: '');
 define('OCR_API_KEY', getenv('OCR_API_KEY') ?: '');
 define('UPLOAD_MAX_BYTES', (int) (getenv('UPLOAD_MAX_BYTES') ?: 5 * 1024 * 1024));
+define('ADMIN_WHATSAPP', getenv('ADMIN_WHATSAPP') ?: '');
+define('PAYMENT_PORTAL_URL', getenv('PAYMENT_PORTAL_URL') ?: '');
 
 try {
     $pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);
@@ -70,6 +72,17 @@ function log_activity(PDO $pdo, string $description, string $type = 'info'): voi
         $stmt->execute([$description, $type]);
     } catch (Exception $e) {
         // تجاهل الأخطاء في حال عدم وجود الجدول أو أي مشكلة في الاتصال
+    }
+}
+
+function require_role(array $roles): void {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    $role = $_SESSION['role'] ?? null;
+    if (!$role || !in_array($role, $roles, true)) {
+        http_response_code(403);
+        die("غير مصرح بالدخول.");
     }
 }
 
