@@ -67,9 +67,40 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
 <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
         <h3>👷 إدارة المقاولين</h3>
-        <a href="index.php?p=vendors&act=add" class="btn btn-primary" style="text-decoration:none">
+        <button type="button" id="openVendorModal" class="btn btn-primary" style="text-decoration:none">
             <i class="fa-solid fa-plus"></i> إضافة مقاول
-        </a>
+        </button>
+    </div>
+
+    <div id="vendorModal" class="modal-backdrop" style="display:none">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:15px">
+                <h3>إضافة مقاول جديد</h3>
+                <button type="button" id="closeVendorModal" class="btn btn-dark">إغلاق <i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form method="POST" action="index.php?p=vendors">
+                <input type="hidden" name="save_vendor" value="1">
+                <input type="hidden" name="vid" value="">
+                
+                <div style="margin-bottom:15px">
+                    <label style="color:#aaa; display:block; margin-bottom:5px">الاسم</label>
+                    <input type="text" name="name" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555" required>
+                </div>
+                
+                <div style="margin-bottom:15px">
+                    <label style="color:#aaa; display:block; margin-bottom:5px">التخصص</label>
+                    <input type="text" name="type" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555" required>
+                </div>
+                
+                <div style="margin-bottom:25px">
+                    <label style="color:#aaa; display:block; margin-bottom:5px">الجوال</label>
+                    <input type="text" name="phone" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555" required>
+                </div>
+                
+                <button class="btn btn-primary" style="width:100%; justify-content:center; padding:12px">حفظ البيانات</button>
+            </form>
+        </div>
     </div>
     
     <table style="width:100%; border-collapse:collapse">
@@ -100,4 +131,43 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
         </tbody>
     </table>
 </div>
+<style>
+    .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        padding: 20px;
+    }
+    .modal-card {
+        width: min(650px, 100%);
+        background: #1f1f1f;
+        border: 1px solid #333;
+        border-radius: 14px;
+        padding: 25px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+</style>
+<script>
+    const vendorModal = document.getElementById('vendorModal');
+    const openVendorModal = document.getElementById('openVendorModal');
+    const closeVendorModal = document.getElementById('closeVendorModal');
+
+    openVendorModal.addEventListener('click', () => {
+        vendorModal.style.display = 'flex';
+    });
+
+    closeVendorModal.addEventListener('click', () => {
+        vendorModal.style.display = 'none';
+    });
+
+    vendorModal.addEventListener('click', (event) => {
+        if (event.target === vendorModal) {
+            vendorModal.style.display = 'none';
+        }
+    });
+</script>
 <?php endif; ?>
