@@ -251,6 +251,35 @@ if (empty($financeLabels)) {
     </div>
 </div>
 
+<div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; margin-bottom:30px;">
+    <div class="card" style="padding:20px;">
+        <h3 style="margin-top:0"><i class="fa-solid fa-wand-magic-sparkles"></i> لوحة التحكم الذكية للمالك</h3>
+        <p style="color:#94a3b8; margin-top:6px;">مسار سريع لإدارة الأملاك بذكاء: تحديث الوحدات، متابعة العقود، وضبط الفواتير في أقل وقت.</p>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px; margin-top:15px;">
+            <a href="index.php?p=properties" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-city"></i> إدارة العقارات</a>
+            <a href="index.php?p=units" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-building"></i> إدارة الوحدات</a>
+            <a href="index.php?p=contracts" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-file-signature"></i> العقود الذكية</a>
+            <a href="index.php?p=payments" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-money-check-dollar"></i> متابعة الدفعات</a>
+            <a href="index.php?p=maintenance" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-screwdriver-wrench"></i> طلبات الصيانة</a>
+            <a href="index.php?p=smart_center" class="btn btn-primary" style="justify-content:center; width:100%;"><i class="fa-solid fa-brain"></i> مركز التمكين الذكي</a>
+        </div>
+    </div>
+    <div class="card" style="padding:20px;">
+        <h3 style="margin-top:0"><i class="fa-solid fa-shield-heart"></i> مساعد الإدارة الذكي</h3>
+        <div style="display:grid; gap:10px;">
+            <div style="background:#0f172a; padding:12px; border-radius:12px; color:#cbd5f5;">
+                ركّز اليوم على تجديد العقود القريبة والانتباه للدفعات المتأخرة.
+            </div>
+            <div style="background:#0f172a; padding:12px; border-radius:12px; color:#cbd5f5;">
+                راقب عدادات الكهرباء والماء لضبط الاستهلاك وتقليل الفاقد.
+            </div>
+            <div style="background:#0f172a; padding:12px; border-radius:12px; color:#cbd5f5;">
+                فعّل تقارير واتساب الذكية للتذكير التلقائي بالمستحقات.
+            </div>
+        </div>
+    </div>
+</div>
+
 <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px; margin-bottom:30px;">
     <div class="card" style="height:350px; padding:20px;">
         <h3 style="margin-top:0"><i class="fa-solid fa-chart-line"></i> الأداء المالي</h3>

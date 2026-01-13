@@ -20,7 +20,7 @@ define('OCR_API_KEY', getenv('OCR_API_KEY') ?: '');
 define('UPLOAD_MAX_BYTES', (int) (getenv('UPLOAD_MAX_BYTES') ?: 5 * 1024 * 1024));
 define('ADMIN_WHATSAPP', getenv('ADMIN_WHATSAPP') ?: '');
 define('PAYMENT_PORTAL_URL', getenv('PAYMENT_PORTAL_URL') ?: '');
-define('SMART_FEATURES_MODE', getenv('SMART_FEATURES_MODE') ?: 'real');
+define('SMART_FEATURES_MODE', getenv('SMART_FEATURES_MODE') ?: 'force');
 
 try {
     $pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);

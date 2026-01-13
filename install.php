@@ -53,6 +53,19 @@ $sql_commands = [
         FOREIGN KEY (tenant_id) REFERENCES tenants(id),
         FOREIGN KEY (unit_id) REFERENCES units(id)
     )",
+    "CREATE TABLE IF NOT EXISTS meter_readings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        contract_id INT,
+        unit_id INT,
+        reading_type ENUM('check_in','check_out','periodic') DEFAULT 'periodic',
+        elec_reading DECIMAL(12,2) DEFAULT NULL,
+        water_reading DECIMAL(12,2) DEFAULT NULL,
+        reading_date DATE,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE,
+        FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE CASCADE
+    )",
     "CREATE TABLE IF NOT EXISTS payments (
         id INT AUTO_INCREMENT PRIMARY KEY,
         contract_id INT, title VARCHAR(100), 

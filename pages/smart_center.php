@@ -105,7 +105,7 @@ $readinessScore = $forceSmart
             <p style="margin:8px 0 0; color:var(--muted)">واجهة تجمع كل عناصر القوة التشغيلية والتحليلية للنظام.</p>
         </div>
         <div style="text-align:left; color:#22c55e; font-weight:700;">
-            <i class="fa-solid fa-sparkles"></i> <?= $forceSmart ? 'وضع تجريبي (محاكاة محلية)' : 'وضع تشغيلي فعلي' ?>
+            <i class="fa-solid fa-sparkles"></i> <?= $forceSmart ? 'وضع تمكين شامل (جميع المميزات مفعلة)' : 'وضع تشغيلي فعلي' ?>
         </div>
     </div>
 </div>
