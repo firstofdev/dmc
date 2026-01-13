@@ -1,4 +1,28 @@
 </div> <script>
+    (function() {
+        var root = document.documentElement;
+        var toggle = document.getElementById('themeToggle');
+        var storedTheme = localStorage.getItem('theme');
+        var currentTheme = storedTheme || 'dark';
+
+        function applyTheme(theme) {
+            root.setAttribute('data-theme', theme);
+            if (toggle) {
+                toggle.textContent = theme === 'light' ? 'الوضع: فاتح' : 'الوضع: داكن';
+            }
+        }
+
+        applyTheme(currentTheme);
+
+        if (toggle) {
+            toggle.addEventListener('click', function() {
+                currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+                localStorage.setItem('theme', currentTheme);
+                applyTheme(currentTheme);
+            });
+        }
+    })();
+
     // إغلاق المودال عند النقر في الخارج
     window.onclick = function(e){ if(e.target.classList.contains('modal')) e.target.style.display='none'; }
     
