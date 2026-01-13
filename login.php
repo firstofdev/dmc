@@ -94,19 +94,20 @@ try {
             background: radial-gradient(circle, rgba(99, 102, 241, 0.25), transparent 70%);
         }
         .brand-badge{
-            height: 84px;
-            width: 84px;
-            border-radius: 22px;
+            height: 120px;
+            width: 120px;
+            border-radius: 28px;
             background: rgba(15, 23, 42, 0.8);
             display: grid;
             place-items: center;
             margin-bottom: 20px;
             border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.35);
             position: relative;
             z-index: 1;
         }
         .brand-badge img{
-            max-width: 70%;
+            max-width: 78%;
             height: auto;
         }
         .brand-title{
@@ -148,17 +149,18 @@ try {
             backdrop-filter: blur(8px);
         }
         .login-card .logo{
-            height: 74px;
-            width: 74px;
-            border-radius: 18px;
+            height: 110px;
+            width: 110px;
+            border-radius: 24px;
             background: rgba(15, 23, 42, 0.8);
             display: grid;
             place-items: center;
             margin: 0 auto 20px;
             border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.35);
         }
         .login-card .logo img{
-            max-width: 70%;
+            max-width: 80%;
         }
         .login-card h2{
             font-size: 1.4rem;
