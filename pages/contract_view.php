@@ -65,10 +65,24 @@ if (isset($_POST['save_photo'])) {
     
     /* منطقة التوقيع */
     .sig-wrapper { background: white; border-radius: 10px; padding: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .sig-tools { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+    .sig-meta { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px; margin-top:12px; }
+    .sig-meta input { width:100%; padding:8px 10px; border-radius:8px; border:1px solid #d1d5db; }
+    .sig-consent { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:14px; color:#374151; }
+    .sig-strength { margin-top:10px; display:flex; align-items:center; gap:10px; }
+    .sig-strength-bar { flex:1; height:8px; background:#e5e7eb; border-radius:999px; overflow:hidden; }
+    .sig-strength-bar span { display:block; height:100%; width:0%; background:linear-gradient(90deg, #f59e0b, #10b981); transition:width 0.3s ease; }
+    .sig-strength-text { font-size:13px; color:#6b7280; min-width:110px; text-align:end; }
+    .sig-tips { margin-top:10px; font-size:13px; color:#6b7280; line-height:1.6; }
     canvas { width: 100%; height: 250px; border: 2px dashed #ccc; touch-action: none; }
     
     /* منطقة الكاميرا */
     .cam-wrapper { background: black; border-radius: 10px; overflow: hidden; position: relative; height: 300px; }
+    .cam-overlay { position:absolute; inset:0; pointer-events:none; background-image: linear-gradient(to right, rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.2) 1px, transparent 1px); background-size: 33.333% 33.333%; mix-blend-mode: soft-light; }
+    .cam-badge { position:absolute; bottom:10px; left:10px; padding:6px 10px; border-radius:999px; font-size:12px; background:rgba(17,24,39,0.75); color:#fff; }
+    .cam-hint { margin-top:8px; font-size:13px; color:#6b7280; }
+    .quality-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-size:12px; background:#111827; color:#fff; margin-top:10px; }
+    .quality-chip strong { color:#fbbf24; }
     video { width: 100%; height: 100%; object-fit: cover; }
     
     /* شبكة الصور */
@@ -102,20 +116,41 @@ if (isset($_POST['save_photo'])) {
                 <div style="color:green; margin-top:10px; font-weight:bold;">
                     <i class="fa-solid fa-circle-check"></i> تم التوقيع والحفظ
                 </div>
+                <button type="button" class="btn btn-dark" style="margin-top:12px;" onclick="toggleSignatureEdit(true)">توقيع جديد</button>
             </div>
-        <?php else: ?>
+        <?php endif; ?>
+        <div id="sig-editor" style="<?= $c['signature_img'] ? 'display:none;' : 'display:block;' ?>">
             <div class="sig-wrapper">
                 <canvas id="signature-pad"></canvas>
             </div>
-            <div style="margin-top:15px; display:flex; gap:10px;">
-                <button type="button" onclick="saveSignature()" class="btn btn-primary" style="flex:1">حفظ التوقيع</button>
+            <div class="sig-strength">
+                <div class="sig-strength-bar"><span id="sig-strength-bar"></span></div>
+                <div class="sig-strength-text" id="sig-strength-text">قوة التوقيع: --</div>
+            </div>
+            <div class="sig-meta">
+                <input type="text" id="sig-name" placeholder="اسم الموقّع" autocomplete="name">
+                <input type="text" id="sig-id" placeholder="رقم الهوية / الإقامة">
+            </div>
+            <div class="sig-consent">
+                <input type="checkbox" id="sig-consent">
+                <label for="sig-consent">أقر بأن هذا التوقيع إلكتروني ويعبّر عن موافقتي.</label>
+            </div>
+            <div class="sig-tools">
+                <button type="button" onclick="saveSignature()" class="btn btn-primary" style="flex:1">حفظ التوقيع الذكي</button>
+                <button type="button" onclick="undoSignature()" class="btn btn-dark">تراجع خطوة</button>
                 <button type="button" onclick="clearSignature()" class="btn btn-dark">مسح</button>
+                <?php if ($c['signature_img']): ?>
+                    <button type="button" onclick="toggleSignatureEdit(false)" class="btn btn-dark">إلغاء</button>
+                <?php endif; ?>
+            </div>
+            <div class="sig-tips">
+                <strong>نصائح ذكية:</strong> حرّك يدك بشكل طبيعي، املأ مساحة معقولة من اللوحة، وتأكد من وضوح الاسم والهوية لتقوية التوقيع.
             </div>
             <form id="sigForm" method="POST" style="display:none;">
                 <input type="hidden" name="save_sig" value="1">
                 <input type="hidden" name="sig_data" id="sig-data-input">
             </form>
-        <?php endif; ?>
+        </div>
     </div>
 </div>
 
@@ -125,7 +160,11 @@ if (isset($_POST['save_photo'])) {
             <h4><i class="fa-solid fa-camera"></i> التقاط صور (قبل الاستلام)</h4>
             <div class="cam-wrapper">
                 <video id="video-in" autoplay playsinline></video>
+                <div class="cam-overlay"></div>
+                <div class="cam-badge">وضع التحقق الذكي: قبل الاستلام</div>
             </div>
+            <div class="quality-chip" id="quality-in">جودة الصورة: <strong>--</strong></div>
+            <div class="cam-hint">نصيحة: التقط زوايا الغرف والأرضيات والأسقف، وتأكد من الإضاءة الكافية.</div>
             <button onclick="takeSnapshot('check_in')" class="btn btn-primary" style="width:100%; margin-top:10px;">التقاط وحفظ الصورة</button>
         </div>
         <div class="card">
@@ -133,8 +172,12 @@ if (isset($_POST['save_photo'])) {
             <div class="gallery">
                 <?php 
                 $photos = $pdo->query("SELECT * FROM inspection_photos WHERE contract_id=$id AND photo_type='check_in'");
-                while($p = $photos->fetch()) {
+                $photoRows = $photos->fetchAll();
+                foreach ($photoRows as $p) {
                     echo "<a href='{$p['photo_path']}' target='_blank'><img src='{$p['photo_path']}'></a>";
+                }
+                if (count($photoRows) === 0) {
+                    echo "<div style='color:#6b7280; font-size:13px;'>لا توجد صور محفوظة بعد.</div>";
                 }
                 ?>
             </div>
@@ -148,7 +191,11 @@ if (isset($_POST['save_photo'])) {
             <h4><i class="fa-solid fa-camera"></i> التقاط صور (بعد التسليم)</h4>
             <div class="cam-wrapper">
                 <video id="video-out" autoplay playsinline></video>
+                <div class="cam-overlay"></div>
+                <div class="cam-badge">وضع التحقق الذكي: بعد التسليم</div>
             </div>
+            <div class="quality-chip" id="quality-out">جودة الصورة: <strong>--</strong></div>
+            <div class="cam-hint">نصيحة: ركّز على أي أضرار أو تغييرات، وصوّر نفس الزوايا السابقة للمقارنة.</div>
             <button onclick="takeSnapshot('check_out')" class="btn btn-danger" style="width:100%; margin-top:10px;">التقاط وحفظ الصورة</button>
         </div>
         <div class="card">
@@ -156,8 +203,12 @@ if (isset($_POST['save_photo'])) {
             <div class="gallery">
                 <?php 
                 $photos = $pdo->query("SELECT * FROM inspection_photos WHERE contract_id=$id AND photo_type='check_out'");
-                while($p = $photos->fetch()) {
+                $photoRows = $photos->fetchAll();
+                foreach ($photoRows as $p) {
                     echo "<a href='{$p['photo_path']}' target='_blank'><img src='{$p['photo_path']}'></a>";
+                }
+                if (count($photoRows) === 0) {
+                    echo "<div style='color:#6b7280; font-size:13px;'>لا توجد صور محفوظة بعد.</div>";
                 }
                 ?>
             </div>
@@ -197,32 +248,153 @@ if (isset($_POST['save_photo'])) {
     // 2. إعداد التوقيع
     var canvas = document.getElementById('signature-pad');
     var signaturePad;
-    
+    var sigRatio = 1;
+    var sigStrengthBar = document.getElementById('sig-strength-bar');
+    var sigStrengthText = document.getElementById('sig-strength-text');
+
     if (canvas) {
         // ضبط أبعاد الكانفاس لتكون دقيقة
         function resizeCanvas() {
-            var ratio =  Math.max(window.devicePixelRatio || 1, 1);
-            canvas.width = canvas.offsetWidth * ratio;
-            canvas.height = canvas.offsetHeight * ratio;
-            canvas.getContext("2d").scale(ratio, ratio);
+            sigRatio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * sigRatio;
+            canvas.height = canvas.offsetHeight * sigRatio;
+            canvas.getContext("2d").scale(sigRatio, sigRatio);
         }
         window.onresize = resizeCanvas;
         resizeCanvas();
         
-        signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(255, 255, 255)' });
+        signaturePad = new SignaturePad(canvas, { 
+            backgroundColor: 'rgb(255, 255, 255)',
+            minWidth: 1.2,
+            maxWidth: 3.2,
+            velocityFilterWeight: 0.7
+        });
+        signaturePad.onEnd = updateSignatureStrength;
+        updateSignatureStrength();
+    }
+
+    function toggleSignatureEdit(show) {
+        var editor = document.getElementById('sig-editor');
+        if (!editor) return;
+        editor.style.display = show ? 'block' : 'none';
+        if (show && signaturePad) {
+            clearSignature();
+            updateSignatureStrength();
+        }
     }
 
     function clearSignature() {
         if(signaturePad) signaturePad.clear();
+        updateSignatureStrength();
+    }
+
+    function undoSignature() {
+        if (!signaturePad) return;
+        var data = signaturePad.toData();
+        if (data.length) {
+            data.pop();
+            signaturePad.fromData(data);
+        }
+        updateSignatureStrength();
+    }
+
+    function updateSignatureStrength() {
+        if (!signaturePad || !sigStrengthBar || !sigStrengthText) return;
+        var data = signaturePad.toData();
+        if (!data.length) {
+            sigStrengthBar.style.width = '0%';
+            sigStrengthText.textContent = 'قوة التوقيع: --';
+            return;
+        }
+        var metrics = calculateSignatureMetrics(data);
+        var score = metrics.score;
+        var label = 'ضعيف';
+        if (score >= 70) {
+            label = 'قوي';
+        } else if (score >= 40) {
+            label = 'متوسط';
+        }
+        sigStrengthBar.style.width = score + '%';
+        sigStrengthText.textContent = 'قوة التوقيع: ' + label + ' (' + score + '%)';
+    }
+
+    function calculateSignatureMetrics(data) {
+        var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        var totalLength = 0;
+        var pointCount = 0;
+        data.forEach(function (stroke) {
+            var points = stroke.points || [];
+            for (var i = 0; i < points.length; i++) {
+                var x = points[i].x / sigRatio;
+                var y = points[i].y / sigRatio;
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x);
+                maxY = Math.max(maxY, y);
+                pointCount++;
+                if (i > 0) {
+                    var prev = points[i - 1];
+                    var dx = (points[i].x - prev.x) / sigRatio;
+                    var dy = (points[i].y - prev.y) / sigRatio;
+                    totalLength += Math.sqrt(dx * dx + dy * dy);
+                }
+            }
+        });
+        var canvasWidth = canvas.offsetWidth || 1;
+        var canvasHeight = canvas.offsetHeight || 1;
+        var area = Math.max(0, (maxX - minX) * (maxY - minY));
+        var areaRatio = Math.min(area / (canvasWidth * canvasHeight), 1);
+        var lengthScore = Math.min(totalLength / (canvasWidth * 1.5), 1);
+        var strokeScore = Math.min(data.length / 6, 1);
+        var score = Math.round((areaRatio * 50) + (lengthScore * 35) + (strokeScore * 15));
+        score = Math.min(Math.max(score, 0), 100);
+        return { score: score, points: pointCount };
+    }
+
+    function buildSignatureImage(name, idNumber) {
+        var metaHeight = 70 * sigRatio;
+        var exportCanvas = document.createElement('canvas');
+        exportCanvas.width = canvas.width;
+        exportCanvas.height = canvas.height + metaHeight;
+        var ctx = exportCanvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+        ctx.drawImage(canvas, 0, 0);
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = 1 * sigRatio;
+        ctx.beginPath();
+        ctx.moveTo(20 * sigRatio, canvas.height + 10 * sigRatio);
+        ctx.lineTo(exportCanvas.width - 20 * sigRatio, canvas.height + 10 * sigRatio);
+        ctx.stroke();
+        ctx.fillStyle = '#111827';
+        ctx.font = (14 * sigRatio) + 'px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText('الاسم: ' + name, 20 * sigRatio, canvas.height + 32 * sigRatio);
+        ctx.fillText('الهوية: ' + idNumber, 20 * sigRatio, canvas.height + 52 * sigRatio);
+        ctx.textAlign = 'right';
+        ctx.fillText('التاريخ: ' + new Date().toLocaleString('ar-SA'), exportCanvas.width - 20 * sigRatio, canvas.height + 52 * sigRatio);
+        ctx.textAlign = 'left';
+        return exportCanvas.toDataURL('image/png');
     }
 
     function saveSignature() {
         if (!signaturePad || signaturePad.isEmpty()) {
             alert("الرجاء التوقيع أولاً.");
-        } else {
-            document.getElementById('sig-data-input').value = signaturePad.toDataURL();
-            document.getElementById('sigForm').submit();
+            return;
         }
+        var name = document.getElementById('sig-name').value.trim();
+        var idNumber = document.getElementById('sig-id').value.trim();
+        var consent = document.getElementById('sig-consent').checked;
+        if (!name || !idNumber) {
+            alert("فضلاً أدخل اسم الموقّع ورقم الهوية.");
+            return;
+        }
+        if (!consent) {
+            alert("يرجى الموافقة على الإقرار لإتمام الحفظ.");
+            return;
+        }
+        document.getElementById('sig-data-input').value = buildSignatureImage(name, idNumber);
+        document.getElementById('sigForm').submit();
     }
 
     // 3. إعداد الكاميرا
@@ -240,19 +412,126 @@ if (isset($_POST['save_photo'])) {
         }
     }
 
-    function takeSnapshot(type) {
+    function updatePhotoQualityBadge(type, analysis) {
+        var badgeId = type === 'check_in' ? 'quality-in' : 'quality-out';
+        var badge = document.getElementById(badgeId);
+        if (!badge) return;
+        var label = analysis.label || '--';
+        badge.innerHTML = 'جودة الصورة: <strong>' + label + '</strong>';
+    }
+
+    function analyzeFrame(sourceCanvas) {
+        var targetWidth = 200;
+        var scale = targetWidth / sourceCanvas.width;
+        var targetHeight = Math.max(1, Math.round(sourceCanvas.height * scale));
+        var sample = document.createElement('canvas');
+        sample.width = targetWidth;
+        sample.height = targetHeight;
+        var sctx = sample.getContext('2d');
+        sctx.drawImage(sourceCanvas, 0, 0, targetWidth, targetHeight);
+        var image = sctx.getImageData(0, 0, targetWidth, targetHeight);
+        var data = image.data;
+        var gray = new Float32Array(targetWidth * targetHeight);
+        var sum = 0;
+        for (var i = 0, j = 0; i < data.length; i += 4, j++) {
+            var g = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+            gray[j] = g;
+            sum += g;
+        }
+        var avg = sum / gray.length;
+        var lapSum = 0;
+        var lapSq = 0;
+        for (var y = 1; y < targetHeight - 1; y++) {
+            for (var x = 1; x < targetWidth - 1; x++) {
+                var idx = y * targetWidth + x;
+                var lap = -4 * gray[idx] + gray[idx - 1] + gray[idx + 1] + gray[idx - targetWidth] + gray[idx + targetWidth];
+                lapSum += lap;
+                lapSq += lap * lap;
+            }
+        }
+        var count = (targetWidth - 2) * (targetHeight - 2);
+        var variance = count ? (lapSq / count) - Math.pow(lapSum / count, 2) : 0;
+        var brightnessScore = 1 - Math.min(Math.abs(avg - 140) / 140, 1);
+        var sharpnessScore = Math.min(variance / 500, 1);
+        var score = Math.round((brightnessScore * 0.5 + sharpnessScore * 0.5) * 100);
+        var label = 'بحاجة لتحسين';
+        if (score >= 75) {
+            label = 'ممتازة';
+        } else if (score >= 55) {
+            label = 'جيدة';
+        }
+        return { brightness: avg, sharpness: variance, score: score, label: label };
+    }
+
+    function getLocation() {
+        return new Promise(function (resolve) {
+            if (!navigator.geolocation) {
+                resolve(null);
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                },
+                function () { resolve(null); },
+                { enableHighAccuracy: true, timeout: 5000 }
+            );
+        });
+    }
+
+    function addPhotoStamp(photoCanvas, meta) {
+        var ctx = photoCanvas.getContext('2d');
+        var baseHeight = meta.location ? 70 : 50;
+        var barHeight = Math.round(baseHeight);
+        ctx.fillStyle = 'rgba(17,24,39,0.6)';
+        ctx.fillRect(0, photoCanvas.height - barHeight, photoCanvas.width, barHeight);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(meta.line1, 16, photoCanvas.height - barHeight + 30);
+        if (meta.location) {
+            ctx.font = '14px Arial';
+            ctx.fillText('الموقع: ' + meta.location.lat.toFixed(5) + ', ' + meta.location.lng.toFixed(5), 16, photoCanvas.height - 12);
+        }
+    }
+
+    async function takeSnapshot(type) {
         var videoId = (type === 'check_in') ? 'video-in' : 'video-out';
         var video = document.getElementById(videoId);
+        if (!video || !video.videoWidth) {
+            alert('يرجى انتظار تشغيل الكاميرا أولاً.');
+            return;
+        }
+        if (video.videoWidth < 640 || video.videoHeight < 480) {
+            alert('دقة الكاميرا منخفضة. يفضل استخدام دقة أعلى لتحسين جودة التوثيق.');
+            return;
+        }
         
         // إنشاء كانفاس مؤقت للرسم
-        var canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        var ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        var shotCanvas = document.createElement('canvas');
+        shotCanvas.width = video.videoWidth;
+        shotCanvas.height = video.videoHeight;
+        var ctx = shotCanvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, shotCanvas.width, shotCanvas.height);
+
+        var analysis = analyzeFrame(shotCanvas);
+        updatePhotoQualityBadge(type, analysis);
+        var warnings = [];
+        if (analysis.brightness < 70) warnings.push('الإضاءة منخفضة');
+        if (analysis.brightness > 220) warnings.push('الإضاءة عالية جداً');
+        if (analysis.sharpness < 120) warnings.push('الصورة غير حادة');
+        if (warnings.length) {
+            var proceed = confirm('تنبيه الجودة: ' + warnings.join('، ') + '. هل تريد المتابعة؟');
+            if (!proceed) return;
+        }
+
+        var location = await getLocation();
+        var typeLabel = type === 'check_in' ? 'قبل الاستلام' : 'بعد التسليم';
+        var line1 = 'عقد #' + <?= json_encode($c['id']) ?> + ' • ' + typeLabel + ' • ' + new Date().toLocaleString('ar-SA');
+        addPhotoStamp(shotCanvas, { line1: line1, location: location });
         
         // تحويل الصورة لنص وارسالها
-        var dataURI = canvas.toDataURL('image/png');
+        var dataURI = shotCanvas.toDataURL('image/png');
         document.getElementById('p-type-input').value = type;
         document.getElementById('p-data-input').value = dataURI;
         document.getElementById('photoForm').submit();
