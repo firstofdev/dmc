@@ -193,9 +193,18 @@ try {
 }
 
 if (empty($financeLabels)) {
-    $financeLabels = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'];
-    $financePaid = [1000, 2500, 1800, 3000, 4000, 5000];
-    $financeExpected = [1200, 2200, 2600, 3200, 3800, 4200];
+    $monthNames = [
+        1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل', 5 => 'مايو', 6 => 'يونيو',
+        7 => 'يوليو', 8 => 'أغسطس', 9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر'
+    ];
+    $periodCursor = (new DateTime('first day of this month'))->modify('-5 months');
+    for ($i = 0; $i < 6; $i++) {
+        $monthIndex = (int) $periodCursor->format('n');
+        $financeLabels[] = $monthNames[$monthIndex] . ' ' . $periodCursor->format('Y');
+        $financePaid[] = 0;
+        $financeExpected[] = 0;
+        $periodCursor->modify('+1 month');
+    }
 }
 ?>
 
