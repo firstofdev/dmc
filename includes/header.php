@@ -101,9 +101,9 @@ $company_name_safe = htmlspecialchars($company_name);
 
         /* Sidebar */
         .sidebar { width:280px; background:var(--sidebar-bg); border-left:1px solid var(--border); display:flex; flex-direction:column; padding:25px; z-index:20; box-shadow:var(--sidebar-shadow); backdrop-filter: blur(18px); }
-        .logo-wrapper { width: 120px; height: 120px; margin: 0 auto 22px; border-radius: 50%; background: var(--logo-bg); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 12px; transition: 0.3s; animation:floatLogo 6s ease-in-out infinite; }
+        .logo-wrapper { width: 150px; height: 150px; margin: 0 auto 22px; border-radius: 50%; background: var(--logo-bg); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 14px; transition: 0.3s; animation:floatLogo 6s ease-in-out infinite; }
         .logo-wrapper:hover { border-color: var(--primary); box-shadow: var(--glow); transform: scale(1.05); }
-        .logo-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .logo-img { width: 100%; height: 100%; object-fit: contain; image-rendering: -webkit-optimize-contrast; }
         .nav-link { display:flex; align-items:center; gap:15px; padding:16px; margin-bottom:6px; border-radius:14px; color:var(--muted); text-decoration:none; font-weight:500; transition:0.3s; position:relative; overflow:hidden; }
         .nav-link::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.08)); opacity:0; transition:0.3s; }
         .nav-link:hover::after, .nav-link.active::after { opacity:1; }
@@ -131,7 +131,7 @@ $company_name_safe = htmlspecialchars($company_name);
         body.sidebar-collapsed .sidebar { width:90px; padding:20px 12px; }
         body.sidebar-collapsed .sidebar .nav-link { justify-content:center; gap:0; }
         body.sidebar-collapsed .sidebar .nav-link span { display:none; }
-        body.sidebar-collapsed .sidebar .logo-wrapper { width:72px; height:72px; margin-bottom:16px; }
+        body.sidebar-collapsed .sidebar .logo-wrapper { width:90px; height:90px; margin-bottom:16px; }
         body.sidebar-collapsed .sidebar h4, body.sidebar-collapsed .sidebar .tagline { display:none; }
         body.sidebar-collapsed .main { padding:35px; }
         
