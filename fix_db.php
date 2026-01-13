@@ -1,0 +1,88 @@
+<?php
+// fix_db.php - أداة إصلاح وتحديث قاعدة البيانات
+require 'db.php';
+
+echo "<body style='font-family:tahoma; background:#f1f5f9; padding:40px;'>";
+echo "<div style='max-width:600px; margin:auto; background:white; padding:30px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1);'>";
+echo "<h2>🛠️ جاري تحديث قاعدة البيانات...</h2>";
+
+try {
+    // 1. إصلاح جدول المستخدمين (users)
+    // إضافة عمود username
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN username VARCHAR(50) UNIQUE AFTER id");
+        echo "<p style='color:green'>✅ تم إضافة عمود اسم المستخدم (username).</p>";
+    } catch (PDOException $e) { echo "<p style='color:orange'>⚠️ عمود username موجود مسبقاً.</p>"; }
+
+    // إضافة عمود full_name
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN full_name VARCHAR(100) AFTER username");
+        // نقل الأسماء القديمة للعمود الجديد
+        $pdo->exec("UPDATE users SET full_name = name WHERE full_name IS NULL");
+        echo "<p style='color:green'>✅ تم إضافة عمود الاسم الكامل (full_name).</p>";
+    } catch (PDOException $e) { echo "<p style='color:orange'>⚠️ عمود full_name موجود مسبقاً.</p>"; }
+
+    // إضافة عمود phone
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN phone VARCHAR(20) AFTER full_name");
+        echo "<p style='color:green'>✅ تم إضافة عمود الجوال (phone).</p>";
+    } catch (PDOException $e) { echo "<p style='color:orange'>⚠️ عمود phone موجود مسبقاً.</p>"; }
+
+    // 2. تحديث بيانات المستخدمين القدامى
+    // أي مستخدم قديم ليس لديه username سنقوم بتوليده من بريده الإلكتروني
+    $users = $pdo->query("SELECT id, email FROM users WHERE username IS NULL")->fetchAll();
+    foreach ($users as $u) {
+        $parts = explode('@', $u['email']);
+        $newUser = $parts[0];
+        
+        // التأكد من عدم تكرار الاسم
+        $cnt = 0;
+        $finalUser = $newUser;
+        while($pdo->query("SELECT count(*) FROM users WHERE username='$finalUser'")->fetchColumn() > 0) {
+            $cnt++;
+            $finalUser = $newUser . $cnt;
+        }
+        
+        $pdo->prepare("UPDATE users SET username=? WHERE id=?")->execute([$finalUser, $u['id']]);
+        echo "<p style='color:blue'>🔄 تم تحديث حساب: {$u['email']} ⬅️ أصبح اسم المستخدم: <b>$finalUser</b></p>";
+    }
+
+    // 3. إصلاح جدول الوحدات (units) - إضافة الأنواع والعدادات
+    try {
+        $pdo->exec("ALTER TABLE units ADD COLUMN type ENUM('shop','apartment','villa','land','office','warehouse') DEFAULT 'apartment'");
+        $pdo->exec("ALTER TABLE units ADD COLUMN elec_meter_no VARCHAR(50)");
+        $pdo->exec("ALTER TABLE units ADD COLUMN water_meter_no VARCHAR(50)");
+        $pdo->exec("ALTER TABLE units ADD COLUMN notes TEXT");
+        echo "<p style='color:green'>✅ تم تحديث جدول الوحدات (إضافة الأنواع والعدادات).</p>";
+    } catch (PDOException $e) {}
+
+    // 4. إصلاح جدول العقود (contracts) - إضافة التوقيع
+    try {
+        $pdo->exec("ALTER TABLE contracts ADD COLUMN signature_img LONGTEXT");
+        echo "<p style='color:green'>✅ تم تحديث جدول العقود (إضافة التوقيع الإلكتروني).</p>";
+    } catch (PDOException $e) {}
+
+    // 5. التأكد من وجود مستخدم Admin
+    $chk = $pdo->query("SELECT count(*) FROM users WHERE role='admin'")->fetchColumn();
+    if ($chk == 0) {
+        $pass = password_hash('123456', PASSWORD_DEFAULT);
+        $pdo->exec("INSERT INTO users (username, password, full_name, email, role) VALUES ('admin', '$pass', 'المدير العام', 'admin@system.com', 'admin')");
+        echo "<p style='color:green'>✅ تم إنشاء حساب المدير (admin / 123456).</p>";
+    } else {
+        // تحديث كلمة مرور الأدمن للتأكد
+        $pass = password_hash('123456', PASSWORD_DEFAULT);
+        $pdo->exec("UPDATE users SET password='$pass' WHERE username='admin'");
+        echo "<p style='color:blue'>ℹ️ تم إعادة تعيين كلمة مرور (admin) إلى 123456.</p>";
+    }
+
+    echo "<hr><div style='background:#dcfce7; color:#166534; padding:20px; border-radius:10px; text-align:center;'>
+            <h1>🎉 تمت الصيانة بنجاح!</h1>
+            <p>تم تحديث قاعدة البيانات لتتوافق مع نظام Gemini Quantum.</p>
+            <a href='index.php' style='background:#166534; color:white; padding:10px 20px; text-decoration:none; border-radius:5px; font-weight:bold;'>الدخول للنظام الآن</a>
+          </div>";
+
+} catch (PDOException $e) {
+    echo "<h3 style='color:red'>خطأ: " . $e->getMessage() . "</h3>";
+}
+echo "</div></body>";
+?>
