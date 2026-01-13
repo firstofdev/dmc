@@ -1,29 +1,5 @@
 </div> <script>
     (function() {
-        var root = document.documentElement;
-        var toggle = document.getElementById('themeToggle');
-        var storedTheme = localStorage.getItem('theme');
-        var currentTheme = storedTheme || 'dark';
-
-        function applyTheme(theme) {
-            root.setAttribute('data-theme', theme);
-            if (toggle) {
-                toggle.textContent = theme === 'light' ? 'الوضع: فاتح' : 'الوضع: داكن';
-            }
-        }
-
-        applyTheme(currentTheme);
-
-        if (toggle) {
-            toggle.addEventListener('click', function() {
-                currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-                localStorage.setItem('theme', currentTheme);
-                applyTheme(currentTheme);
-            });
-        }
-    })();
-
-    (function() {
         var body = document.body;
         var toggle = document.getElementById('sidebarToggle');
         var storedState = localStorage.getItem('sidebarCollapsed');
