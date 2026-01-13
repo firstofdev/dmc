@@ -6,7 +6,9 @@ if(isset($_POST['save_settings'])){
         'invoice_prefix','invoice_terms','alert_days','target_occupancy','target_collection',
         'overdue_threshold','whatsapp_number','reporting_email',
         'whatsapp_token','whatsapp_api_url','ocr_api_url','ocr_api_key','admin_whatsapp','payment_portal_url',
-        'smart_features_mode'
+        'smart_features_mode','timezone','date_format','maintenance_mode','maintenance_message',
+        'alerts_digest','auto_backup','backup_frequency','invoice_grace_days','default_payment_method',
+        'tenant_portal_url','support_phone','support_email'
     ];
     foreach($keys as $k){ if(isset($_POST[$k])) { $pdo->prepare("REPLACE INTO settings (k,v) VALUES (?,?)")->execute([$k, $_POST[$k]]); } }
     if(!empty($_FILES['logo']['name'])){
@@ -23,6 +25,11 @@ $smartModeHint = $smartMode === 'force' ? 'جميع المميزات فعالة'
 $alertChannelReady = !empty($sets['whatsapp_number']) || !empty($sets['reporting_email']);
 $companyReady = !empty($sets['company_name']) && !empty($sets['phone']) && !empty($sets['email']);
 $brandReady = !empty($sets['logo']);
+$maintenanceEnabled = ($sets['maintenance_mode'] ?? 'off') === 'on';
+$maintenanceLabel = $maintenanceEnabled ? 'مفعّل' : 'غير مفعّل';
+$timezoneValue = $sets['timezone'] ?? 'Asia/Riyadh';
+$dateFormatValue = $sets['date_format'] ?? 'Y-m-d';
+$dateFormatExample = date($dateFormatValue);
 ?>
 
 <form method="POST" enctype="multipart/form-data">
@@ -40,6 +47,7 @@ $brandReady = !empty($sets['logo']);
         .settings-overview-value { font-size:16px; font-weight:700; }
         .settings-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; background:rgba(34,211,238,0.12); color:var(--accent-2); }
         .settings-badge.is-warning { background:rgba(239,68,68,0.12); color:#f87171; }
+        .settings-badge.is-neutral { background:rgba(148,163,184,0.12); color:#cbd5f5; }
         .settings-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; }
         .settings-card { padding:0; overflow:hidden; border:none; }
         .settings-card-header { display:flex; align-items:center; gap:10px; padding:16px 18px; color:white; font-weight:700; background:linear-gradient(135deg, var(--primary), var(--accent)); }
@@ -54,6 +62,8 @@ $brandReady = !empty($sets['logo']);
         .settings-backup p { color:var(--muted); font-size:13px; margin-top:6px; }
         .settings-logo-box { text-align:center; margin-top:15px; border:1px dashed var(--border); padding:12px; border-radius:14px; background:rgba(15,23,42,0.4); }
         .settings-logo-box img { height:50px; display:block; margin:0 auto 6px; }
+        .settings-row { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-top:10px; flex-wrap:wrap; }
+        .settings-inline-badge { padding:6px 12px; border-radius:999px; background:rgba(99,102,241,0.15); color:var(--primary); font-size:12px; font-weight:700; }
     </style>
 
     <div class="settings-header">
@@ -102,6 +112,16 @@ $brandReady = !empty($sets['logo']);
                 <div class="settings-overview-value"><?= $brandReady ? 'شعار مرفوع' : 'بدون شعار' ?></div>
                 <span class="settings-badge <?= $brandReady ? '' : 'is-warning' ?>">
                     <i class="fa-solid fa-image"></i> <?= $brandReady ? 'محدثة' : 'ارفع الشعار' ?>
+                </span>
+            </div>
+        </div>
+        <div class="settings-overview-card">
+            <div class="settings-overview-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div>
+                <div class="settings-overview-title">وضع الصيانة</div>
+                <div class="settings-overview-value"><?= $maintenanceLabel ?></div>
+                <span class="settings-badge <?= $maintenanceEnabled ? 'is-warning' : 'is-neutral' ?>">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <?= $maintenanceEnabled ? 'تنبيه ظاهر' : 'تشغيل طبيعي' ?>
                 </span>
             </div>
         </div>
@@ -186,6 +206,34 @@ $brandReady = !empty($sets['logo']);
         </div>
 
         <div class="card settings-card">
+            <div class="settings-card-header slate"><i class="fa-solid fa-sliders"></i> التفضيلات العامة</div>
+            <div class="settings-card-body">
+                <label class="inp-label">المنطقة الزمنية</label>
+                <select name="timezone" class="inp">
+                    <?php
+                    $timezones = ['Asia/Riyadh' => 'الرياض', 'Asia/Dubai' => 'دبي', 'Africa/Cairo' => 'القاهرة', 'Europe/Istanbul' => 'اسطنبول', 'UTC' => 'UTC'];
+                    foreach ($timezones as $value => $label):
+                    ?>
+                        <option value="<?= $value ?>" <?= $timezoneValue === $value ? 'selected' : '' ?>><?= $label ?> (<?= $value ?>)</option>
+                    <?php endforeach; ?>
+                </select>
+                <label class="inp-label">تنسيق التاريخ</label>
+                <select name="date_format" class="inp">
+                    <?php
+                    $formats = ['Y-m-d' => '2024-01-31', 'd/m/Y' => '31/01/2024', 'd-m-Y' => '31-01-2024', 'M d, Y' => 'Jan 31, 2024'];
+                    foreach ($formats as $format => $label):
+                    ?>
+                        <option value="<?= $format ?>" <?= $dateFormatValue === $format ? 'selected' : '' ?>><?= $label ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="settings-row">
+                    <span class="settings-inline-badge">المثال الحالي: <?= $dateFormatExample ?></span>
+                </div>
+                <div class="settings-tip">تنعكس المنطقة الزمنية على التنبيهات والتقارير وتوقيتات النظام.</div>
+            </div>
+        </div>
+
+        <div class="card settings-card">
             <div class="settings-card-header slate"><i class="fa-solid fa-satellite-dish"></i> تكاملات التمكين الذكي</div>
             <div class="settings-card-body">
                 <label class="inp-label">وضع التمكين الذكي</label>
@@ -216,7 +264,68 @@ $brandReady = !empty($sets['logo']);
                 <input type="text" name="invoice_prefix" class="inp" value="<?= $sets['invoice_prefix'] ?? 'INV-' ?>">
                 <label class="inp-label">ملاحظات الفاتورة</label>
                 <textarea name="invoice_terms" class="inp" rows="3"><?= $sets['invoice_terms'] ?? '' ?></textarea>
+                <label class="inp-label">مهلة السداد بعد الاستحقاق (يوم)</label>
+                <input type="number" name="invoice_grace_days" class="inp" value="<?= $sets['invoice_grace_days'] ?? '5' ?>" min="0">
+                <label class="inp-label">طريقة الدفع الافتراضية</label>
+                <select name="default_payment_method" class="inp">
+                    <?php $paymentMethod = $sets['default_payment_method'] ?? 'bank_transfer'; ?>
+                    <option value="bank_transfer" <?= $paymentMethod === 'bank_transfer' ? 'selected' : '' ?>>تحويل بنكي</option>
+                    <option value="card" <?= $paymentMethod === 'card' ? 'selected' : '' ?>>بطاقة</option>
+                    <option value="cash" <?= $paymentMethod === 'cash' ? 'selected' : '' ?>>نقداً</option>
+                    <option value="online" <?= $paymentMethod === 'online' ? 'selected' : '' ?>>بوابة دفع إلكترونية</option>
+                </select>
                 <div class="settings-tip">يمكنك إضافة شروط الدفع أو تعليمات التحويل البنكي.</div>
+            </div>
+        </div>
+
+        <div class="card settings-card">
+            <div class="settings-card-header danger"><i class="fa-solid fa-triangle-exclamation"></i> وضع الصيانة والإشعارات</div>
+            <div class="settings-card-body">
+                <label class="inp-label">تفعيل وضع الصيانة</label>
+                <select name="maintenance_mode" class="inp">
+                    <option value="off" <?= !$maintenanceEnabled ? 'selected' : '' ?>>غير مفعّل</option>
+                    <option value="on" <?= $maintenanceEnabled ? 'selected' : '' ?>>مفعّل</option>
+                </select>
+                <label class="inp-label">رسالة الصيانة المعروضة</label>
+                <input type="text" name="maintenance_message" class="inp" value="<?= $sets['maintenance_message'] ?? 'النظام تحت صيانة مجدولة، قد تتأخر بعض الخدمات.' ?>">
+                <label class="inp-label">تكرار ملخص التنبيهات</label>
+                <select name="alerts_digest" class="inp">
+                    <?php $digest = $sets['alerts_digest'] ?? 'weekly'; ?>
+                    <option value="instant" <?= $digest === 'instant' ? 'selected' : '' ?>>فوري</option>
+                    <option value="daily" <?= $digest === 'daily' ? 'selected' : '' ?>>يومي</option>
+                    <option value="weekly" <?= $digest === 'weekly' ? 'selected' : '' ?>>أسبوعي</option>
+                </select>
+                <div class="settings-tip">يظهر وضع الصيانة كتنبيه واضح للمستخدمين داخل النظام.</div>
+            </div>
+        </div>
+
+        <div class="card settings-card">
+            <div class="settings-card-header secondary"><i class="fa-solid fa-headset"></i> بوابات العملاء والدعم</div>
+            <div class="settings-card-body">
+                <label class="inp-label">رابط بوابة المستأجرين</label>
+                <input type="url" name="tenant_portal_url" class="inp" value="<?= $sets['tenant_portal_url'] ?? '' ?>" placeholder="https://tenants.example.com">
+                <label class="inp-label">هاتف الدعم</label>
+                <input type="text" name="support_phone" class="inp" value="<?= $sets['support_phone'] ?? '' ?>" placeholder="+9665XXXXXXX">
+                <label class="inp-label">بريد الدعم</label>
+                <input type="email" name="support_email" class="inp" value="<?= $sets['support_email'] ?? '' ?>" placeholder="support@example.com">
+                <div class="settings-tip">يساعد ذلك الفرق التشغيلية على مشاركة قنوات التواصل الرسمية بسرعة.</div>
+            </div>
+        </div>
+
+        <div class="card settings-card">
+            <div class="settings-card-header success"><i class="fa-solid fa-cloud-arrow-down"></i> نسخ احتياطي وأتمتة</div>
+            <div class="settings-card-body">
+                <label class="inp-label">نسخ احتياطي تلقائي</label>
+                <select name="auto_backup" class="inp">
+                    <?php $autoBackup = $sets['auto_backup'] ?? 'weekly'; ?>
+                    <option value="off" <?= $autoBackup === 'off' ? 'selected' : '' ?>>غير مفعل</option>
+                    <option value="daily" <?= $autoBackup === 'daily' ? 'selected' : '' ?>>يومي</option>
+                    <option value="weekly" <?= $autoBackup === 'weekly' ? 'selected' : '' ?>>أسبوعي</option>
+                    <option value="monthly" <?= $autoBackup === 'monthly' ? 'selected' : '' ?>>شهري</option>
+                </select>
+                <label class="inp-label">الاحتفاظ بالنسخ (بالأسابيع)</label>
+                <input type="number" name="backup_frequency" class="inp" value="<?= $sets['backup_frequency'] ?? '8' ?>" min="1">
+                <div class="settings-tip">يساعدك هذا على تنظيم الاحتفاظ بالنسخ الاحتياطية وخطط الأتمتة.</div>
             </div>
         </div>
 
