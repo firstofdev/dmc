@@ -35,32 +35,7 @@ $automation = [
     'pending_payments' => 0,
 ];
 
-$coverage = [];
-$actionItems = [];
-
 $readinessScore = 0;
-$quickActions = [
-    [
-        'label' => 'ضبط التكاملات',
-        'href' => 'index.php?p=settings',
-        'icon' => 'fa-solid fa-gear',
-    ],
-    [
-        'label' => 'متابعة الصيانة',
-        'href' => 'index.php?p=maintenance',
-        'icon' => 'fa-solid fa-screwdriver-wrench',
-    ],
-    [
-        'label' => 'مراجعة التنبيهات',
-        'href' => 'index.php?p=alerts',
-        'icon' => 'fa-solid fa-bell',
-    ],
-    [
-        'label' => 'تجديد العقود',
-        'href' => 'index.php?p=contracts',
-        'icon' => 'fa-solid fa-file-contract',
-    ],
-];
 
 
 try {
@@ -106,48 +81,6 @@ $integrations['ocr'] = $forceSmart ? true : (OCR_API_URL && OCR_API_KEY);
 $integrations['payment_portal'] = $forceSmart ? true : (bool) PAYMENT_PORTAL_URL;
 $integrations['admin_whatsapp'] = $forceSmart ? true : (bool) ADMIN_WHATSAPP;
 
-$coverage = [
-    [
-        'title' => 'إدارة التشغيل الأساسية',
-        'status' => $forceSmart ? 'جاهز' : (($coreStats['properties'] && $coreStats['units'] && $coreStats['contracts'] && $coreStats['tenants']) ? 'جاهز' : 'يحتاج بيانات'),
-        'hint' => 'العقارات والوحدات والعقود والمستأجرون.',
-    ],
-    [
-        'title' => 'التحصيل المالي والفواتير',
-        'status' => $forceSmart ? 'جاهز' : ($coreStats['payments'] ? 'جاهز' : 'غير مفعل'),
-        'hint' => 'متابعة الدفعات، الغرامات، وخطط السداد.',
-    ],
-    [
-        'title' => 'الصيانة الذكية',
-        'status' => $forceSmart ? 'قيد التشغيل' : ($coreStats['maintenance'] ? 'قيد التشغيل' : 'غير مفعل'),
-        'hint' => 'تصنيف البلاغات وتحديد الأولويات تلقائياً.',
-    ],
-    [
-        'title' => 'التحليلات والتقارير',
-        'status' => $forceSmart ? 'مفعّل' : (($coreStats['payments'] || $coreStats['contracts']) ? 'مفعّل' : 'يحتاج بيانات'),
-        'hint' => 'مؤشرات إشغال وتحصيل وتوقعات نقدية.',
-    ],
-    [
-        'title' => 'الأمان والصلاحيات',
-        'status' => $forceSmart ? 'مفعل' : ($coreStats['users'] > 1 ? 'مفعل' : 'يحتاج ضبط أدوار'),
-        'hint' => 'أدوار متعددة وسجل تدقيق آمن.',
-    ],
-    [
-        'title' => 'التكاملات',
-        'status' => $forceSmart ? 'مفعّل' : (($integrations['whatsapp'] || $integrations['ocr'] || $integrations['payment_portal']) ? 'جزئي' : 'غير مفعل'),
-        'hint' => 'واتساب، OCR، بوابة دفع.',
-    ],
-    [
-        'title' => 'الأتمتة والتنبيهات',
-        'status' => $forceSmart ? 'مفعل' : (($automation['open_alerts'] || $automation['pending_payments']) ? 'مفعل' : 'يحتاج تفعيل'),
-        'hint' => 'تنبيهات تلقائية، رسائل متابعة، مهام وقائية.',
-    ],
-    [
-        'title' => 'الجاهزية للتوسع',
-        'status' => 'مدعوم',
-        'hint' => 'هيكل بيانات قابل للتوسع ومراقبة الأداء.',
-    ],
-];
 
 $readinessInputs = [
     $coreStats['properties'] > 0,
@@ -163,28 +96,6 @@ $readinessInputs = [
 $readinessScore = $forceSmart
     ? 100
     : (int) round((array_sum(array_map('intval', $readinessInputs)) / max(1, count($readinessInputs))) * 100);
-
-
-if (!$forceSmart) {
-    if (!$integrations['whatsapp']) {
-        $actionItems[] = 'تفعيل تكامل واتساب لإرسال التذكيرات والتحصيل.';
-    }
-    if (!$integrations['ocr']) {
-        $actionItems[] = 'ضبط خدمة OCR لاستخراج بيانات الوثائق تلقائياً.';
-    }
-    if (!$integrations['payment_portal']) {
-        $actionItems[] = 'ربط بوابة دفع لتسهيل التحصيل الإلكتروني.';
-    }
-    if ($coreStats['users'] <= 1) {
-        $actionItems[] = 'إضافة أدوار متعددة (تحصيل، صيانة، إدارة) لضمان الحوكمة.';
-    }
-    if ($coreStats['payments'] === 0) {
-        $actionItems[] = 'تسجيل الدفعات لتفعيل التنبؤ المالي والتحصيل الذكي.';
-    }
-    if ($coreStats['maintenance'] === 0) {
-        $actionItems[] = 'إضافة طلبات صيانة لتفعيل التحليل التنبؤي.';
-    }
-}
 ?>
 
 <div class="card" style="margin-bottom:30px;">
@@ -246,58 +157,6 @@ if (!$forceSmart) {
     </div>
 </div>
 
-<div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; margin-bottom:30px;">
-    <div class="card" style="padding:25px;">
-        <h3 style="margin-top:0"><i class="fa-solid fa-layer-group"></i> تغطية عناصر القوة</h3>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px;">
-            <?php foreach ($coverage as $item): ?>
-                <div style="background:var(--input-bg); border:1px solid var(--border); border-radius:16px; padding:16px;">
-                    <div style="font-weight:700; margin-bottom:6px;"><?= htmlspecialchars($item['title']) ?></div>
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                        <span style="font-size:12px; padding:4px 10px; border-radius:12px; background:#1f2937; color:#f8fafc;">
-                            <?= htmlspecialchars($item['status']) ?>
-                        </span>
-                    </div>
-                    <div style="font-size:12px; color:var(--muted);"><?= htmlspecialchars($item['hint']) ?></div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <div class="card" style="padding:25px;">
-        <h3 style="margin-top:0"><i class="fa-solid fa-plug"></i> التكاملات الذكية</h3>
-        <div style="display:flex; flex-direction:column; gap:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span>واتساب للأتمتة</span>
-                <span style="font-size:12px; padding:4px 10px; border-radius:12px; background:<?= $integrations['whatsapp'] ? '#16a34a' : '#7f1d1d' ?>; color:#fff;">
-                    <?= $integrations['whatsapp'] ? 'مفعّل' : 'غير مفعل' ?>
-                </span>
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span>OCR للوثائق</span>
-                <span style="font-size:12px; padding:4px 10px; border-radius:12px; background:<?= $integrations['ocr'] ? '#16a34a' : '#7f1d1d' ?>; color:#fff;">
-                    <?= $integrations['ocr'] ? 'مفعّل' : 'غير مفعل' ?>
-                </span>
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span>بوابة الدفع</span>
-                <span style="font-size:12px; padding:4px 10px; border-radius:12px; background:<?= $integrations['payment_portal'] ? '#16a34a' : '#7f1d1d' ?>; color:#fff;">
-                    <?= $integrations['payment_portal'] ? 'مفعّل' : 'غير مفعل' ?>
-                </span>
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span>قناة إشعارات الإدارة</span>
-                <span style="font-size:12px; padding:4px 10px; border-radius:12px; background:<?= $integrations['admin_whatsapp'] ? '#16a34a' : '#7f1d1d' ?>; color:#fff;">
-                    <?= $integrations['admin_whatsapp'] ? 'مفعّل' : 'غير مفعل' ?>
-                </span>
-            </div>
-        </div>
-
-        <div style="margin-top:20px; background:var(--input-bg); border:1px dashed var(--border); padding:14px; border-radius:16px; font-size:12px; color:var(--muted);">
-            <?= $forceSmart ? 'وضع تجريبي مفعل محلياً. فعّل التكاملات فعلياً عبر متغيرات البيئة في config.php.' : 'التفعيل يتم من خلال متغيرات البيئة في config.php.' ?>
-        </div>
-    </div>
-</div>
-
 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px;">
         <div style="font-size:12px; color:var(--muted)">طلبات صيانة معلقة</div>
@@ -319,37 +178,4 @@ if (!$forceSmart) {
         <div style="font-size:28px; font-weight:800; margin-top:8px;"><?= $automation['pending_payments'] ?></div>
         <div style="font-size:12px; color:#94a3b8; margin-top:6px;">خطط تحصيل مستهدفة</div>
     </div>
-</div>
-
-<div class="card" style="padding:25px; margin-bottom:30px;">
-    <h3 style="margin-top:0"><i class="fa-solid fa-forward-fast"></i> الخطوة التالية</h3>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
-        <?php foreach ($quickActions as $action): ?>
-            <a href="<?= htmlspecialchars($action['href']) ?>" style="text-decoration:none; color:inherit;">
-                <div style="background:var(--input-bg); border:1px solid var(--border); border-radius:16px; padding:14px; display:flex; align-items:center; gap:12px; transition:0.2s;">
-                    <div style="width:40px; height:40px; border-radius:12px; background:var(--tag-bg); display:flex; align-items:center; justify-content:center; color:var(--primary);">
-                        <i class="<?= htmlspecialchars($action['icon']) ?>"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight:700;"><?= htmlspecialchars($action['label']) ?></div>
-                        <div style="font-size:12px; color:var(--muted);">افتح الصفحة ذات الصلة</div>
-                    </div>
-                </div>
-            </a>
-        <?php endforeach; ?>
-    </div>
-</div>
-
-
-<div class="card" style="padding:25px;">
-    <h3 style="margin-top:0"><i class="fa-solid fa-bolt"></i> خطوات تطبيق القوة الخارقة</h3>
-    <?php if (!empty($actionItems)): ?>
-        <ul style="margin:0; padding-inline-start:20px; color:#cbd5f5;">
-            <?php foreach ($actionItems as $item): ?>
-                <li style="margin-bottom:10px;"><?= htmlspecialchars($item) ?></li>
-            <?php endforeach; ?>
-        </ul>
-    <?php else: ?>
-        <div style="color:#94a3b8;">كل عناصر التمكين مفعّلة، استمر بمراقبة الأداء وتحسين الأتمتة.</div>
-    <?php endif; ?>
 </div>

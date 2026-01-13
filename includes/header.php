@@ -75,34 +75,6 @@ $company_name_safe = htmlspecialchars($company_name);
             --tag-bg:rgba(99,102,241,0.12);
             --glow:0 0 25px rgba(99,102,241,0.25);
         }
-        [data-theme="light"] {
-            --bg:#f5f6ff;
-            --card:rgba(255,255,255,0.92);
-            --border:rgba(148, 163, 184, 0.3);
-            --text:#111827;
-            --muted:#6b7280;
-            --sidebar-bg:rgba(255,255,255,0.9);
-            --sidebar-shadow:8px 0 40px rgba(15,23,42,0.08);
-            --logo-bg:radial-gradient(circle at center, rgba(99,102,241,0.2), #f8fafc);
-            --nav-hover-bg:rgba(99,102,241,0.12);
-            --nav-hover-text:#111827;
-            --main-bg:radial-gradient(circle at 10% 10%, rgba(99,102,241,0.18), transparent 40%);
-            --table-th:#6b7280;
-            --table-td-bg:rgba(255,255,255,0.95);
-            --table-td-border:rgba(148, 163, 184, 0.3);
-            --btn-dark-bg:#111827;
-            --btn-dark-border:#1f2937;
-            --modal-overlay:rgba(15,23,42,0.4);
-            --modal-bg:rgba(255,255,255,0.96);
-            --modal-border:rgba(148, 163, 184, 0.3);
-            --input-bg:rgba(248,250,252,0.9);
-            --input-border:rgba(148, 163, 184, 0.3);
-            --scrollbar:rgba(99,102,241,0.35);
-            --close-bg:rgba(239,68,68,0.15);
-            --close-hover:#ef4444;
-            --tag-bg:rgba(99,102,241,0.14);
-            --glow:0 0 25px rgba(99,102,241,0.18);
-        }
         * { box-sizing:border-box; outline:none; }
         body { font-family:'Tajawal'; background:var(--bg); color:var(--text); margin:0; display:flex; height:100vh; overflow:hidden; position:relative; }
         body::before {
@@ -222,9 +194,6 @@ $company_name_safe = htmlspecialchars($company_name);
         <div class="header-actions">
             <button class="btn btn-dark btn-icon" id="sidebarToggle" type="button" title="طي/إظهار القائمة">
                 <i class="fa-solid fa-bars"></i>
-            </button>
-            <button class="btn btn-dark" id="themeToggle" type="button">
-                الوضع: داكن
             </button>
             <button class="btn btn-dark btn-small">
                 <i class="fa-regular fa-calendar"></i> <?= date('Y-m-d') ?>
