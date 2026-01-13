@@ -1,5 +1,5 @@
 <?php
-require 'db.php';
+require 'config.php';
 $id = $_GET['cid'];
 $c = $pdo->query("SELECT c.*, t.full_name, t.id_number, u.unit_name, u.type, u.elec_meter, u.water_meter, p.name as pname 
                   FROM contracts c JOIN tenants t ON c.tenant_id=t.id JOIN units u ON c.unit_id=u.id JOIN properties p ON u.property_id=p.id WHERE c.id=$id")->fetch();

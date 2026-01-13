@@ -1,6 +1,6 @@
 <?php
 // fix_db.php - أداة إصلاح وتحديث قاعدة البيانات
-require 'db.php';
+require 'config.php';
 
 echo "<body style='font-family:tahoma; background:#f1f5f9; padding:40px;'>";
 echo "<div style='max-width:600px; margin:auto; background:white; padding:30px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1);'>";
