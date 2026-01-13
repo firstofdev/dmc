@@ -194,7 +194,7 @@ if (!$forceSmart) {
             <p style="margin:8px 0 0; color:var(--muted)">واجهة تجمع كل عناصر القوة التشغيلية والتحليلية للنظام.</p>
         </div>
         <div style="text-align:left; color:#22c55e; font-weight:700;">
-            <i class="fa-solid fa-sparkles"></i> <?= $forceSmart ? 'وضع التمكين الكامل' : 'وضع ذكي نشط' ?>
+            <i class="fa-solid fa-sparkles"></i> <?= $forceSmart ? 'وضع تجريبي (محاكاة محلية)' : 'وضع تشغيلي فعلي' ?>
         </div>
     </div>
 </div>
@@ -293,7 +293,7 @@ if (!$forceSmart) {
         </div>
 
         <div style="margin-top:20px; background:var(--input-bg); border:1px dashed var(--border); padding:14px; border-radius:16px; font-size:12px; color:var(--muted);">
-            <?= $forceSmart ? 'تم فرض تفعيل جميع التكاملات محلياً لضمان التشغيل الكامل.' : 'التفعيل يتم من خلال متغيرات البيئة في config.php.' ?>
+            <?= $forceSmart ? 'وضع تجريبي مفعل محلياً. فعّل التكاملات فعلياً عبر متغيرات البيئة في config.php.' : 'التفعيل يتم من خلال متغيرات البيئة في config.php.' ?>
         </div>
     </div>
 </div>
