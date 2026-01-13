@@ -2,6 +2,7 @@
 // الحذف
 if (isset($_POST['delete_id'])) {
     $pdo->prepare("DELETE FROM tenants WHERE id=?")->execute([$_POST['delete_id']]);
+    log_activity($pdo, "حذف مستأجر رقم #{$_POST['delete_id']}", 'tenant');
     echo "<script>window.location='index.php?p=tenants';</script>";
 }
 
@@ -10,9 +11,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_tenant'])) {
     if(!empty($_POST['tenant_id'])){
         $stmt = $pdo->prepare("UPDATE tenants SET name=?, phone=?, id_number=?, email=? WHERE id=?");
         $stmt->execute([$_POST['name'], $_POST['phone'], $_POST['idn'], $_POST['email'], $_POST['tenant_id']]);
+        log_activity($pdo, "تحديث بيانات المستأجر #{$_POST['tenant_id']}", 'tenant');
     } else {
         $stmt = $pdo->prepare("INSERT INTO tenants (name, phone, id_number, email) VALUES (?,?,?,?)");
         $stmt->execute([$_POST['name'], $_POST['phone'], $_POST['idn'], $_POST['email']]);
+        log_activity($pdo, "إضافة مستأجر جديد: ".$_POST['name'], 'tenant');
     }
     echo "<script>window.location='index.php?p=tenants';</script>";
 }
