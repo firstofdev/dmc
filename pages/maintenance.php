@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_maint'])) {
     $pid = $u ? $u['property_id'] : 0;
     
     try {
-        $analysis = isset($AI) ? $AI->analyzeMaintenance($_POST['desc'], (float) $_POST['cost']) : ['priority' => 'medium', 'analysis' => 'تحليل ذكي افتراضي.'];
+        $analysis = isset($AI) ? $AI->analyzeMaintenance($_POST['desc'], (float) $_POST['cost']) : null;
         $columns = "property_id, unit_id, vendor_id, description, cost, request_date, status";
         $placeholders = "?,?,?,?,?, CURDATE(), 'pending'";
         $params = [$pid, $_POST['uid'], $_POST['vid'], $_POST['desc'], $_POST['cost']];
@@ -16,17 +16,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_maint'])) {
         if ($hasPriority) {
             $columns .= ", priority";
             $placeholders .= ", ?";
-            $params[] = $analysis['priority'];
+            $params[] = $analysis['priority'] ?? null;
         }
         if ($hasAnalysis) {
             $columns .= ", ai_analysis";
             $placeholders .= ", ?";
-            $params[] = $analysis['analysis'];
+            $params[] = $analysis['analysis'] ?? null;
         }
 
         $pdo->prepare("INSERT INTO maintenance ($columns) VALUES ($placeholders)")->execute($params);
         if (isset($pdo)) {
-            log_activity($pdo, "إضافة طلب صيانة للوحدة #{$_POST['uid']} بالأولوية {$analysis['priority']}", 'maintenance');
+            $priorityNote = $analysis['priority'] ?? null;
+            $logMessage = $priorityNote
+                ? "إضافة طلب صيانة للوحدة #{$_POST['uid']} بالأولوية {$priorityNote}"
+                : "إضافة طلب صيانة للوحدة #{$_POST['uid']} بدون تحليل ذكي";
+            log_activity($pdo, $logMessage, 'maintenance');
         }
         echo "<script>window.location='index.php?p=maintenance';</script>";
         exit;
@@ -164,14 +168,14 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
                 <?php if ($hasPriority): ?>
                     <td style="padding:15px">
                         <span class="badge" style="background:#111827; border:1px solid #374151">
-                            <?= $r['priority'] ? htmlspecialchars($r['priority']) : 'medium' ?>
+                            <?= $r['priority'] ? htmlspecialchars($r['priority']) : 'غير محدد' ?>
                         </span>
                     </td>
                 <?php endif; ?>
                 <td style="padding:15px"><?= $r['vname'] ?: '-' ?></td>
                 <?php if ($hasAnalysis): ?>
                     <td style="padding:15px; color:#9ca3af; font-size:12px">
-                        <?= $r['ai_analysis'] ? htmlspecialchars($r['ai_analysis']) : 'تحليل قيد الإنشاء' ?>
+                        <?= $r['ai_analysis'] ? htmlspecialchars($r['ai_analysis']) : 'غير متوفر' ?>
                     </td>
                 <?php endif; ?>
                 <td style="padding:15px">

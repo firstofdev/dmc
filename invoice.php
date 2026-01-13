@@ -15,6 +15,7 @@ $stmt->execute([$_GET['uuid']]);
 $inv = $stmt->fetch();
 
 if(!$inv) die("خطأ: الفاتورة غير موجودة.");
+$companyName = get_setting('company_name', 'اسم الشركة غير محدد');
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -43,7 +44,7 @@ if(!$inv) die("خطأ: الفاتورة غير موجودة.");
     <div class="invoice-box">
         <div class="header">
             <div class="title">
-                دار الميار للمقاولات<br>
+                <?= htmlspecialchars($companyName) ?><br>
                 <small style="font-size:14px; font-weight:normal">إدارة الأملاك والعقارات</small>
             </div>
             <div class="info">

@@ -3,6 +3,7 @@ require 'config.php';
 $id = $_GET['cid'];
 $c = $pdo->query("SELECT c.*, t.full_name, t.id_number, u.unit_name, u.type, u.elec_meter, u.water_meter, p.name as pname 
                   FROM contracts c JOIN tenants t ON c.tenant_id=t.id JOIN units u ON c.unit_id=u.id JOIN properties p ON u.property_id=p.id WHERE c.id=$id")->fetch();
+$companyName = get_setting('company_name', 'اسم الشركة غير محدد');
 // رابط للتحقق من العقد (QR Data)
 $qrData = "CONTRACT-{$c['id']}-{$c['full_name']}-AMOUNT-{$c['total_amount']}";
 ?>
@@ -21,14 +22,14 @@ $qrData = "CONTRACT-{$c['id']}-{$c['full_name']}-AMOUNT-{$c['total_amount']}";
 <body onload="window.print()">
     <div class="page">
         <div class="header">
-            <div><h1 style="margin:0">دار الميار للمقاولات</h1><p>عقد إيجار إلكتروني موحد</p><p>الرقم الضريبي: <?= getSet('vat_no') ?></p></div>
+            <div><h1 style="margin:0"><?= htmlspecialchars($companyName) ?></h1><p>عقد إيجار إلكتروني موحد</p><p>الرقم الضريبي: <?= getSet('vat_no') ?></p></div>
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=<?= urlencode($qrData) ?>" style="width:100px">
         </div>
 
         <h2 style="text-align:center; background:#1e293b; color:white; padding:12px; border-radius:5px">عقد إيجار وحدة (<?= $c['type'] ?>)</h2>
 
         <h3>1. أطراف العقد</h3>
-        <table><tr><th>الطرف الأول (المؤجر)</th><td>دار الميار للمقاولات</td></tr><tr><th>الطرف الثاني (المستأجر)</th><td><b><?= $c['full_name'] ?></b> <br> هوية رقم: <?= $c['id_number'] ?></td></tr></table>
+        <table><tr><th>الطرف الأول (المؤجر)</th><td><?= htmlspecialchars($companyName) ?></td></tr><tr><th>الطرف الثاني (المستأجر)</th><td><b><?= $c['full_name'] ?></b> <br> هوية رقم: <?= $c['id_number'] ?></td></tr></table>
 
         <h3>2. بيانات العين المؤجرة</h3>
         <table>
@@ -46,7 +47,7 @@ $qrData = "CONTRACT-{$c['id']}-{$c['full_name']}-AMOUNT-{$c['total_amount']}";
             <div style="text-align:center">
                 <p>الطرف الأول</p>
                 <img src="<?= getSet('logo') ?>" width="100" style="opacity:0.5">
-                <p><b>دار الميار</b></p>
+                <p><b><?= htmlspecialchars($companyName) ?></b></p>
             </div>
             <div style="text-align:center">
                 <p>الطرف الثاني</p>

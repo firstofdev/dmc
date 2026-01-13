@@ -27,7 +27,7 @@ if($_POST){
         $err="خطأ في البيانات";
     }
 }
-$company_name = 'دار الميار للمقاولات';
+$company_name = 'اسم الشركة غير محدد';
 $logo_src = 'logo.png';
 try {
     $stmt = $pdo->prepare("SELECT v FROM settings WHERE k='company_name'");
