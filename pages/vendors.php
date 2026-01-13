@@ -64,16 +64,38 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
 </div>
 
 <?php else: ?>
+<?php
+    $vendorSummary = $pdo->query("SELECT COUNT(*) AS total, COUNT(DISTINCT service_type) AS types FROM vendors")->fetch();
+    $activeVendors = $pdo->query("SELECT COUNT(DISTINCT vendor_id) FROM maintenance WHERE vendor_id IS NOT NULL AND vendor_id != 0")->fetchColumn();
+?>
 <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-        <h3>👷 إدارة المقاولين</h3>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:20px; flex-wrap:wrap">
+        <div>
+            <p style="margin:0; color:#94a3b8; font-size:13px">شبكة المقاولين الذكية</p>
+            <h3 style="margin:6px 0 0">👷 إدارة المقاولين</h3>
+        </div>
 
-      <a href="index.php?p=vendors&act=add" id="openVendorModal" class="btn btn-primary" style="text-decoration:none">
-
-        <button type="button" id="openVendorModal" class="btn btn-primary" style="text-decoration:none">
-
-          <i class="fa-solid fa-plus"></i> إضافة مقاول
+        <a href="index.php?p=vendors&act=add" id="openVendorModal" class="btn btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px">
+            <i class="fa-solid fa-plus"></i> إضافة مقاول
         </a>
+    </div>
+
+    <div class="vendor-summary">
+        <div class="summary-card">
+            <p>إجمالي المقاولين</p>
+            <h4><?= (int) $vendorSummary['total'] ?></h4>
+            <span>شبكة الموردين</span>
+        </div>
+        <div class="summary-card summary-card--info">
+            <p>التخصصات المتاحة</p>
+            <h4><?= (int) $vendorSummary['types'] ?></h4>
+            <span>تغطية شاملة للخدمات</span>
+        </div>
+        <div class="summary-card summary-card--success">
+            <p>مقاولون نشطون</p>
+            <h4><?= (int) $activeVendors ?></h4>
+            <span>تم تنفيذ أعمال صيانة</span>
+        </div>
     </div>
 
     <div id="vendorModal" class="modal-backdrop" style="display:none">
@@ -110,22 +132,41 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
         </div>
     </div>
     
-    <table style="width:100%; border-collapse:collapse">
+    <table class="vendor-table">
         <thead>
-            <tr style="background:#222; text-align:right">
+            <tr>
                 <th style="padding:15px">الاسم</th>
                 <th style="padding:15px">التخصص</th>
                 <th style="padding:15px">الجوال</th>
+                <th style="padding:15px">الخبرة</th>
                 <th style="padding:15px">إجراءات</th>
             </tr>
         </thead>
         <tbody>
-            <?php $vendors = $pdo->query("SELECT * FROM vendors ORDER BY id DESC"); while($v = $vendors->fetch()): ?>
-            <tr style="border-bottom:1px solid #333">
-                <td style="padding:15px"><?= $v['name'] ?></td>
-                <td style="padding:15px"><?= $v['service_type'] ?></td>
-                <td style="padding:15px"><?= $v['phone'] ?></td>
-                <td style="padding:15px; display:flex; gap:10px">
+            <?php $vendors = $pdo->query("SELECT v.*, COUNT(m.id) AS jobs FROM vendors v LEFT JOIN maintenance m ON m.vendor_id = v.id GROUP BY v.id ORDER BY v.id DESC"); while($v = $vendors->fetch()): ?>
+            <?php
+                $jobs = (int) $v['jobs'];
+                $experienceLabel = $jobs >= 10 ? 'خبير' : ($jobs >= 5 ? 'متوسط' : 'جديد');
+                $experienceClass = $jobs >= 10 ? 'exp-pill--high' : ($jobs >= 5 ? 'exp-pill--mid' : 'exp-pill--low');
+            ?>
+            <tr>
+                <td data-label="الاسم" style="padding:15px">
+                    <strong><?= $v['name'] ?></strong>
+                    <div class="row-meta">معرف #<?= $v['id'] ?></div>
+                </td>
+                <td data-label="التخصص" style="padding:15px">
+                    <span class="type-chip"><?= $v['service_type'] ?></span>
+                </td>
+                <td data-label="الجوال" style="padding:15px">
+                    <span class="contact-chip"><i class="fa-solid fa-phone"></i> <?= $v['phone'] ?></span>
+                </td>
+                <td data-label="الخبرة" style="padding:15px">
+                    <div class="exp-box">
+                        <span class="exp-pill <?= $experienceClass ?>"><?= $experienceLabel ?></span>
+                        <div class="row-meta"><?= $jobs ?> طلب صيانة</div>
+                    </div>
+                </td>
+                <td data-label="إجراءات" style="padding:15px; display:flex; gap:10px">
                     <a href="index.php?p=vendors&act=edit&id=<?= $v['id'] ?>" class="btn btn-dark btn-sm"><i class="fa-solid fa-pen"></i></a>
                     
                     <form method="POST" onsubmit="return confirm('هل أنت متأكد من الحذف؟')" style="margin:0">
@@ -139,6 +180,129 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
     </table>
 </div>
 <style>
+    .vendor-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 18px;
+    }
+    .summary-card {
+        background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95));
+        border: 1px solid rgba(148,163,184,0.2);
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        box-shadow: 0 10px 30px rgba(15,23,42,0.35);
+    }
+    .summary-card p {
+        margin: 0;
+        color: #94a3b8;
+        font-size: 12px;
+    }
+    .summary-card h4 {
+        margin: 0;
+        font-size: 26px;
+        color: #f8fafc;
+    }
+    .summary-card span {
+        color: #64748b;
+        font-size: 12px;
+    }
+    .summary-card--success {
+        border-color: rgba(16,185,129,0.35);
+        background: linear-gradient(140deg, rgba(16,185,129,0.18), rgba(30,41,59,0.95));
+    }
+    .summary-card--info {
+        border-color: rgba(56,189,248,0.35);
+        background: linear-gradient(140deg, rgba(56,189,248,0.18), rgba(30,41,59,0.95));
+    }
+    .vendor-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 14px;
+        overflow: hidden;
+        background: rgba(15,23,42,0.6);
+    }
+    .vendor-table thead tr {
+        background: rgba(30,41,59,0.8);
+        text-align: right;
+    }
+    .vendor-table tbody tr {
+        border-bottom: 1px solid rgba(51,65,85,0.8);
+    }
+    .vendor-table tbody tr:hover {
+        background: rgba(30,41,59,0.35);
+    }
+    .type-chip {
+        display: inline-flex;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(56,189,248,0.2);
+        color: #bae6fd;
+        font-size: 12px;
+        border: 1px solid rgba(56,189,248,0.4);
+    }
+    .contact-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: rgba(51,65,85,0.6);
+        color: #e2e8f0;
+        font-size: 12px;
+    }
+    .exp-box {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .exp-pill {
+        display: inline-flex;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        border: 1px solid transparent;
+    }
+    .exp-pill--high {
+        background: rgba(16,185,129,0.2);
+        border-color: rgba(16,185,129,0.4);
+        color: #6ee7b7;
+    }
+    .exp-pill--mid {
+        background: rgba(250,204,21,0.2);
+        border-color: rgba(250,204,21,0.4);
+        color: #fde68a;
+    }
+    .exp-pill--low {
+        background: rgba(148,163,184,0.2);
+        border-color: rgba(148,163,184,0.4);
+        color: #e2e8f0;
+    }
+    @media (max-width: 900px) {
+        .vendor-table thead {
+            display: none;
+        }
+        .vendor-table tbody tr {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 12px;
+        }
+        .vendor-table td {
+            padding: 8px 0 !important;
+        }
+        .vendor-table td::before {
+            content: attr(data-label);
+            display: block;
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+    }
     .modal-backdrop {
         position: fixed;
         inset: 0;
