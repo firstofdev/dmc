@@ -94,8 +94,56 @@ function get_setting(string $key, string $default = ''): string {
     }
 }
 
+function set_setting(string $key, string $value): void {
+    if (!isset($GLOBALS['pdo'])) {
+        return;
+    }
+
+    try {
+        $stmt = $GLOBALS['pdo']->prepare("REPLACE INTO settings (k, v) VALUES (?, ?)");
+        $stmt->execute([$key, $value]);
+    } catch (Exception $e) {
+        // تجاهل الأخطاء المؤقتة في حال عدم توفر الجدول
+    }
+}
+
 function getSet(string $key, string $default = ''): string {
     return get_setting($key, $default);
+}
+
+function get_setting_int(string $key, int $default = 0): int {
+    $value = get_setting($key, '');
+    if ($value === '') {
+        return $default;
+    }
+    return (int) $value;
+}
+
+function secure($value): string {
+    return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function format_date(string $date, string $fallback = ''): string {
+    if ($date === '') {
+        return $fallback;
+    }
+    $format = get_setting('date_format', 'Y-m-d');
+    try {
+        $dt = new DateTime($date);
+        return $dt->format($format);
+    } catch (Exception $e) {
+        return $date;
+    }
+}
+
+function payment_method_label(string $method): string {
+    $map = [
+        'bank_transfer' => 'تحويل بنكي',
+        'card' => 'بطاقة',
+        'cash' => 'نقدي',
+        'online' => 'بوابة دفع إلكترونية',
+    ];
+    return $map[$method] ?? 'غير محدد';
 }
 
 function runtime_setting(string $key, string $envValue = '', string $default = ''): string {
@@ -188,5 +236,41 @@ function table_has_column(PDO $pdo, string $table, string $column): bool {
 
 function smart_features_force_enabled(): bool {
     return smart_features_mode() === 'force';
+}
+
+function generate_backup_sql(PDO $pdo): string {
+    $tables = [];
+    $query = $pdo->query('SHOW TABLES');
+    while ($row = $query->fetch(PDO::FETCH_NUM)) {
+        $tables[] = $row[0];
+    }
+
+    $sqlScript = "-- DATABASE BACKUP\n-- DATE: " . date('Y-m-d H:i:s') . "\n\n";
+
+    foreach ($tables as $table) {
+        $query = $pdo->query('SHOW CREATE TABLE ' . $table);
+        $row = $query->fetch(PDO::FETCH_NUM);
+        if (!empty($row[1])) {
+            $sqlScript .= "\n\n" . $row[1] . ";\n\n";
+        }
+
+        $query = $pdo->query('SELECT * FROM ' . $table);
+        $columnCount = $query->columnCount();
+
+        while ($row = $query->fetch(PDO::FETCH_NUM)) {
+            $sqlScript .= "INSERT INTO $table VALUES(";
+            for ($j = 0; $j < $columnCount; $j++) {
+                $row[$j] = addslashes($row[$j]);
+                $row[$j] = str_replace("\n", "\\n", $row[$j]);
+                $sqlScript .= isset($row[$j]) ? '"' . $row[$j] . '"' : '""';
+                if ($j < ($columnCount - 1)) {
+                    $sqlScript .= ',';
+                }
+            }
+            $sqlScript .= ");\n";
+        }
+    }
+
+    return $sqlScript;
 }
 ?>

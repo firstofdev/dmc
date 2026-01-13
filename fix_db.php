@@ -80,19 +80,20 @@ try {
         echo "<p style='color:green'>✅ تم إضافة جدول قراءات العدادات.</p>";
     } catch (PDOException $e) {}
 
-    // 5. التأكد من وجود مستخدم Admin
+    // 5. تحديث جدول المدفوعات (payments) لإضافة الحقول الذكية
+    try {
+        $pdo->exec("ALTER TABLE payments ADD COLUMN uuid VARCHAR(64) NULL AFTER id");
+        $pdo->exec("ALTER TABLE payments ADD COLUMN payment_method VARCHAR(30) NULL AFTER amount");
+        $pdo->exec("ALTER TABLE payments ADD COLUMN note TEXT AFTER payment_method");
+        $pdo->exec("ALTER TABLE payments ADD COLUMN paid_date DATE NULL AFTER due_date");
+        echo "<p style='color:green'>✅ تم تحديث جدول المدفوعات (الحقول الذكية).</p>";
+    } catch (PDOException $e) {}
+
+    // 6. التأكد من وجود مستخدم Admin
     $pass = password_hash('12345678910', PASSWORD_DEFAULT);
 
-  $adminByUsername = $pdo->query("SELECT id FROM users WHERE username='admin101' LIMIT 1")->fetchColumn();
+    $adminByUsername = $pdo->query("SELECT id FROM users WHERE username='admin101' LIMIT 1")->fetchColumn();
     if ($adminByUsername) {
-
-    $chk = $pdo->query("SELECT count(*) FROM users WHERE username='admin101'")->fetchColumn();
-    if ($chk == 0) {
-        $pdo->exec("INSERT INTO users (username, password, full_name, email, role) VALUES ('admin101', '$pass', 'المدير العام', 'admin@system.com', 'admin')");
-        echo "<p style='color:green'>✅ تم إنشاء حساب المدير (admin101 / 12345678910).</p>";
-    } else {
-
-      // تحديث كلمة مرور الأدمن للتأكد وتثبيت الصلاحية
         $pdo->exec("UPDATE users SET password='$pass', role='admin' WHERE username='admin101'");
         echo "<p style='color:blue'>ℹ️ تم إعادة تعيين كلمة مرور (admin101) إلى 12345678910.</p>";
     } else {

@@ -2,7 +2,21 @@
 require 'config.php';
 
 // التحقق من وجود رقم الفاتورة
-if(!isset($_GET['uuid'])) die("خطأ: رقم الفاتورة مفقود.");
+$hasUuid = table_has_column($pdo, 'payments', 'uuid');
+$identifier = null;
+$identifierField = $hasUuid ? 'uuid' : 'id';
+
+if ($hasUuid && isset($_GET['uuid']) && $_GET['uuid'] !== '') {
+    $identifier = $_GET['uuid'];
+    $identifierField = 'uuid';
+} elseif (isset($_GET['id']) && $_GET['id'] !== '') {
+    $identifier = (int) $_GET['id'];
+    $identifierField = 'id';
+}
+
+if ($identifier === null) {
+    die("خطأ: رقم الفاتورة مفقود.");
+}
 
 // جلب بيانات الفاتورة والعقد والوحدة
 $stmt = $pdo->prepare("SELECT p.*, c.id as contract_id, t.full_name, u.unit_name 
@@ -10,20 +24,25 @@ $stmt = $pdo->prepare("SELECT p.*, c.id as contract_id, t.full_name, u.unit_name
                        JOIN contracts c ON p.contract_id = c.id
                        JOIN tenants t ON c.tenant_id = t.id
                        JOIN units u ON c.unit_id = u.id
-                       WHERE p.uuid = ?");
-$stmt->execute([$_GET['uuid']]);
+                       WHERE p.$identifierField = ?");
+$stmt->execute([$identifier]);
 $inv = $stmt->fetch();
 
 if(!$inv) die("خطأ: الفاتورة غير موجودة.");
 $companyName = get_setting('company_name', 'اسم الشركة غير محدد');
 $currency = get_setting('currency', 'SAR');
 $currencyCode = get_setting('currency_code', 'ر.س');
+$invoiceNumber = $hasUuid && !empty($inv['uuid']) ? $inv['uuid'] : ('PAY-' . $inv['id']);
+$paymentDate = $inv['paid_date'] ?? $inv['payment_date'] ?? $inv['due_date'] ?? date('Y-m-d');
+$paymentMethodRaw = $inv['payment_method'] ?? get_setting('default_payment_method', 'bank_transfer');
+$paymentMethodLabel = payment_method_label($paymentMethodRaw);
+$noteText = $inv['note'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>سند قبض - <?= secure($inv['uuid']) ?></title>
+    <title>سند قبض - <?= secure($invoiceNumber) ?></title>
     <style>
         body { font-family: 'Tahoma', sans-serif; background: #525659; padding: 20px; display: flex; justify-content: center; }
         .invoice-box { background: white; width: 21cm; padding: 40px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
@@ -50,8 +69,8 @@ $currencyCode = get_setting('currency_code', 'ر.س');
                 <small style="font-size:14px; font-weight:normal">إدارة الأملاك والعقارات</small>
             </div>
             <div class="info">
-                <strong>رقم السند:</strong> <?= secure($inv['uuid']) ?><br>
-                <strong>التاريخ:</strong> <?= $inv['payment_date'] ?>
+                <strong>رقم السند:</strong> <?= secure($invoiceNumber) ?><br>
+                <strong>التاريخ:</strong> <?= secure(format_date($paymentDate, $paymentDate)) ?>
             </div>
         </div>
 
@@ -59,8 +78,8 @@ $currencyCode = get_setting('currency_code', 'ر.س');
             <tr><th>استلمنا من السيد</th><td><?= secure($inv['full_name']) ?></td></tr>
             <tr><th>مبلغ وقدره</th><td><?= number_format($inv['amount'], 2) ?> <?= htmlspecialchars($currencyCode) ?></td></tr>
             <tr><th>وذلك عن</th><td>دفع إيجار الوحدة: <?= secure($inv['unit_name']) ?> (عقد رقم #<?= $inv['contract_id'] ?>)</td></tr>
-            <tr><th>طريقة الدفع</th><td><?= $inv['payment_method'] == 'cash' ? 'نقدي' : 'تحويل بنكي' ?></td></tr>
-            <tr><th>ملاحظات</th><td><?= secure($inv['note']) ?></td></tr>
+            <tr><th>طريقة الدفع</th><td><?= secure($paymentMethodLabel) ?></td></tr>
+            <tr><th>ملاحظات</th><td><?= $noteText !== '' ? secure($noteText) : '-' ?></td></tr>
         </table>
 
         <div class="total">
