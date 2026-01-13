@@ -1,10 +1,53 @@
 <?php
 // config.php
 ob_start(); // تفعيل التخزين المؤقت لمنع مشاكل الـ Header
+
+function is_https_request(): bool {
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        return true;
+    }
+    if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+        return true;
+    }
+    return isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443;
+}
+
+function send_security_headers(): void {
+    if (headers_sent()) {
+        return;
+    }
+    header('X-Frame-Options: DENY');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: same-origin');
+    header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+    header('Cross-Origin-Opener-Policy: same-origin');
+    header('Cross-Origin-Resource-Policy: same-origin');
+    $csp = [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+        "img-src 'self' data:",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
+        "font-src 'self' https://fonts.gstatic.com",
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+        "connect-src 'self'",
+    ];
+    header('Content-Security-Policy: ' . implode('; ', $csp));
+}
+
 if (session_status() === PHP_SESSION_NONE) {
-    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.cookie_secure', is_https_request() ? '1' : '0');
+    ini_set('session.cookie_samesite', 'Lax');
+    ini_set('session.sid_length', '48');
+    ini_set('session.sid_bits_per_character', '6');
     session_start();
 }
+
+send_security_headers();
 
 // إعدادات قاعدة البيانات
 define('DB_HOST', getenv('DB_HOST') ?: 'db5019378605.hosting-data.io'); // عدل البيانات هنا
