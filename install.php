@@ -1,6 +1,6 @@
 <?php
 // install.php - Gemini Ultimate Suite
-require 'db.php';
+require 'config.php';
 
 echo "<body style='background:#050505; color:#4ade80; font-family:tahoma; padding:40px; text-align:center'>";
 echo "<h2>🚀 جاري تثبيت النسخة الشاملة...</h2>";

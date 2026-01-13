@@ -1,5 +1,5 @@
 <?php
-require 'db.php';
+require 'config.php';
 
 // التحقق من وجود رقم الفاتورة
 if(!isset($_GET['uuid'])) die("خطأ: رقم الفاتورة مفقود.");

@@ -1,6 +1,6 @@
 <?php
 // fix_db.php - أداة إصلاح وتحديث قاعدة البيانات
-require 'db.php';
+require 'config.php';
 
 echo "<body style='font-family:tahoma; background:#f1f5f9; padding:40px;'>";
 echo "<div style='max-width:600px; margin:auto; background:white; padding:30px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1);'>";
@@ -63,16 +63,23 @@ try {
     } catch (PDOException $e) {}
 
     // 5. التأكد من وجود مستخدم Admin
-    $chk = $pdo->query("SELECT count(*) FROM users WHERE role='admin'")->fetchColumn();
-    if ($chk == 0) {
-        $pass = password_hash('123456', PASSWORD_DEFAULT);
-        $pdo->exec("INSERT INTO users (username, password, full_name, email, role) VALUES ('admin', '$pass', 'المدير العام', 'admin@system.com', 'admin')");
-        echo "<p style='color:green'>✅ تم إنشاء حساب المدير (admin / 123456).</p>";
-    } else {
-        // تحديث كلمة مرور الأدمن للتأكد
-        $pass = password_hash('123456', PASSWORD_DEFAULT);
-        $pdo->exec("UPDATE users SET password='$pass' WHERE username='admin'");
+    $pass = password_hash('123456', PASSWORD_DEFAULT);
+    $adminByUsername = $pdo->query("SELECT id FROM users WHERE username='admin' LIMIT 1")->fetchColumn();
+    if ($adminByUsername) {
+        // تحديث كلمة مرور الأدمن للتأكد وتثبيت الصلاحية
+        $pdo->exec("UPDATE users SET password='$pass', role='admin' WHERE username='admin'");
         echo "<p style='color:blue'>ℹ️ تم إعادة تعيين كلمة مرور (admin) إلى 123456.</p>";
+    } else {
+        $adminByRole = $pdo->query("SELECT id FROM users WHERE role='admin' ORDER BY id ASC LIMIT 1")->fetchColumn();
+        if ($adminByRole) {
+            $stmt = $pdo->prepare("UPDATE users SET username='admin', password=?, role='admin' WHERE id=?");
+            $stmt->execute([$pass, $adminByRole]);
+            echo "<p style='color:blue'>ℹ️ تم إصلاح بيانات المدير وتعيين اسم المستخدم (admin) مع كلمة المرور 123456.</p>";
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, email, role) VALUES ('admin', ?, 'المدير العام', 'admin@system.com', 'admin')");
+            $stmt->execute([$pass]);
+            echo "<p style='color:green'>✅ تم إنشاء حساب المدير (admin / 123456).</p>";
+        }
     }
 
     echo "<hr><div style='background:#dcfce7; color:#166534; padding:20px; border-radius:10px; text-align:center;'>
