@@ -61,9 +61,54 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
 <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
         <h3>🛠️ سجلات الصيانة</h3>
+
         <a href="index.php?p=maintenance&act=add" id="openMaintModal" class="btn btn-primary" style="text-decoration:none">
+
+        <button type="button" id="openMaintModal" class="btn btn-primary" style="text-decoration:none">
+ 
             <i class="fa-solid fa-plus"></i> تسجيل طلب جديد
-        </a>
+        </button>
+    </div>
+
+    <div id="maintModal" class="modal-backdrop" style="display:none">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:15px">
+                <h3>تسجيل طلب صيانة جديد</h3>
+                <button type="button" id="closeMaintModal" class="btn btn-dark">إغلاق <i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form method="POST" action="index.php?p=maintenance">
+                <input type="hidden" name="save_maint" value="1">
+                
+                <div style="margin-bottom:15px">
+                    <label style="color:#aaa; display:block; margin-bottom:5px">الوحدة المتضررة</label>
+                    <select name="uid" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555" required>
+                        <option value="">-- اختر الوحدة --</option>
+                        <?php $us=$pdo->query("SELECT * FROM units"); while($u=$us->fetch()) echo "<option value='{$u['id']}'>{$u['unit_name']}</option>"; ?>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom:15px">
+                    <label style="color:#aaa; display:block; margin-bottom:5px">المقاول (اختياري)</label>
+                    <select name="vid" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555">
+                        <option value="0">-- اختر --</option>
+                        <?php $vs=$pdo->query("SELECT * FROM vendors"); while($v=$vs->fetch()) echo "<option value='{$v['id']}'>{$v['name']}</option>"; ?>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom:15px">
+                    <label style="color:#aaa; display:block; margin-bottom:5px">وصف المشكلة</label>
+                    <textarea name="desc" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555; height:100px" required></textarea>
+                </div>
+                
+                <div style="margin-bottom:25px">
+                    <label style="color:#aaa; display:block; margin-bottom:5px">التكلفة التقديرية (ريال)</label>
+                    <input type="number" name="cost" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555">
+                </div>
+                
+                <button class="btn btn-primary" style="width:100%; justify-content:center; padding:12px">حفظ الطلب</button>
+            </form>
+        </div>
     </div>
 
     <div id="maintModal" class="modal-backdrop" style="display:none">
@@ -160,6 +205,7 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
     const openMaintModal = document.getElementById('openMaintModal');
     const closeMaintModal = document.getElementById('closeMaintModal');
 
+
     if (maintModal && openMaintModal && closeMaintModal) {
         openMaintModal.addEventListener('click', (event) => {
             event.preventDefault();
@@ -176,5 +222,20 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
             }
         });
     }
+
+    openMaintModal.addEventListener('click', () => {
+        maintModal.style.display = 'flex';
+    });
+
+    closeMaintModal.addEventListener('click', () => {
+        maintModal.style.display = 'none';
+    });
+
+    maintModal.addEventListener('click', (event) => {
+        if (event.target === maintModal) {
+            maintModal.style.display = 'none';
+        }
+    });
+
 </script>
 <?php endif; ?>
