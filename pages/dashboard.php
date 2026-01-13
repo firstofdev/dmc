@@ -29,6 +29,25 @@ $insights = [
 $recommendations = [];
 $riskTenants = [];
 $recentActivity = [];
+$cashflow = [
+    'in_30' => 0,
+    'in_60' => 0,
+    'in_90' => 0,
+    'overdue' => 0,
+    'collection_trend' => 0,
+];
+$maintenancePulse = [
+    'pending' => 0,
+    'avg_cost_90' => 0,
+    'repeat_units' => 0,
+    'emergency' => 0,
+    'risk_score' => 0,
+];
+$tenantRiskSnapshot = [
+    'high_risk_count' => 0,
+    'max_overdue_days' => 0,
+    'items' => [],
+];
 
 // 2. جلب البيانات بأمان
 try {
@@ -63,7 +82,10 @@ try {
         ) t")->fetchColumn();
         $insights['avg_paid_3m'] = $avgPaid ?: 0;
 
-        $riskTenants = $pdo->query("SELECT t.name, t.phone, COUNT(p.id) as overdue_count
+        $riskTenants = $pdo->query("SELECT t.name, t.phone,
+            COUNT(p.id) as overdue_count,
+            COALESCE(SUM(p.amount),0) AS overdue_amount,
+            COALESCE(MAX(DATEDIFF(CURDATE(), p.due_date)),0) AS max_overdue_days
             FROM payments p
             JOIN contracts c ON p.contract_id=c.id
             JOIN tenants t ON c.tenant_id=t.id
@@ -73,6 +95,11 @@ try {
             LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
 
         $recentActivity = get_recent_activity($pdo, 6);
+        if (isset($AI)) {
+            $cashflow = $AI->getCashflowForecast();
+            $maintenancePulse = $AI->getMaintenancePulse();
+            $tenantRiskSnapshot = $AI->getTenantRiskSnapshot();
+        }
 
         if ($insights['occupancy_rate'] < 85 && $stats['units'] > 0) {
             $recommendations[] = 'رفع نسبة الإشغال عبر حملات تسويق أو تحسين التسعير.';
@@ -88,6 +115,15 @@ try {
         }
         if ($insights['collection_rate'] < 80 && $totalInvoiced > 0) {
             $recommendations[] = 'تحسين التحصيل عبر تذكيرات مبكرة وجدولة خطط سداد.';
+        }
+        if ($maintenancePulse['risk_score'] >= 60) {
+            $recommendations[] = 'تفعيل خطة صيانة وقائية للوحدات المتكررة الأعطال.';
+        }
+        if ($cashflow['overdue'] > 0) {
+            $recommendations[] = 'إطلاق حملة تحصيل مركزة للدفعات المتأخرة عبر واتساب.';
+        }
+        if ($tenantRiskSnapshot['high_risk_count'] > 0) {
+            $recommendations[] = 'متابعة المستأجرين مرتفعي المخاطر بجدولة خطط سداد.';
         }
     }
 } catch (Exception $e) {
@@ -243,6 +279,22 @@ try {
             <div style="font-size:12px; color:#9ca3af">متوسط التحصيل الشهري (3 أشهر)</div>
             <div style="font-size:24px; font-weight:700"><?= number_format($insights['avg_paid_3m']) ?></div>
         </div>
+        <div style="background:#111827; padding:15px; border-radius:12px;">
+            <div style="font-size:12px; color:#9ca3af">توقع تحصيل 90 يوماً</div>
+            <div style="font-size:24px; font-weight:700"><?= number_format($cashflow['in_90']) ?></div>
+        </div>
+        <div style="background:#111827; padding:15px; border-radius:12px;">
+            <div style="font-size:12px; color:#9ca3af">المتأخرات الحالية</div>
+            <div style="font-size:24px; font-weight:700"><?= number_format($cashflow['overdue']) ?></div>
+        </div>
+        <div style="background:#111827; padding:15px; border-radius:12px;">
+            <div style="font-size:12px; color:#9ca3af">مؤشر مخاطر الصيانة</div>
+            <div style="font-size:24px; font-weight:700"><?= $maintenancePulse['risk_score'] ?>/100</div>
+        </div>
+        <div style="background:#111827; padding:15px; border-radius:12px;">
+            <div style="font-size:12px; color:#9ca3af">مستأجرون عالي المخاطر</div>
+            <div style="font-size:24px; font-weight:700"><?= $tenantRiskSnapshot['high_risk_count'] ?></div>
+        </div>
     </div>
 
     <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px;">
@@ -258,17 +310,17 @@ try {
                 <div style="color:#94a3b8">كل المؤشرات ضمن الحدود الطبيعية.</div>
             <?php endif; ?>
         </div>
-        <div style="background:#0f172a; padding:15px; border-radius:12px;">
-            <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-triangle-exclamation"></i> أعلى مخاطر التعثر</h4>
-            <?php if (!empty($riskTenants)): ?>
-                <?php foreach ($riskTenants as $tenant): ?>
-                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #1f2937;">
-                        <span><?= htmlspecialchars($tenant['name']) ?></span>
-                        <span style="color:#f97316">متأخر <?= (int) $tenant['overdue_count'] ?></span>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div style="color:#94a3b8">لا توجد حالات تعثر حالياً.</div>
+    <div style="background:#0f172a; padding:15px; border-radius:12px;">
+        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-triangle-exclamation"></i> أعلى مخاطر التعثر</h4>
+        <?php if (!empty($riskTenants)): ?>
+            <?php foreach ($riskTenants as $tenant): ?>
+                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #1f2937;">
+                    <span><?= htmlspecialchars($tenant['name']) ?></span>
+                    <span style="color:#f97316">متأخر <?= (int) $tenant['overdue_count'] ?> (<?= (int) $tenant['max_overdue_days'] ?> يوم)</span>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div style="color:#94a3b8">لا توجد حالات تعثر حالياً.</div>
             <?php endif; ?>
         </div>
     </div>
