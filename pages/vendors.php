@@ -67,8 +67,12 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
 <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
         <h3>👷 إدارة المقاولين</h3>
-        <a href="index.php?p=vendors&act=add" id="openVendorModal" class="btn btn-primary" style="text-decoration:none">
-            <i class="fa-solid fa-plus"></i> إضافة مقاول
+
+      <a href="index.php?p=vendors&act=add" id="openVendorModal" class="btn btn-primary" style="text-decoration:none">
+
+        <button type="button" id="openVendorModal" class="btn btn-primary" style="text-decoration:none">
+
+          <i class="fa-solid fa-plus"></i> إضافة مقاول
         </a>
     </div>
 

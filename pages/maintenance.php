@@ -61,8 +61,12 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
 <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
         <h3>🛠️ سجلات الصيانة</h3>
-        <a href="index.php?p=maintenance&act=add" id="openMaintModal" class="btn btn-primary" style="text-decoration:none">
-            <i class="fa-solid fa-plus"></i> تسجيل طلب جديد
+
+      <a href="index.php?p=maintenance&act=add" id="openMaintModal" class="btn btn-primary" style="text-decoration:none">
+
+        <button type="button" id="openMaintModal" class="btn btn-primary" style="text-decoration:none">
+
+          <i class="fa-solid fa-plus"></i> تسجيل طلب جديد
         </a>
     </div>
 
