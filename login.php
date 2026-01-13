@@ -25,6 +25,7 @@ if($_POST){
                 $_SESSION['uid'] = $u['id'];
                 $_SESSION['user_name'] = $u['full_name'] ?: $u['username'];
                 $_SESSION['role'] = $u['role'] ?? 'staff';
+                initialize_session_security();
                 rate_limit_clear($ipKey);
                 rate_limit_clear($userKey);
                 log_activity($pdo, "تسجيل دخول ناجح للمستخدم: ".$u['username'], 'auth_success');
