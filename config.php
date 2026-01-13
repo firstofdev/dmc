@@ -18,10 +18,16 @@ function send_security_headers(): void {
     }
     header('X-Frame-Options: DENY');
     header('X-Content-Type-Options: nosniff');
+    header('X-Download-Options: noopen');
+    header('X-Permitted-Cross-Domain-Policies: none');
+    header('X-DNS-Prefetch-Control: off');
     header('Referrer-Policy: same-origin');
     header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
     header('Cross-Origin-Opener-Policy: same-origin');
     header('Cross-Origin-Resource-Policy: same-origin');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
     if (is_https_request()) {
         header('Strict-Transport-Security: max-age=63072000; includeSubDomains; preload');
     }
@@ -39,6 +45,7 @@ function send_security_headers(): void {
     ];
     if (is_https_request()) {
         $csp[] = "upgrade-insecure-requests";
+        $csp[] = "block-all-mixed-content";
     }
     header('Content-Security-Policy: ' . implode('; ', $csp));
 }
@@ -46,6 +53,7 @@ function send_security_headers(): void {
 if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.use_strict_mode', '1');
     ini_set('session.use_only_cookies', '1');
+    ini_set('session.use_trans_sid', '0');
     ini_set('session.cookie_httponly', '1');
     ini_set('session.cookie_secure', is_https_request() ? '1' : '0');
     ini_set('session.cookie_samesite', 'Lax');
