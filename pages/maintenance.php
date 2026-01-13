@@ -84,16 +84,71 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
 </div>
 
 <?php else: ?>
+<?php
+    $summary = $pdo->query("SELECT COUNT(*) AS total, SUM(status='pending') AS pending, SUM(status!='pending') AS completed, AVG(cost) AS avg_cost FROM maintenance")->fetch();
+    $analysisCount = 0;
+    if ($hasAnalysis) {
+        $analysisCount = (int) $pdo->query("SELECT COUNT(*) FROM maintenance WHERE ai_analysis IS NOT NULL AND ai_analysis != ''")->fetchColumn();
+    }
+    $priorityCounts = [
+        'عالية' => 0,
+        'متوسطة' => 0,
+        'منخفضة' => 0,
+    ];
+    if ($hasPriority) {
+        $priorityRows = $pdo->query("SELECT priority, COUNT(*) AS total FROM maintenance WHERE priority IS NOT NULL AND priority != '' GROUP BY priority")->fetchAll();
+        foreach ($priorityRows as $row) {
+            $priorityCounts[$row['priority']] = (int) $row['total'];
+        }
+    }
+?>
 <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-        <h3>🛠️ سجلات الصيانة</h3>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:20px; flex-wrap:wrap">
+        <div>
+            <p style="margin:0; color:#94a3b8; font-size:13px">لوحة متابعة الصيانة الذكية</p>
+            <h3 style="margin:6px 0 0">🛠️ سجلات الصيانة</h3>
+        </div>
 
-      <a href="index.php?p=maintenance&act=add" id="openMaintModal" class="btn btn-primary" style="text-decoration:none">
-
-        <button type="button" id="openMaintModal" class="btn btn-primary" style="text-decoration:none">
-
-          <i class="fa-solid fa-plus"></i> تسجيل طلب جديد
+        <a href="index.php?p=maintenance&act=add" id="openMaintModal" class="btn btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px">
+            <i class="fa-solid fa-plus"></i> تسجيل طلب جديد
         </a>
+    </div>
+
+    <div class="maintenance-summary">
+        <div class="summary-card">
+            <p>إجمالي الطلبات</p>
+            <h4><?= (int) $summary['total'] ?></h4>
+            <span>نشاط اليوم الذكي</span>
+        </div>
+        <div class="summary-card summary-card--warn">
+            <p>طلبات معلّقة</p>
+            <h4><?= (int) $summary['pending'] ?></h4>
+            <span>تحتاج متابعة فورية</span>
+        </div>
+        <div class="summary-card summary-card--success">
+            <p>طلبات منجزة</p>
+            <h4><?= (int) $summary['completed'] ?></h4>
+            <span>تحسين جودة الخدمة</span>
+        </div>
+        <div class="summary-card summary-card--info">
+            <p>تحليل ذكي</p>
+            <h4><?= $hasAnalysis ? $analysisCount : 0 ?></h4>
+            <span>تقييم أولويات آلي</span>
+        </div>
+    </div>
+
+    <div class="maintenance-toolbar">
+        <div class="toolbar-left">
+            <span class="smart-tag"><i class="fa-solid fa-sparkles"></i> توصية النظام</span>
+            <p>متوسط التكلفة: <?= $summary['avg_cost'] ? number_format((float) $summary['avg_cost'], 2) : '0.00' ?> ريال</p>
+        </div>
+        <?php if ($hasPriority): ?>
+        <div class="priority-badges">
+            <span class="priority-chip priority-chip--high">عالية: <?= $priorityCounts['عالية'] ?></span>
+            <span class="priority-chip priority-chip--mid">متوسطة: <?= $priorityCounts['متوسطة'] ?></span>
+            <span class="priority-chip priority-chip--low">منخفضة: <?= $priorityCounts['منخفضة'] ?></span>
+        </div>
+        <?php endif; ?>
     </div>
 
     <div id="maintModal" class="modal-backdrop" style="display:none">
@@ -140,12 +195,14 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
         </div>
     </div>
     
-    <table style="width:100%; border-collapse:collapse">
+    <table class="maintenance-table">
         <thead>
-            <tr style="background:#222; text-align:right">
+            <tr>
                 <th style="padding:15px">#</th>
                 <th style="padding:15px">الوحدة</th>
                 <th style="padding:15px">الوصف</th>
+                <th style="padding:15px">التكلفة</th>
+                <th style="padding:15px">التاريخ</th>
                 <?php if ($hasPriority): ?>
                     <th style="padding:15px">الأولوية الذكية</th>
                 <?php endif; ?>
@@ -161,25 +218,48 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
             $reqs = $pdo->query("SELECT m.*, u.unit_name, v.name as vname FROM maintenance m JOIN units u ON m.unit_id=u.id LEFT JOIN vendors v ON m.vendor_id=v.id ORDER BY m.id DESC");
             while($r = $reqs->fetch()): 
             ?>
-            <tr style="border-bottom:1px solid #333">
-                <td style="padding:15px"><?= $r['id'] ?></td>
-                <td style="padding:15px"><?= $r['unit_name'] ?></td>
-                <td style="padding:15px"><?= $r['description'] ?></td>
+            <tr>
+                <td data-label="#" style="padding:15px"><?= $r['id'] ?></td>
+                <td data-label="الوحدة" style="padding:15px">
+                    <strong><?= $r['unit_name'] ?></strong>
+                    <div class="row-meta">رقم الطلب #<?= $r['id'] ?></div>
+                </td>
+                <td data-label="الوصف" style="padding:15px">
+                    <?= $r['description'] ?>
+                    <div class="row-meta">آخر تحديث: <?= $r['request_date'] ?></div>
+                </td>
+                <td data-label="التكلفة" style="padding:15px">
+                    <span class="cost-chip"><?= $r['cost'] ? number_format((float) $r['cost'], 2) : '—' ?> ريال</span>
+                </td>
+                <td data-label="التاريخ" style="padding:15px"><?= $r['request_date'] ?></td>
                 <?php if ($hasPriority): ?>
-                    <td style="padding:15px">
-                        <span class="badge" style="background:#111827; border:1px solid #374151">
-                            <?= $r['priority'] ? htmlspecialchars($r['priority']) : 'غير محدد' ?>
-                        </span>
-                    </td>
+                <td data-label="الأولوية الذكية" style="padding:15px">
+                    <?php
+                        $priorityValue = $r['priority'] ? htmlspecialchars($r['priority']) : 'غير محدد';
+                        $priorityClass = 'priority-chip--neutral';
+                        if ($priorityValue === 'عالية') { $priorityClass = 'priority-chip--high'; }
+                        if ($priorityValue === 'متوسطة') { $priorityClass = 'priority-chip--mid'; }
+                        if ($priorityValue === 'منخفضة') { $priorityClass = 'priority-chip--low'; }
+                    ?>
+                    <span class="priority-chip <?= $priorityClass ?>"><?= $priorityValue ?></span>
+                </td>
                 <?php endif; ?>
-                <td style="padding:15px"><?= $r['vname'] ?: '-' ?></td>
+                <td data-label="المقاول" style="padding:15px">
+                    <?= $r['vname'] ?: '-' ?>
+                    <div class="row-meta">جهة التنفيذ</div>
+                </td>
                 <?php if ($hasAnalysis): ?>
-                    <td style="padding:15px; color:#9ca3af; font-size:12px">
-                        <?= $r['ai_analysis'] ? htmlspecialchars($r['ai_analysis']) : 'غير متوفر' ?>
-                    </td>
+                <td data-label="تحليل ذكي" style="padding:15px">
+                    <div class="analysis-box">
+                        <span><?= $r['ai_analysis'] ? htmlspecialchars($r['ai_analysis']) : 'لا يوجد تحليل حتى الآن' ?></span>
+                        <span class="analysis-pill"><?= $r['ai_analysis'] ? 'تم التحليل' : 'بانتظار البيانات' ?></span>
+                    </div>
+                </td>
                 <?php endif; ?>
-                <td style="padding:15px">
-                    <span class="badge" style="background:<?= $r['status']=='pending'?'#f59e0b':'#10b981' ?>"><?= $r['status'] ?></span>
+                <td data-label="الحالة" style="padding:15px">
+                    <span class="status-pill <?= $r['status']=='pending'?'status-pill--pending':'status-pill--done' ?>">
+                        <?= $r['status']=='pending' ? 'قيد المعالجة' : 'مكتمل' ?>
+                    </span>
                 </td>
             </tr>
             <?php endwhile; ?>
@@ -187,6 +267,193 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
     </table>
 </div>
 <style>
+    .maintenance-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 18px;
+    }
+    .summary-card {
+        background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95));
+        border: 1px solid rgba(148,163,184,0.2);
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        box-shadow: 0 10px 30px rgba(15,23,42,0.35);
+    }
+    .summary-card p {
+        margin: 0;
+        color: #94a3b8;
+        font-size: 12px;
+    }
+    .summary-card h4 {
+        margin: 0;
+        font-size: 26px;
+        color: #f8fafc;
+    }
+    .summary-card span {
+        color: #64748b;
+        font-size: 12px;
+    }
+    .summary-card--warn {
+        border-color: rgba(249,115,22,0.4);
+        background: linear-gradient(140deg, rgba(249,115,22,0.18), rgba(30,41,59,0.95));
+    }
+    .summary-card--success {
+        border-color: rgba(16,185,129,0.35);
+        background: linear-gradient(140deg, rgba(16,185,129,0.18), rgba(30,41,59,0.95));
+    }
+    .summary-card--info {
+        border-color: rgba(129,140,248,0.4);
+        background: linear-gradient(140deg, rgba(129,140,248,0.18), rgba(30,41,59,0.95));
+    }
+    .maintenance-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 12px 16px;
+        background: rgba(15,23,42,0.6);
+        border-radius: 14px;
+        border: 1px solid rgba(148,163,184,0.15);
+        margin-bottom: 18px;
+    }
+    .toolbar-left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        color: #cbd5f5;
+        font-size: 13px;
+    }
+    .smart-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(99,102,241,0.18);
+        color: #c7d2fe;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .priority-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .priority-chip {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid transparent;
+        background: rgba(15,23,42,0.8);
+        color: #e2e8f0;
+    }
+    .priority-chip--high {
+        border-color: rgba(239,68,68,0.5);
+        color: #fecaca;
+        background: rgba(239,68,68,0.12);
+    }
+    .priority-chip--mid {
+        border-color: rgba(250,204,21,0.45);
+        color: #fef08a;
+        background: rgba(250,204,21,0.12);
+    }
+    .priority-chip--low {
+        border-color: rgba(34,197,94,0.45);
+        color: #bbf7d0;
+        background: rgba(34,197,94,0.12);
+    }
+    .priority-chip--neutral {
+        border-color: rgba(148,163,184,0.35);
+        color: #cbd5f5;
+    }
+    .maintenance-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 14px;
+        overflow: hidden;
+        background: rgba(15,23,42,0.6);
+    }
+    .maintenance-table thead tr {
+        background: rgba(30,41,59,0.8);
+        text-align: right;
+    }
+    .maintenance-table tbody tr {
+        border-bottom: 1px solid rgba(51,65,85,0.8);
+    }
+    .maintenance-table tbody tr:hover {
+        background: rgba(30,41,59,0.35);
+    }
+    .row-meta {
+        margin-top: 6px;
+        font-size: 11px;
+        color: #64748b;
+    }
+    .cost-chip {
+        display: inline-flex;
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: rgba(51,65,85,0.6);
+        color: #f8fafc;
+        font-size: 12px;
+    }
+    .analysis-box {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 12px;
+        color: #e2e8f0;
+    }
+    .analysis-pill {
+        align-self: flex-start;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(129,140,248,0.2);
+        color: #c7d2fe;
+        font-size: 11px;
+    }
+    .status-pill {
+        display: inline-flex;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .status-pill--pending {
+        background: rgba(249,115,22,0.2);
+        color: #fdba74;
+        border: 1px solid rgba(249,115,22,0.4);
+    }
+    .status-pill--done {
+        background: rgba(16,185,129,0.2);
+        color: #6ee7b7;
+        border: 1px solid rgba(16,185,129,0.4);
+    }
+    @media (max-width: 900px) {
+        .maintenance-table thead {
+            display: none;
+        }
+        .maintenance-table tbody tr {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 12px;
+        }
+        .maintenance-table td {
+            padding: 8px 0 !important;
+        }
+        .maintenance-table td::before {
+            content: attr(data-label);
+            display: block;
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+    }
     .modal-backdrop {
         position: fixed;
         inset: 0;
