@@ -61,10 +61,14 @@ CREATE TABLE `inspection_photos` (
 
 CREATE TABLE `payments` (
   `id` int NOT NULL,
+  `uuid` varchar(64) DEFAULT NULL,
   `contract_id` int NOT NULL,
   `title` varchar(100) DEFAULT NULL,
   `amount` decimal(15,2) NOT NULL,
+  `payment_method` varchar(30) DEFAULT NULL,
+  `note` text,
   `due_date` date NOT NULL,
+  `paid_date` date DEFAULT NULL,
   `status` enum('pending','paid') DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
