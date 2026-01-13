@@ -21,6 +21,16 @@ if($_POST){
             $stmt = $pdo->prepare("SELECT * FROM users WHERE username=?");
             $stmt->execute([$username]); $u = $stmt->fetch();
             if($u && password_verify($password, $u['password'])){ 
+                if (password_needs_rehash($u['password'], PASSWORD_DEFAULT)) {
+                    try {
+                        $newHash = password_hash($password, PASSWORD_DEFAULT);
+                        $updateStmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+                        $updateStmt->execute([$newHash, $u['id']]);
+                        log_activity($pdo, "تم تحديث تجزئة كلمة المرور للمستخدم: ".$u['username'], 'auth_rehash');
+                    } catch (Exception $e) {
+                        log_activity($pdo, "تعذر تحديث تجزئة كلمة المرور للمستخدم: ".$u['username'], 'auth_rehash_failed');
+                    }
+                }
                 session_regenerate_id(true);
                 $_SESSION['uid'] = $u['id'];
                 $_SESSION['user_name'] = $u['full_name'] ?: $u['username'];
@@ -32,6 +42,7 @@ if($_POST){
                 header("Location: index.php"); exit; 
             } 
             log_activity($pdo, "فشل تسجيل الدخول للمستخدم: ".$username, 'auth_failed');
+            usleep(250000);
             $err="خطأ في البيانات";
         }
     }
