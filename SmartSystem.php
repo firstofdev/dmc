@@ -52,7 +52,7 @@ class SmartSystem {
 
     // تحليل الهوية (OCR)
     public function analyzeIDCard($imagePath) {
-        if (!OCR_API_URL || !OCR_API_KEY) {
+        if (!ocr_api_url() || !ocr_api_key()) {
             return [
                 'success' => false,
                 'error' => 'OCR غير مُعد. تأكد من ضبط OCR_API_URL و OCR_API_KEY.',
@@ -71,8 +71,8 @@ class SmartSystem {
             'image' => $imageData,
         ];
 
-        $result = $this->postJson(OCR_API_URL, $payload, [
-            'Authorization: Bearer '.OCR_API_KEY,
+        $result = $this->postJson(ocr_api_url(), $payload, [
+            'Authorization: Bearer '.ocr_api_key(),
         ]);
 
         if ($result['error'] || $result['status'] >= 400) {
@@ -92,19 +92,19 @@ class SmartSystem {
 
     // إرسال واتساب (تسجيل في activity_log المرفق)
     public function sendWhatsApp($phone, $message) {
-        if (!WHATSAPP_TOKEN || WHATSAPP_TOKEN === 'your_token_here') {
+        if (!is_whatsapp_configured()) {
             $stmt = $this->pdo->prepare("INSERT INTO activity_log (description, type) VALUES (?, 'whatsapp_error')");
             $stmt->execute(["تعذر إرسال رسالة واتساب لعدم ضبط التوكن."]);
             return false;
         }
 
         $payload = [
-            'token' => WHATSAPP_TOKEN,
+            'token' => whatsapp_token(),
             'to' => $phone,
             'body' => $message,
         ];
 
-        $result = $this->postJson(WHATSAPP_API_URL, $payload);
+        $result = $this->postJson(whatsapp_api_url(), $payload);
         if ($result['error'] || $result['status'] >= 400) {
             $stmt = $this->pdo->prepare("INSERT INTO activity_log (description, type) VALUES (?, 'whatsapp_error')");
             $stmt->execute(["فشل إرسال رسالة واتساب إلى $phone."]);
@@ -235,11 +235,12 @@ class SmartSystem {
         if (!$paymentId) {
             return null;
         }
-        if (!PAYMENT_PORTAL_URL) {
+        if (!payment_portal_url()) {
             return null;
         }
-        $separator = str_contains(PAYMENT_PORTAL_URL, '?') ? '&' : '?';
-        return PAYMENT_PORTAL_URL.$separator.'payment_id='.urlencode((string) $paymentId);
+        $portalUrl = payment_portal_url();
+        $separator = str_contains($portalUrl, '?') ? '&' : '?';
+        return $portalUrl.$separator.'payment_id='.urlencode((string) $paymentId);
     }
 
     public function analyzeMaintenance(string $description, ?float $cost = null): array {

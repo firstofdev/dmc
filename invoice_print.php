@@ -4,6 +4,7 @@ $id = $_GET['cid'];
 $c = $pdo->query("SELECT c.*, t.full_name, t.id_number, u.unit_name, u.type, u.elec_meter_no AS elec_meter, u.water_meter_no AS water_meter, p.name as pname 
                   FROM contracts c JOIN tenants t ON c.tenant_id=t.id JOIN units u ON c.unit_id=u.id JOIN properties p ON u.property_id=p.id WHERE c.id=$id")->fetch();
 $companyName = get_setting('company_name', 'اسم الشركة غير محدد');
+$currencyCode = get_setting('currency_code', 'ر.س');
 // رابط للتحقق من العقد (QR Data)
 $qrData = "CONTRACT-{$c['id']}-{$c['full_name']}-AMOUNT-{$c['total_amount']}";
 ?>
@@ -40,7 +41,7 @@ $qrData = "CONTRACT-{$c['id']}-{$c['full_name']}-AMOUNT-{$c['total_amount']}";
         <h3>3. المدة والقيمة</h3>
         <table>
             <tr><th>مدة العقد</th><td>من: <b><?= $c['start_date'] ?></b> إلى: <b><?= $c['end_date'] ?></b></td></tr>
-            <tr><th>القيمة الإجمالية</th><td><b><?= number_format($c['total_amount']) ?></b> ريال سعودي</td></tr>
+            <tr><th>القيمة الإجمالية</th><td><b><?= number_format($c['total_amount']) ?></b> <?= htmlspecialchars($currencyCode) ?></td></tr>
         </table>
 
         <div style="display:flex; justify-content:space-between; margin-top:60px">

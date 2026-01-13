@@ -16,6 +16,8 @@ $inv = $stmt->fetch();
 
 if(!$inv) die("خطأ: الفاتورة غير موجودة.");
 $companyName = get_setting('company_name', 'اسم الشركة غير محدد');
+$currency = get_setting('currency', 'SAR');
+$currencyCode = get_setting('currency_code', 'ر.س');
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -55,14 +57,14 @@ $companyName = get_setting('company_name', 'اسم الشركة غير محدد'
 
         <table>
             <tr><th>استلمنا من السيد</th><td><?= secure($inv['full_name']) ?></td></tr>
-            <tr><th>مبلغ وقدره</th><td><?= number_format($inv['amount'], 2) ?> ريال سعودي</td></tr>
+            <tr><th>مبلغ وقدره</th><td><?= number_format($inv['amount'], 2) ?> <?= htmlspecialchars($currencyCode) ?></td></tr>
             <tr><th>وذلك عن</th><td>دفع إيجار الوحدة: <?= secure($inv['unit_name']) ?> (عقد رقم #<?= $inv['contract_id'] ?>)</td></tr>
             <tr><th>طريقة الدفع</th><td><?= $inv['payment_method'] == 'cash' ? 'نقدي' : 'تحويل بنكي' ?></td></tr>
             <tr><th>ملاحظات</th><td><?= secure($inv['note']) ?></td></tr>
         </table>
 
         <div class="total">
-            المجموع المستلم: <?= number_format($inv['amount'], 2) ?> SAR
+            المجموع المستلم: <?= number_format($inv['amount'], 2) ?> <?= htmlspecialchars($currency) ?>
         </div>
 
         <div class="footer">

@@ -98,6 +98,62 @@ function getSet(string $key, string $default = ''): string {
     return get_setting($key, $default);
 }
 
+function runtime_setting(string $key, string $envValue = '', string $default = ''): string {
+    $setting = get_setting($key, '');
+    if ($setting !== '') {
+        return $setting;
+    }
+    if ($envValue !== '') {
+        return (string) $envValue;
+    }
+    return $default;
+}
+
+function whatsapp_token(): string {
+    return runtime_setting('whatsapp_token', WHATSAPP_TOKEN);
+}
+
+function whatsapp_api_url(): string {
+    return runtime_setting('whatsapp_api_url', WHATSAPP_API_URL);
+}
+
+function ocr_api_url(): string {
+    return runtime_setting('ocr_api_url', OCR_API_URL);
+}
+
+function ocr_api_key(): string {
+    return runtime_setting('ocr_api_key', OCR_API_KEY);
+}
+
+function admin_whatsapp_number(): string {
+    return runtime_setting('admin_whatsapp', ADMIN_WHATSAPP);
+}
+
+function payment_portal_url(): string {
+    return runtime_setting('payment_portal_url', PAYMENT_PORTAL_URL);
+}
+
+function smart_features_mode(): string {
+    return runtime_setting('smart_features_mode', SMART_FEATURES_MODE, 'force');
+}
+
+function is_whatsapp_configured(): bool {
+    $token = whatsapp_token();
+    return $token !== '' && $token !== 'your_token_here';
+}
+
+function is_ocr_configured(): bool {
+    return ocr_api_url() !== '' && ocr_api_key() !== '';
+}
+
+function is_payment_portal_configured(): bool {
+    return payment_portal_url() !== '';
+}
+
+function is_admin_whatsapp_configured(): bool {
+    return admin_whatsapp_number() !== '';
+}
+
 function require_role(array $roles): void {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -131,6 +187,6 @@ function table_has_column(PDO $pdo, string $table, string $column): bool {
 }
 
 function smart_features_force_enabled(): bool {
-    return defined('SMART_FEATURES_MODE') && SMART_FEATURES_MODE === 'force';
+    return smart_features_mode() === 'force';
 }
 ?>
