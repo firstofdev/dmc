@@ -4,17 +4,38 @@ if(!isset($_SESSION['uid'])) { header("Location: login.php"); exit; }
 $user_name = $_SESSION['user_name'] ?? 'المدير';
 $role = $_SESSION['role'] ?? 'admin'; // نحتاج الصلاحية هنا
 $p = $_GET['p'] ?? 'dashboard';
+$page_titles = [
+    'dashboard' => 'لوحة القيادة',
+    'properties' => 'العقارات',
+    'units' => 'الوحدات',
+    'contracts' => 'العقود',
+    'tenants' => 'المستأجرين',
+    'alerts' => 'التنبيهات',
+    'maintenance' => 'الصيانة',
+    'vendors' => 'المقاولين',
+    'users' => 'المستخدمين',
+    'settings' => 'الإعدادات'
+];
+$page_title = $page_titles[$p] ?? 'لوحة القيادة';
 
 // جلب الشعار
 $stmt = $pdo->prepare("SELECT v FROM settings WHERE k='logo'"); $stmt->execute();
 $db_logo = $stmt->fetchColumn();
 $logo_src = $db_logo && file_exists($db_logo) ? $db_logo : 'logo.png';
+$company_name = 'دار الميار للمقاولات';
+try {
+    $stmt = $pdo->prepare("SELECT v FROM settings WHERE k='company_name'");
+    $stmt->execute();
+    $company_name = $stmt->fetchColumn() ?: $company_name;
+} catch (Exception $e) {
+}
+$company_name_safe = htmlspecialchars($company_name);
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>دار الميار - النظام المتكامل</title>
+    <title><?= $company_name_safe ?> - النظام المتكامل</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -94,6 +115,24 @@ $logo_src = $db_logo && file_exists($db_logo) ? $db_logo : 'logo.png';
         /* Main Content */
         .main { flex:1; padding:40px; overflow-y:auto; background:var(--main-bg); position:relative; }
         .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; padding-bottom:20px; border-bottom:1px solid var(--border); }
+        .header-actions { display:flex; gap:12px; align-items:center; }
+        .smart-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:18px; justify-content:space-between; background:var(--card); border:1px solid var(--border); padding:16px 20px; border-radius:20px; margin-bottom:30px; }
+        .smart-search { flex:1; display:flex; align-items:center; gap:12px; background:var(--input-bg); border:1px solid var(--input-border); border-radius:16px; padding:12px 16px; min-width:260px; }
+        .smart-search i { color:var(--muted); font-size:16px; }
+        .smart-search input { background:transparent; border:none; color:var(--text); width:100%; font-size:15px; font-family:'Tajawal'; }
+        .smart-search-hint { background:var(--tag-bg); color:var(--primary); padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold; }
+        .smart-meta { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:14px; }
+        .page-pill { background:var(--tag-bg); color:var(--primary); padding:6px 12px; border-radius:14px; font-weight:bold; }
+
+        .btn-icon { width:44px; height:44px; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; }
+        .btn-small { padding:10px 14px; font-size:13px; border-radius:12px; }
+
+        body.sidebar-collapsed .sidebar { width:90px; padding:20px 12px; }
+        body.sidebar-collapsed .sidebar .nav-link { justify-content:center; gap:0; }
+        body.sidebar-collapsed .sidebar .nav-link span { display:none; }
+        body.sidebar-collapsed .sidebar .logo-wrapper { width:60px; height:60px; margin-bottom:16px; }
+        body.sidebar-collapsed .sidebar h4, body.sidebar-collapsed .sidebar .tagline { display:none; }
+        body.sidebar-collapsed .main { padding:35px; }
         
         /* Cards & Tables */
         .card { background:var(--card); border:1px solid var(--border); border-radius:24px; padding:30px; margin-bottom:30px; position:relative; }
@@ -128,27 +167,27 @@ $logo_src = $db_logo && file_exists($db_logo) ? $db_logo : 'logo.png';
 </head>
 <body>
 
-<div class="sidebar">
+    <div class="sidebar">
     <div style="text-align:center; margin-bottom:30px">
         <div class="logo-wrapper"><img src="<?= $logo_src ?>" class="logo-img" alt="Logo"></div>
-        <h4 style="margin:10px 0 5px; font-weight:800">دار الميار</h4>
-        <span style="font-size:12px; color:var(--primary); background:var(--tag-bg); padding:4px 10px; border-radius:20px">نظام الإدارة</span>
+        <h4 style="margin:10px 0 5px; font-weight:800"><?= $company_name_safe ?></h4>
+        <span class="tagline" style="font-size:12px; color:var(--primary); background:var(--tag-bg); padding:4px 10px; border-radius:20px">نظام الإدارة</span>
     </div>
     <div style="flex:1; overflow-y:auto; padding-left:5px">
-        <a href="index.php?p=dashboard" class="nav-link <?= $p=='dashboard'?'active':'' ?>"><i class="fa-solid fa-layer-group"></i> لوحة القيادة</a>
-        <a href="index.php?p=properties" class="nav-link <?= $p=='properties'?'active':'' ?>"><i class="fa-solid fa-city"></i> العقارات</a>
-        <a href="index.php?p=units" class="nav-link <?= $p=='units'?'active':'' ?>"><i class="fa-solid fa-door-open"></i> الوحدات</a>
-        <a href="index.php?p=contracts" class="nav-link <?= $p=='contracts'?'active':'' ?>"><i class="fa-solid fa-file-contract"></i> العقود</a>
-        <a href="index.php?p=tenants" class="nav-link <?= $p=='tenants'?'active':'' ?>"><i class="fa-solid fa-users"></i> المستأجرين</a>
-        <a href="index.php?p=alerts" class="nav-link <?= $p=='alerts'?'active':'' ?>"><i class="fa-solid fa-bell"></i> التنبيهات</a>
-        <a href="index.php?p=maintenance" class="nav-link <?= $p=='maintenance'?'active':'' ?>"><i class="fa-solid fa-screwdriver-wrench"></i> الصيانة</a>
-        <a href="index.php?p=vendors" class="nav-link <?= $p=='vendors'?'active':'' ?>"><i class="fa-solid fa-helmet-safety"></i> المقاولين</a>
+        <a href="index.php?p=dashboard" class="nav-link <?= $p=='dashboard'?'active':'' ?>"><i class="fa-solid fa-layer-group"></i> <span>لوحة القيادة</span></a>
+        <a href="index.php?p=properties" class="nav-link <?= $p=='properties'?'active':'' ?>"><i class="fa-solid fa-city"></i> <span>العقارات</span></a>
+        <a href="index.php?p=units" class="nav-link <?= $p=='units'?'active':'' ?>"><i class="fa-solid fa-door-open"></i> <span>الوحدات</span></a>
+        <a href="index.php?p=contracts" class="nav-link <?= $p=='contracts'?'active':'' ?>"><i class="fa-solid fa-file-contract"></i> <span>العقود</span></a>
+        <a href="index.php?p=tenants" class="nav-link <?= $p=='tenants'?'active':'' ?>"><i class="fa-solid fa-users"></i> <span>المستأجرين</span></a>
+        <a href="index.php?p=alerts" class="nav-link <?= $p=='alerts'?'active':'' ?>"><i class="fa-solid fa-bell"></i> <span>التنبيهات</span></a>
+        <a href="index.php?p=maintenance" class="nav-link <?= $p=='maintenance'?'active':'' ?>"><i class="fa-solid fa-screwdriver-wrench"></i> <span>الصيانة</span></a>
+        <a href="index.php?p=vendors" class="nav-link <?= $p=='vendors'?'active':'' ?>"><i class="fa-solid fa-helmet-safety"></i> <span>المقاولين</span></a>
         <?php if($role === 'admin'): ?>
-        <a href="index.php?p=users" class="nav-link <?= $p=='users'?'active':'' ?>"><i class="fa-solid fa-user-shield"></i> المستخدمين</a>
+        <a href="index.php?p=users" class="nav-link <?= $p=='users'?'active':'' ?>"><i class="fa-solid fa-user-shield"></i> <span>المستخدمين</span></a>
         <?php endif; ?>
-        <a href="index.php?p=settings" class="nav-link <?= $p=='settings'?'active':'' ?>"><i class="fa-solid fa-gear"></i> الإعدادات</a>
+        <a href="index.php?p=settings" class="nav-link <?= $p=='settings'?'active':'' ?>"><i class="fa-solid fa-gear"></i> <span>الإعدادات</span></a>
     </div>
-    <a href="logout.php" class="nav-link" style="color:#ef4444; margin-top:10px"><i class="fa-solid fa-power-off"></i> خروج</a>
+    <a href="logout.php" class="nav-link" style="color:#ef4444; margin-top:10px"><i class="fa-solid fa-power-off"></i> <span>خروج</span></a>
 </div>
 
 <div class="main">
@@ -157,12 +196,28 @@ $logo_src = $db_logo && file_exists($db_logo) ? $db_logo : 'logo.png';
             <h1 style="margin:0; font-size:26px; font-weight:800">أهلاً، <?= $user_name ?> 👋</h1>
             <div style="color:var(--muted); font-size:14px; margin-top:5px">إدارة الأملاك الذكية</div>
         </div>
-        <div style="display:flex; gap:12px; align-items:center;">
+        <div class="header-actions">
+            <button class="btn btn-dark btn-icon" id="sidebarToggle" type="button" title="طي/إظهار القائمة">
+                <i class="fa-solid fa-bars"></i>
+            </button>
             <button class="btn btn-dark" id="themeToggle" type="button">
                 الوضع: داكن
             </button>
-            <button class="btn btn-dark">
+            <button class="btn btn-dark btn-small">
                 <i class="fa-regular fa-calendar"></i> <?= date('Y-m-d') ?>
             </button>
+        </div>
+    </div>
+
+    <div class="smart-toolbar">
+        <div class="smart-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input id="globalSearch" type="search" placeholder="بحث ذكي داخل الصفحة والجداول..." autocomplete="off">
+            <span class="smart-search-hint">Ctrl + /</span>
+        </div>
+        <div class="smart-meta">
+            <span>الصفحة الحالية:</span>
+            <span class="page-pill"><?= $page_title ?></span>
+            <span id="searchCount">كل النتائج ظاهرة</span>
         </div>
     </div>

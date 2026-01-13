@@ -64,9 +64,17 @@ try {
 
     // 5. التأكد من وجود مستخدم Admin
     $pass = password_hash('123456', PASSWORD_DEFAULT);
-    $adminByUsername = $pdo->query("SELECT id FROM users WHERE username='admin' LIMIT 1")->fetchColumn();
+
+  $adminByUsername = $pdo->query("SELECT id FROM users WHERE username='admin' LIMIT 1")->fetchColumn();
     if ($adminByUsername) {
-        // تحديث كلمة مرور الأدمن للتأكد وتثبيت الصلاحية
+
+    $chk = $pdo->query("SELECT count(*) FROM users WHERE username='admin'")->fetchColumn();
+    if ($chk == 0) {
+        $pdo->exec("INSERT INTO users (username, password, full_name, email, role) VALUES ('admin', '$pass', 'المدير العام', 'admin@system.com', 'admin')");
+        echo "<p style='color:green'>✅ تم إنشاء حساب المدير (admin / 123456).</p>";
+    } else {
+
+      // تحديث كلمة مرور الأدمن للتأكد وتثبيت الصلاحية
         $pdo->exec("UPDATE users SET password='$pass', role='admin' WHERE username='admin'");
         echo "<p style='color:blue'>ℹ️ تم إعادة تعيين كلمة مرور (admin) إلى 123456.</p>";
     } else {
