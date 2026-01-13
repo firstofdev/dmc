@@ -48,10 +48,23 @@ $tenantRiskSnapshot = [
     'max_overdue_days' => 0,
     'items' => [],
 ];
+$settings = [
+    'target_occupancy' => 90,
+    'target_collection' => 95,
+    'overdue_threshold' => 5,
+];
+$financeLabels = [];
+$financePaid = [];
+$financeExpected = [];
 
 // 2. جلب البيانات بأمان
 try {
     if(isset($pdo)) {
+        $settingsQuery = $pdo->query("SELECT * FROM settings");
+        while ($row = $settingsQuery->fetch()) {
+            $settings[$row['k']] = $row['v'];
+        }
+
         // الإحصائيات العلوية
         $stats['contracts'] = $pdo->query("SELECT COUNT(*) FROM contracts WHERE status='active'")->fetchColumn() ?: 0;
         $stats['units'] = $pdo->query("SELECT COUNT(*) FROM units")->fetchColumn() ?: 0;
@@ -82,6 +95,41 @@ try {
         ) t")->fetchColumn();
         $insights['avg_paid_3m'] = $avgPaid ?: 0;
 
+        $startDate = (new DateTime('first day of this month'))->modify('-5 months')->format('Y-m-d');
+        $paidRows = $pdo->prepare("SELECT DATE_FORMAT(paid_date,'%Y-%m') AS ym, COALESCE(SUM(amount),0) AS total
+            FROM payments
+            WHERE status='paid' AND paid_date >= ?
+            GROUP BY DATE_FORMAT(paid_date,'%Y-%m')");
+        $paidRows->execute([$startDate]);
+        $paidMap = [];
+        foreach ($paidRows->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $paidMap[$row['ym']] = (float) $row['total'];
+        }
+
+        $expectedRows = $pdo->prepare("SELECT DATE_FORMAT(due_date,'%Y-%m') AS ym, COALESCE(SUM(amount),0) AS total
+            FROM payments
+            WHERE status!='paid' AND due_date >= ?
+            GROUP BY DATE_FORMAT(due_date,'%Y-%m')");
+        $expectedRows->execute([$startDate]);
+        $expectedMap = [];
+        foreach ($expectedRows->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $expectedMap[$row['ym']] = (float) $row['total'];
+        }
+
+        $monthNames = [
+            1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل', 5 => 'مايو', 6 => 'يونيو',
+            7 => 'يوليو', 8 => 'أغسطس', 9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر'
+        ];
+        $periodCursor = new DateTime($startDate);
+        for ($i = 0; $i < 6; $i++) {
+            $ym = $periodCursor->format('Y-m');
+            $monthIndex = (int) $periodCursor->format('n');
+            $financeLabels[] = $monthNames[$monthIndex] . ' ' . $periodCursor->format('Y');
+            $financePaid[] = $paidMap[$ym] ?? 0;
+            $financeExpected[] = $expectedMap[$ym] ?? 0;
+            $periodCursor->modify('+1 month');
+        }
+
         $riskTenants = $pdo->query("SELECT t.name, t.phone,
             COUNT(p.id) as overdue_count,
             COALESCE(SUM(p.amount),0) AS overdue_amount,
@@ -99,12 +147,26 @@ try {
             $cashflow = $AI->getCashflowForecast();
             $maintenancePulse = $AI->getMaintenancePulse();
             $tenantRiskSnapshot = $AI->getTenantRiskSnapshot();
+        } else {
+            $cashflow['in_30'] = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status!='paid' AND due_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)")->fetchColumn() ?: 0;
+            $cashflow['in_60'] = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status!='paid' AND due_date BETWEEN DATE_ADD(CURDATE(), INTERVAL 31 DAY) AND DATE_ADD(CURDATE(), INTERVAL 60 DAY)")->fetchColumn() ?: 0;
+            $cashflow['in_90'] = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status!='paid' AND due_date BETWEEN DATE_ADD(CURDATE(), INTERVAL 61 DAY) AND DATE_ADD(CURDATE(), INTERVAL 90 DAY)")->fetchColumn() ?: 0;
+            $cashflow['overdue'] = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status!='paid' AND due_date < CURDATE()")->fetchColumn() ?: 0;
+            $current30 = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='paid' AND paid_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()")->fetchColumn() ?: 0;
+            $prev30 = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='paid' AND paid_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 60 DAY) AND DATE_SUB(CURDATE(), INTERVAL 31 DAY)")->fetchColumn() ?: 0;
+            $cashflow['collection_trend'] = $prev30 > 0 ? round((($current30 - $prev30) / $prev30) * 100, 1) : ($current30 > 0 ? 100 : 0);
         }
 
-        if ($insights['occupancy_rate'] < 85 && $stats['units'] > 0) {
+        $targetOccupancy = (float) ($settings['target_occupancy'] ?? 90);
+        $targetCollection = (float) ($settings['target_collection'] ?? 95);
+        $overdueThreshold = (int) ($settings['overdue_threshold'] ?? 5);
+        $insights['occupancy_gap'] = round($insights['occupancy_rate'] - $targetOccupancy, 1);
+        $insights['collection_gap'] = round($insights['collection_rate'] - $targetCollection, 1);
+
+        if ($insights['occupancy_rate'] < $targetOccupancy && $stats['units'] > 0) {
             $recommendations[] = 'رفع نسبة الإشغال عبر حملات تسويق أو تحسين التسعير.';
         }
-        if ($insights['overdue_count'] > 0) {
+        if ($insights['overdue_count'] > $overdueThreshold) {
             $recommendations[] = 'متابعة الدفعات المتأخرة وإرسال تذكيرات واتساب مخصصة.';
         }
         if ($insights['maintenance_pending'] > 3) {
@@ -113,7 +175,7 @@ try {
         if (!empty($lists['ending'])) {
             $recommendations[] = 'بدء إجراءات تجديد العقود المنتهية قريباً.';
         }
-        if ($insights['collection_rate'] < 80 && $totalInvoiced > 0) {
+        if ($insights['collection_rate'] < $targetCollection && $totalInvoiced > 0) {
             $recommendations[] = 'تحسين التحصيل عبر تذكيرات مبكرة وجدولة خطط سداد.';
         }
         if ($maintenancePulse['risk_score'] >= 60) {
@@ -128,6 +190,12 @@ try {
     }
 } catch (Exception $e) {
     // في حال حدوث خطأ، سيتم استخدام القيم الصفرية الافتراضية ولن تتوقف الصفحة
+}
+
+if (empty($financeLabels)) {
+    $financeLabels = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'];
+    $financePaid = [1000, 2500, 1800, 3000, 4000, 5000];
+    $financeExpected = [1200, 2200, 2600, 3200, 3800, 4200];
 }
 ?>
 
@@ -268,8 +336,18 @@ try {
             <div style="font-size:24px; font-weight:700"><?= $insights['occupancy_rate'] ?>%</div>
         </div>
         <div style="background:#111827; padding:15px; border-radius:12px;">
+            <div style="font-size:12px; color:#9ca3af">هدف الإشغال</div>
+            <div style="font-size:24px; font-weight:700"><?= number_format((float) ($settings['target_occupancy'] ?? 90), 1) ?>%</div>
+            <div style="font-size:12px; color:<?= ($insights['occupancy_gap'] ?? 0) >= 0 ? '#10b981' : '#f97316' ?>">فرق <?= $insights['occupancy_gap'] ?? 0 ?>%</div>
+        </div>
+        <div style="background:#111827; padding:15px; border-radius:12px;">
             <div style="font-size:12px; color:#9ca3af">معدل التحصيل</div>
             <div style="font-size:24px; font-weight:700"><?= $insights['collection_rate'] ?>%</div>
+        </div>
+        <div style="background:#111827; padding:15px; border-radius:12px;">
+            <div style="font-size:12px; color:#9ca3af">هدف التحصيل</div>
+            <div style="font-size:24px; font-weight:700"><?= number_format((float) ($settings['target_collection'] ?? 95), 1) ?>%</div>
+            <div style="font-size:12px; color:<?= ($insights['collection_gap'] ?? 0) >= 0 ? '#10b981' : '#f97316' ?>">فرق <?= $insights['collection_gap'] ?? 0 ?>%</div>
         </div>
         <div style="background:#111827; padding:15px; border-radius:12px;">
             <div style="font-size:12px; color:#9ca3af">توقع تحصيل 30 يوماً</div>
@@ -286,6 +364,10 @@ try {
         <div style="background:#111827; padding:15px; border-radius:12px;">
             <div style="font-size:12px; color:#9ca3af">المتأخرات الحالية</div>
             <div style="font-size:24px; font-weight:700"><?= number_format($cashflow['overdue']) ?></div>
+        </div>
+        <div style="background:#111827; padding:15px; border-radius:12px;">
+            <div style="font-size:12px; color:#9ca3af">اتجاه التحصيل (30 يوم)</div>
+            <div style="font-size:24px; font-weight:700"><?= number_format($cashflow['collection_trend'], 1) ?>%</div>
         </div>
         <div style="background:#111827; padding:15px; border-radius:12px;">
             <div style="font-size:12px; color:#9ca3af">مؤشر مخاطر الصيانة</div>
@@ -333,25 +415,36 @@ document.addEventListener("DOMContentLoaded", function() {
     const unitsCtx = document.getElementById('unitsChart');
 
     if (financeCtx) {
+        const financeLabels = <?= json_encode($financeLabels, JSON_UNESCAPED_UNICODE) ?>;
+        const financePaid = <?= json_encode($financePaid) ?>;
+        const financeExpected = <?= json_encode($financeExpected) ?>;
         new Chart(financeCtx, {
             type: 'line',
             data: {
-                labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'],
+                labels: financeLabels,
                 datasets: [{
                     label: 'التحصيل الشهري',
-                    // بيانات افتراضية للجمالية في حال عدم وجود دخل
-                    data: [1000, 2500, 1800, <?= $stats['income'] > 0 ? $stats['income'] : 3000 ?>, 4000, 5000],
+                    data: financePaid,
                     borderColor: '#6366f1',
                     backgroundColor: 'rgba(99,102,241,0.1)',
                     fill: true,
                     tension: 0.4,
                     borderWidth: 3
+                }, {
+                    label: 'المتوقع تحصيله',
+                    data: financeExpected,
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34,197,94,0.08)',
+                    borderDash: [6, 6],
+                    fill: false,
+                    tension: 0.35,
+                    borderWidth: 2
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { legend: { position: 'bottom', labels: { color: '#e5e7eb', padding: 16 } } },
                 scales: {
                     y: { grid: { color: '#333' }, ticks: { color: '#888' } },
                     x: { grid: { display: false }, ticks: { color: '#888' } }
