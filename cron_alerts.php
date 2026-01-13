@@ -35,8 +35,9 @@ function should_run_schedule(string $mode, ?string $lastRun): bool {
 }
 
 // 1. تذكير بالدفعات المستحقة غداً
+$tenantNameColumn = tenant_name_column($pdo);
 $tomorrow = date('Y-m-d', strtotime('+1 day'));
-$stmt = $pdo->prepare("SELECT p.*, t.full_name, t.phone, u.unit_name 
+$stmt = $pdo->prepare("SELECT p.*, t.$tenantNameColumn AS full_name, t.phone, u.unit_name 
                        FROM payments p 
                        JOIN contracts c ON p.contract_id=c.id
                        JOIN tenants t ON c.tenant_id=t.id
@@ -55,7 +56,7 @@ while($r = $stmt->fetch()){
 }
 
 // 2. تذكير بالدفعات المتأخرة (بعد 3 أيام)
-$stmt = $pdo->query("SELECT p.*, t.full_name, t.phone, u.unit_name, DATEDIFF(CURDATE(), p.due_date) AS overdue_days
+$stmt = $pdo->query("SELECT p.*, t.$tenantNameColumn AS full_name, t.phone, u.unit_name, DATEDIFF(CURDATE(), p.due_date) AS overdue_days
                      FROM payments p 
                      JOIN contracts c ON p.contract_id=c.id
                      JOIN tenants t ON c.tenant_id=t.id

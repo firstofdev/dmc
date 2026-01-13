@@ -1,12 +1,14 @@
 <div class="card">
     <h2 style="margin-bottom:30px; border-bottom:1px solid #222; padding-bottom:15px">🔔 مركز التنبيهات</h2>
 
+    <?php $tenantNameColumn = tenant_name_column($pdo); ?>
+
     <h4 style="color:#ef4444; margin:20px 0 10px"><i class="fa-solid fa-circle-exclamation"></i> دفعات متأخرة السداد</h4>
     <table>
         <thead><tr><th>المستأجر</th><th>رقم العقد</th><th>المبلغ المستحق</th><th>تاريخ الاستحقاق</th><th>إجراء</th></tr></thead>
         <tbody>
             <?php
-            $late = $pdo->query("SELECT p.*, t.full_name, t.phone, c.id as cid FROM payments p JOIN contracts c ON p.contract_id=c.id JOIN tenants t ON c.tenant_id=t.id WHERE p.status!='paid' AND p.due_date < CURRENT_DATE");
+            $late = $pdo->query("SELECT p.*, t.$tenantNameColumn AS full_name, t.phone, c.id as cid FROM payments p JOIN contracts c ON p.contract_id=c.id JOIN tenants t ON c.tenant_id=t.id WHERE p.status!='paid' AND p.due_date < CURRENT_DATE");
             if($late->rowCount() == 0) echo "<tr><td colspan='5' style='text-align:center; color:#666'>لا توجد دفعات متأخرة</td></tr>";
             while($r=$late->fetch()): ?>
             <tr>
@@ -27,7 +29,7 @@
         <thead><tr><th>رقم العقد</th><th>المستأجر</th><th>تاريخ الانتهاء</th><th>الحالة</th></tr></thead>
         <tbody>
             <?php
-            $exp = $pdo->query("SELECT c.*, t.full_name FROM contracts c JOIN tenants t ON c.tenant_id=t.id WHERE c.end_date BETWEEN CURRENT_DATE AND DATE_ADD(CURRENT_DATE, INTERVAL 30 DAY)");
+            $exp = $pdo->query("SELECT c.*, t.$tenantNameColumn AS full_name FROM contracts c JOIN tenants t ON c.tenant_id=t.id WHERE c.end_date BETWEEN CURRENT_DATE AND DATE_ADD(CURRENT_DATE, INTERVAL 30 DAY)");
             if($exp->rowCount() == 0) echo "<tr><td colspan='4' style='text-align:center; color:#666'>لا توجد عقود تنتهي قريباً</td></tr>";
             while($r=$exp->fetch()): ?>
             <tr>

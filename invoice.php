@@ -19,7 +19,8 @@ if ($identifier === null) {
 }
 
 // جلب بيانات الفاتورة والعقد والوحدة
-$stmt = $pdo->prepare("SELECT p.*, c.id as contract_id, t.full_name, u.unit_name 
+$tenantNameColumn = tenant_name_column($pdo);
+$stmt = $pdo->prepare("SELECT p.*, c.id as contract_id, t.$tenantNameColumn AS full_name, u.unit_name 
                        FROM payments p 
                        JOIN contracts c ON p.contract_id = c.id
                        JOIN tenants t ON c.tenant_id = t.id

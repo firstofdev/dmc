@@ -10,7 +10,13 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $id = $_GET['id'];
 
 // 2. جلب بيانات المستأجر
-$stmt = $pdo->prepare("SELECT * FROM tenants WHERE id = ?");
+$tenantNameColumn = tenant_name_column($pdo);
+$tenantCreatedAtColumn = tenant_created_at_column($pdo);
+$tenantColumns = "id, $tenantNameColumn AS name, phone, id_number, email";
+if ($tenantCreatedAtColumn) {
+    $tenantColumns .= ", $tenantCreatedAtColumn AS created_at";
+}
+$stmt = $pdo->prepare("SELECT $tenantColumns FROM tenants WHERE id = ?");
 $stmt->execute([$id]);
 $t = $stmt->fetch();
 
@@ -36,6 +42,8 @@ $active_contracts = $pdo->query("SELECT COUNT(*) FROM contracts WHERE tenant_id 
 
 // المتبقي
 $remaining = $total_contracts_value - $total_paid;
+$registeredAt = $t['created_at'] ?? '';
+$registeredAtLabel = $registeredAt !== '' ? format_date($registeredAt, $registeredAt) : 'غير متوفر';
 ?>
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
@@ -58,7 +66,7 @@ $remaining = $total_contracts_value - $total_paid;
                 <div style="margin-top:8px; opacity:0.9; font-size:14px;">
                     <i class="fa-solid fa-id-card"></i> الهوية: <?= $t['id_number'] ?: 'غير مسجل' ?>
                     <span style="margin:0 10px">|</span>
-                    <i class="fa-solid fa-calendar-check"></i> تاريخ التسجيل: <?= date('Y-m-d', strtotime($t['created_at'])) ?>
+                    <i class="fa-solid fa-calendar-check"></i> تاريخ التسجيل: <?= $registeredAtLabel ?>
                 </div>
             </div>
         </div>

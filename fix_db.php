@@ -56,6 +56,29 @@ try {
         echo "<p style='color:green'>✅ تم تحديث جدول الوحدات (إضافة الأنواع والعدادات).</p>";
     } catch (PDOException $e) {}
 
+    // 3.1 تحديث جدول المستأجرين (tenants) لإضافة الاسم الكامل وتاريخ الإنشاء
+    $tenantHasName = table_has_column($pdo, 'tenants', 'name');
+    $tenantHasFullName = table_has_column($pdo, 'tenants', 'full_name');
+    if (!$tenantHasFullName) {
+        try {
+            $pdo->exec("ALTER TABLE tenants ADD COLUMN full_name VARCHAR(255) AFTER id");
+            echo "<p style='color:green'>✅ تم إضافة عمود الاسم الكامل للمستأجرين (full_name).</p>";
+            $tenantHasFullName = true;
+        } catch (PDOException $e) {}
+    }
+    if ($tenantHasFullName && $tenantHasName) {
+        try {
+            $pdo->exec("UPDATE tenants SET full_name = name WHERE (full_name IS NULL OR full_name = '')");
+            echo "<p style='color:green'>✅ تم ترحيل أسماء المستأجرين إلى full_name.</p>";
+        } catch (PDOException $e) {}
+    }
+    if (!table_has_column($pdo, 'tenants', 'created_at')) {
+        try {
+            $pdo->exec("ALTER TABLE tenants ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+            echo "<p style='color:green'>✅ تم إضافة تاريخ إنشاء للمستأجرين (created_at).</p>";
+        } catch (PDOException $e) {}
+    }
+
     // 4. إصلاح جدول العقود (contracts) - إضافة التوقيع
     try {
         $pdo->exec("ALTER TABLE contracts ADD COLUMN signature_img LONGTEXT");
