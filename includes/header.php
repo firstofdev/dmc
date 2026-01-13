@@ -16,7 +16,6 @@ $page_titles = [
     'users' => 'المستخدمين',
     'settings' => 'الإعدادات',
     'smart_center' => 'مركز التمكين الذكي',
-    'competitive' => 'تحليل المنافسين'
 ];
 $page_title = $page_titles[$p] ?? 'لوحة القيادة';
 
