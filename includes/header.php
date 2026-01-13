@@ -22,12 +22,20 @@ $page_title = $page_titles[$p] ?? 'لوحة القيادة';
 $stmt = $pdo->prepare("SELECT v FROM settings WHERE k='logo'"); $stmt->execute();
 $db_logo = $stmt->fetchColumn();
 $logo_src = $db_logo && file_exists($db_logo) ? $db_logo : 'logo.png';
+$company_name = 'دار الميار للمقاولات';
+try {
+    $stmt = $pdo->prepare("SELECT v FROM settings WHERE k='company_name'");
+    $stmt->execute();
+    $company_name = $stmt->fetchColumn() ?: $company_name;
+} catch (Exception $e) {
+}
+$company_name_safe = htmlspecialchars($company_name);
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>دار الميار - النظام المتكامل</title>
+    <title><?= $company_name_safe ?> - النظام المتكامل</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -159,10 +167,10 @@ $logo_src = $db_logo && file_exists($db_logo) ? $db_logo : 'logo.png';
 </head>
 <body>
 
-<div class="sidebar">
+    <div class="sidebar">
     <div style="text-align:center; margin-bottom:30px">
         <div class="logo-wrapper"><img src="<?= $logo_src ?>" class="logo-img" alt="Logo"></div>
-        <h4 style="margin:10px 0 5px; font-weight:800">دار الميار</h4>
+        <h4 style="margin:10px 0 5px; font-weight:800"><?= $company_name_safe ?></h4>
         <span class="tagline" style="font-size:12px; color:var(--primary); background:var(--tag-bg); padding:4px 10px; border-radius:20px">نظام الإدارة</span>
     </div>
     <div style="flex:1; overflow-y:auto; padding-left:5px">
