@@ -38,6 +38,31 @@ $automation = [
 $coverage = [];
 $actionItems = [];
 
+$readinessScore = 0;
+$quickActions = [
+    [
+        'label' => 'ضبط التكاملات',
+        'href' => 'index.php?p=settings',
+        'icon' => 'fa-solid fa-gear',
+    ],
+    [
+        'label' => 'متابعة الصيانة',
+        'href' => 'index.php?p=maintenance',
+        'icon' => 'fa-solid fa-screwdriver-wrench',
+    ],
+    [
+        'label' => 'مراجعة التنبيهات',
+        'href' => 'index.php?p=alerts',
+        'icon' => 'fa-solid fa-bell',
+    ],
+    [
+        'label' => 'تجديد العقود',
+        'href' => 'index.php?p=contracts',
+        'icon' => 'fa-solid fa-file-contract',
+    ],
+];
+
+
 try {
     if (isset($pdo)) {
         $coreStats['properties'] = (int) $pdo->query("SELECT COUNT(*) FROM properties")->fetchColumn();
@@ -123,6 +148,20 @@ $coverage = [
     ],
 ];
 
+$readinessInputs = [
+    $coreStats['properties'] > 0,
+    $coreStats['units'] > 0,
+    $coreStats['contracts'] > 0,
+    $coreStats['tenants'] > 0,
+    $coreStats['payments'] > 0,
+    $coreStats['maintenance'] > 0,
+    $integrations['whatsapp'],
+    $integrations['ocr'],
+    $integrations['payment_portal'],
+];
+$readinessScore = (int) round((array_sum(array_map('intval', $readinessInputs)) / max(1, count($readinessInputs))) * 100);
+
+
 if (!$integrations['whatsapp']) {
     $actionItems[] = 'تفعيل تكامل واتساب لإرسال التذكيرات والتحصيل.';
 }
@@ -154,6 +193,30 @@ if ($coreStats['maintenance'] === 0) {
         </div>
     </div>
 </div>
+
+<div class="card" style="margin-bottom:30px; padding:22px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;">
+        <div>
+            <h3 style="margin:0"><i class="fa-solid fa-shield-heart"></i> مؤشر الجاهزية الشاملة</h3>
+            <p style="margin:8px 0 0; color:var(--muted);">يعكس اكتمال البيانات والتكاملات الأساسية.</p>
+        </div>
+        <div style="background:var(--input-bg); border:1px solid var(--border); border-radius:16px; padding:12px 18px; font-size:26px; font-weight:800;">
+            <?= $readinessScore ?>%
+        </div>
+    </div>
+    <div style="margin-top:15px; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
+        <div style="background:var(--input-bg); border:1px dashed var(--border); border-radius:12px; padding:10px; font-size:12px; color:var(--muted);">
+            اكتمال الوحدات والعقارات والعقود.
+        </div>
+        <div style="background:var(--input-bg); border:1px dashed var(--border); border-radius:12px; padding:10px; font-size:12px; color:var(--muted);">
+            تغذية الدفعات والصيانة للتحليلات.
+        </div>
+        <div style="background:var(--input-bg); border:1px dashed var(--border); border-radius:12px; padding:10px; font-size:12px; color:var(--muted);">
+            ربط واتساب، OCR، بوابة الدفع.
+        </div>
+    </div>
+</div>
+
 
 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px;">
@@ -252,6 +315,26 @@ if ($coreStats['maintenance'] === 0) {
         <div style="font-size:12px; color:#94a3b8; margin-top:6px;">خطط تحصيل مستهدفة</div>
     </div>
 </div>
+
+<div class="card" style="padding:25px; margin-bottom:30px;">
+    <h3 style="margin-top:0"><i class="fa-solid fa-forward-fast"></i> الخطوة التالية</h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+        <?php foreach ($quickActions as $action): ?>
+            <a href="<?= htmlspecialchars($action['href']) ?>" style="text-decoration:none; color:inherit;">
+                <div style="background:var(--input-bg); border:1px solid var(--border); border-radius:16px; padding:14px; display:flex; align-items:center; gap:12px; transition:0.2s;">
+                    <div style="width:40px; height:40px; border-radius:12px; background:var(--tag-bg); display:flex; align-items:center; justify-content:center; color:var(--primary);">
+                        <i class="<?= htmlspecialchars($action['icon']) ?>"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight:700;"><?= htmlspecialchars($action['label']) ?></div>
+                        <div style="font-size:12px; color:var(--muted);">افتح الصفحة ذات الصلة</div>
+                    </div>
+                </div>
+            </a>
+        <?php endforeach; ?>
+    </div>
+</div>
+
 
 <div class="card" style="padding:25px;">
     <h3 style="margin-top:0"><i class="fa-solid fa-bolt"></i> خطوات تطبيق القوة الخارقة</h3>
