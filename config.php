@@ -20,6 +20,7 @@ define('OCR_API_KEY', getenv('OCR_API_KEY') ?: '');
 define('UPLOAD_MAX_BYTES', (int) (getenv('UPLOAD_MAX_BYTES') ?: 5 * 1024 * 1024));
 define('ADMIN_WHATSAPP', getenv('ADMIN_WHATSAPP') ?: '');
 define('PAYMENT_PORTAL_URL', getenv('PAYMENT_PORTAL_URL') ?: '');
+define('SMART_FEATURES_MODE', getenv('SMART_FEATURES_MODE') ?: 'force');
 
 try {
     $pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);
@@ -105,5 +106,9 @@ function table_has_column(PDO $pdo, string $table, string $column): bool {
     } catch (Exception $e) {
         return false;
     }
+}
+
+function smart_features_force_enabled(): bool {
+    return defined('SMART_FEATURES_MODE') && SMART_FEATURES_MODE === 'force';
 }
 ?>

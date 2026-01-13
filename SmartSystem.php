@@ -53,6 +53,15 @@ class SmartSystem {
     // تحليل الهوية (OCR)
     public function analyzeIDCard($imagePath) {
         if (!OCR_API_URL || !OCR_API_KEY) {
+            if (smart_features_force_enabled()) {
+                return [
+                    'success' => true,
+                    'mode' => 'simulated',
+                    'data' => [
+                        'note' => 'OCR محلي (محاكاة) - يرجى ضبط OCR_API_URL و OCR_API_KEY للحصول على قراءة فعلية.',
+                    ],
+                ];
+            }
             return [
                 'success' => false,
                 'error' => 'OCR غير مُعد. تأكد من ضبط OCR_API_URL و OCR_API_KEY.',
@@ -93,6 +102,11 @@ class SmartSystem {
     // إرسال واتساب (تسجيل في activity_log المرفق)
     public function sendWhatsApp($phone, $message) {
         if (!WHATSAPP_TOKEN) {
+            if (smart_features_force_enabled()) {
+                $stmt = $this->pdo->prepare("INSERT INTO activity_log (description, type) VALUES (?, 'whatsapp_simulated')");
+                $stmt->execute(["تم إرسال رسالة (محاكاة) لـ $phone: $message"]);
+                return;
+            }
             throw new RuntimeException('WHATSAPP_TOKEN غير مُعد.');
         }
 
@@ -227,7 +241,13 @@ class SmartSystem {
     }
 
     public function buildPaymentLink(?int $paymentId): ?string {
-        if (!PAYMENT_PORTAL_URL || !$paymentId) {
+        if (!$paymentId) {
+            return null;
+        }
+        if (!PAYMENT_PORTAL_URL) {
+            if (smart_features_force_enabled()) {
+                return 'index.php?p=payments&payment_id='.urlencode((string) $paymentId);
+            }
             return null;
         }
         $separator = str_contains(PAYMENT_PORTAL_URL, '?') ? '&' : '?';

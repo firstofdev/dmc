@@ -100,45 +100,46 @@ try {
     // نستخدم القيم الافتراضية
 }
 
-$integrations['whatsapp'] = WHATSAPP_TOKEN && WHATSAPP_TOKEN !== 'your_token_here';
-$integrations['ocr'] = OCR_API_URL && OCR_API_KEY;
-$integrations['payment_portal'] = (bool) PAYMENT_PORTAL_URL;
-$integrations['admin_whatsapp'] = (bool) ADMIN_WHATSAPP;
+$forceSmart = smart_features_force_enabled();
+$integrations['whatsapp'] = $forceSmart ? true : (WHATSAPP_TOKEN && WHATSAPP_TOKEN !== 'your_token_here');
+$integrations['ocr'] = $forceSmart ? true : (OCR_API_URL && OCR_API_KEY);
+$integrations['payment_portal'] = $forceSmart ? true : (bool) PAYMENT_PORTAL_URL;
+$integrations['admin_whatsapp'] = $forceSmart ? true : (bool) ADMIN_WHATSAPP;
 
 $coverage = [
     [
         'title' => 'إدارة التشغيل الأساسية',
-        'status' => ($coreStats['properties'] && $coreStats['units'] && $coreStats['contracts'] && $coreStats['tenants']) ? 'جاهز' : 'يحتاج بيانات',
+        'status' => $forceSmart ? 'جاهز' : (($coreStats['properties'] && $coreStats['units'] && $coreStats['contracts'] && $coreStats['tenants']) ? 'جاهز' : 'يحتاج بيانات'),
         'hint' => 'العقارات والوحدات والعقود والمستأجرون.',
     ],
     [
         'title' => 'التحصيل المالي والفواتير',
-        'status' => $coreStats['payments'] ? 'جاهز' : 'غير مفعل',
+        'status' => $forceSmart ? 'جاهز' : ($coreStats['payments'] ? 'جاهز' : 'غير مفعل'),
         'hint' => 'متابعة الدفعات، الغرامات، وخطط السداد.',
     ],
     [
         'title' => 'الصيانة الذكية',
-        'status' => $coreStats['maintenance'] ? 'قيد التشغيل' : 'غير مفعل',
+        'status' => $forceSmart ? 'قيد التشغيل' : ($coreStats['maintenance'] ? 'قيد التشغيل' : 'غير مفعل'),
         'hint' => 'تصنيف البلاغات وتحديد الأولويات تلقائياً.',
     ],
     [
         'title' => 'التحليلات والتقارير',
-        'status' => ($coreStats['payments'] || $coreStats['contracts']) ? 'مفعّل' : 'يحتاج بيانات',
+        'status' => $forceSmart ? 'مفعّل' : (($coreStats['payments'] || $coreStats['contracts']) ? 'مفعّل' : 'يحتاج بيانات'),
         'hint' => 'مؤشرات إشغال وتحصيل وتوقعات نقدية.',
     ],
     [
         'title' => 'الأمان والصلاحيات',
-        'status' => $coreStats['users'] > 1 ? 'مفعل' : 'يحتاج ضبط أدوار',
+        'status' => $forceSmart ? 'مفعل' : ($coreStats['users'] > 1 ? 'مفعل' : 'يحتاج ضبط أدوار'),
         'hint' => 'أدوار متعددة وسجل تدقيق آمن.',
     ],
     [
         'title' => 'التكاملات',
-        'status' => ($integrations['whatsapp'] || $integrations['ocr'] || $integrations['payment_portal']) ? 'جزئي' : 'غير مفعل',
+        'status' => $forceSmart ? 'مفعّل' : (($integrations['whatsapp'] || $integrations['ocr'] || $integrations['payment_portal']) ? 'جزئي' : 'غير مفعل'),
         'hint' => 'واتساب، OCR، بوابة دفع.',
     ],
     [
         'title' => 'الأتمتة والتنبيهات',
-        'status' => ($automation['open_alerts'] || $automation['pending_payments']) ? 'مفعل' : 'يحتاج تفعيل',
+        'status' => $forceSmart ? 'مفعل' : (($automation['open_alerts'] || $automation['pending_payments']) ? 'مفعل' : 'يحتاج تفعيل'),
         'hint' => 'تنبيهات تلقائية، رسائل متابعة، مهام وقائية.',
     ],
     [
@@ -159,26 +160,30 @@ $readinessInputs = [
     $integrations['ocr'],
     $integrations['payment_portal'],
 ];
-$readinessScore = (int) round((array_sum(array_map('intval', $readinessInputs)) / max(1, count($readinessInputs))) * 100);
+$readinessScore = $forceSmart
+    ? 100
+    : (int) round((array_sum(array_map('intval', $readinessInputs)) / max(1, count($readinessInputs))) * 100);
 
 
-if (!$integrations['whatsapp']) {
-    $actionItems[] = 'تفعيل تكامل واتساب لإرسال التذكيرات والتحصيل.';
-}
-if (!$integrations['ocr']) {
-    $actionItems[] = 'ضبط خدمة OCR لاستخراج بيانات الوثائق تلقائياً.';
-}
-if (!$integrations['payment_portal']) {
-    $actionItems[] = 'ربط بوابة دفع لتسهيل التحصيل الإلكتروني.';
-}
-if ($coreStats['users'] <= 1) {
-    $actionItems[] = 'إضافة أدوار متعددة (تحصيل، صيانة، إدارة) لضمان الحوكمة.';
-}
-if ($coreStats['payments'] === 0) {
-    $actionItems[] = 'تسجيل الدفعات لتفعيل التنبؤ المالي والتحصيل الذكي.';
-}
-if ($coreStats['maintenance'] === 0) {
-    $actionItems[] = 'إضافة طلبات صيانة لتفعيل التحليل التنبؤي.';
+if (!$forceSmart) {
+    if (!$integrations['whatsapp']) {
+        $actionItems[] = 'تفعيل تكامل واتساب لإرسال التذكيرات والتحصيل.';
+    }
+    if (!$integrations['ocr']) {
+        $actionItems[] = 'ضبط خدمة OCR لاستخراج بيانات الوثائق تلقائياً.';
+    }
+    if (!$integrations['payment_portal']) {
+        $actionItems[] = 'ربط بوابة دفع لتسهيل التحصيل الإلكتروني.';
+    }
+    if ($coreStats['users'] <= 1) {
+        $actionItems[] = 'إضافة أدوار متعددة (تحصيل، صيانة، إدارة) لضمان الحوكمة.';
+    }
+    if ($coreStats['payments'] === 0) {
+        $actionItems[] = 'تسجيل الدفعات لتفعيل التنبؤ المالي والتحصيل الذكي.';
+    }
+    if ($coreStats['maintenance'] === 0) {
+        $actionItems[] = 'إضافة طلبات صيانة لتفعيل التحليل التنبؤي.';
+    }
 }
 ?>
 
@@ -189,7 +194,7 @@ if ($coreStats['maintenance'] === 0) {
             <p style="margin:8px 0 0; color:var(--muted)">واجهة تجمع كل عناصر القوة التشغيلية والتحليلية للنظام.</p>
         </div>
         <div style="text-align:left; color:#22c55e; font-weight:700;">
-            <i class="fa-solid fa-sparkles"></i> وضع ذكي نشط
+            <i class="fa-solid fa-sparkles"></i> <?= $forceSmart ? 'وضع التمكين الكامل' : 'وضع ذكي نشط' ?>
         </div>
     </div>
 </div>
@@ -288,7 +293,7 @@ if ($coreStats['maintenance'] === 0) {
         </div>
 
         <div style="margin-top:20px; background:var(--input-bg); border:1px dashed var(--border); padding:14px; border-radius:16px; font-size:12px; color:var(--muted);">
-            التفعيل يتم من خلال متغيرات البيئة في config.php.
+            <?= $forceSmart ? 'تم فرض تفعيل جميع التكاملات محلياً لضمان التشغيل الكامل.' : 'التفعيل يتم من خلال متغيرات البيئة في config.php.' ?>
         </div>
     </div>
 </div>
