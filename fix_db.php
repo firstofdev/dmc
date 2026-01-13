@@ -64,14 +64,30 @@ try {
 
     // 5. التأكد من وجود مستخدم Admin
     $pass = password_hash('123456', PASSWORD_DEFAULT);
+
+  $adminByUsername = $pdo->query("SELECT id FROM users WHERE username='admin' LIMIT 1")->fetchColumn();
+    if ($adminByUsername) {
+
     $chk = $pdo->query("SELECT count(*) FROM users WHERE username='admin'")->fetchColumn();
     if ($chk == 0) {
         $pdo->exec("INSERT INTO users (username, password, full_name, email, role) VALUES ('admin', '$pass', 'المدير العام', 'admin@system.com', 'admin')");
         echo "<p style='color:green'>✅ تم إنشاء حساب المدير (admin / 123456).</p>";
     } else {
-        // تحديث كلمة مرور الأدمن للتأكد وتثبيت الصلاحية
+
+      // تحديث كلمة مرور الأدمن للتأكد وتثبيت الصلاحية
         $pdo->exec("UPDATE users SET password='$pass', role='admin' WHERE username='admin'");
         echo "<p style='color:blue'>ℹ️ تم إعادة تعيين كلمة مرور (admin) إلى 123456.</p>";
+    } else {
+        $adminByRole = $pdo->query("SELECT id FROM users WHERE role='admin' ORDER BY id ASC LIMIT 1")->fetchColumn();
+        if ($adminByRole) {
+            $stmt = $pdo->prepare("UPDATE users SET username='admin', password=?, role='admin' WHERE id=?");
+            $stmt->execute([$pass, $adminByRole]);
+            echo "<p style='color:blue'>ℹ️ تم إصلاح بيانات المدير وتعيين اسم المستخدم (admin) مع كلمة المرور 123456.</p>";
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, email, role) VALUES ('admin', ?, 'المدير العام', 'admin@system.com', 'admin')");
+            $stmt->execute([$pass]);
+            echo "<p style='color:green'>✅ تم إنشاء حساب المدير (admin / 123456).</p>";
+        }
     }
 
     echo "<hr><div style='background:#dcfce7; color:#166534; padding:20px; border-radius:10px; text-align:center;'>
