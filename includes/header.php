@@ -20,16 +20,26 @@ $page_titles = [
 $page_title = $page_titles[$p] ?? 'لوحة القيادة';
 
 // جلب الشعار
-$stmt = $pdo->prepare("SELECT v FROM settings WHERE k='logo'"); $stmt->execute();
-$db_logo = $stmt->fetchColumn();
-$logo_src = $db_logo && file_exists($db_logo) ? $db_logo : 'logo.png';
-$company_name = 'اسم الشركة غير محدد';
+$settingsMap = [];
 try {
-    $stmt = $pdo->prepare("SELECT v FROM settings WHERE k='company_name'");
+    $stmt = $pdo->prepare("SELECT k, v FROM settings WHERE k IN ('logo','company_name','timezone','date_format','maintenance_mode','maintenance_message')");
     $stmt->execute();
-    $company_name = $stmt->fetchColumn() ?: $company_name;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $settingsMap[$row['k']] = $row['v'];
+    }
 } catch (Exception $e) {
 }
+$db_logo = $settingsMap['logo'] ?? null;
+$logo_src = $db_logo && file_exists($db_logo) ? $db_logo : 'logo.png';
+$company_name = $settingsMap['company_name'] ?? 'اسم الشركة غير محدد';
+$timezone = $settingsMap['timezone'] ?? 'Asia/Riyadh';
+if (!@date_default_timezone_set($timezone)) {
+    date_default_timezone_set('Asia/Riyadh');
+}
+$dateFormat = $settingsMap['date_format'] ?? 'Y-m-d';
+$displayDate = date($dateFormat);
+$maintenanceEnabled = ($settingsMap['maintenance_mode'] ?? 'off') === 'on';
+$maintenanceMessage = $settingsMap['maintenance_message'] ?? 'النظام تحت صيانة مجدولة، قد تتأخر بعض الخدمات.';
 $company_name_safe = htmlspecialchars($company_name);
 ?>
 <!DOCTYPE html>
@@ -112,6 +122,8 @@ $company_name_safe = htmlspecialchars($company_name);
         .smart-search-hint { background:var(--tag-bg); color:var(--primary); padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold; }
         .smart-meta { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:14px; }
         .page-pill { background:var(--tag-bg); color:var(--primary); padding:6px 12px; border-radius:14px; font-weight:bold; }
+        .maintenance-banner { background:linear-gradient(135deg, rgba(239,68,68,0.18), rgba(248,113,113,0.12)); border:1px solid rgba(239,68,68,0.45); color:#fecaca; padding:14px 18px; border-radius:16px; display:flex; align-items:center; gap:12px; margin-bottom:24px; box-shadow:0 12px 24px rgba(15,23,42,0.25); }
+        .maintenance-banner i { color:#f87171; }
 
         .btn-icon { width:44px; height:44px; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; }
         .btn-small { padding:10px 14px; font-size:13px; border-radius:12px; }
@@ -186,6 +198,15 @@ $company_name_safe = htmlspecialchars($company_name);
 </div>
 
 <div class="main">
+    <?php if ($maintenanceEnabled): ?>
+        <div class="maintenance-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div>
+                <strong>وضع الصيانة مفعّل</strong>
+                <div style="font-size:13px; color:#fecaca; margin-top:4px;"><?= htmlspecialchars($maintenanceMessage) ?></div>
+            </div>
+        </div>
+    <?php endif; ?>
     <div class="header">
         <div>
             <h1 style="margin:0; font-size:26px; font-weight:800">أهلاً، <?= $user_name ?> 👋</h1>
@@ -196,7 +217,7 @@ $company_name_safe = htmlspecialchars($company_name);
                 <i class="fa-solid fa-bars"></i>
             </button>
             <button class="btn btn-dark btn-small">
-                <i class="fa-regular fa-calendar"></i> <?= date('Y-m-d') ?>
+                <i class="fa-regular fa-calendar"></i> <?= $displayDate ?>
             </button>
         </div>
     </div>
