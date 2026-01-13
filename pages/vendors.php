@@ -67,19 +67,18 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
 <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
         <h3>👷 إدارة المقاولين</h3>
-
-        <a href="index.php?p=vendors&act=add" id="openVendorModal" class="btn btn-primary" style="text-decoration:none">
-
         <button type="button" id="openVendorModal" class="btn btn-primary" style="text-decoration:none">
-
             <i class="fa-solid fa-plus"></i> إضافة مقاول
         </button>
     </div>
 
     <div id="vendorModal" class="modal-backdrop" style="display:none">
-        <div class="modal-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:15px">
-                <h3>إضافة مقاول جديد</h3>
+        <div class="modal-card modal-card--glow">
+            <div class="modal-header">
+                <div>
+                    <p class="modal-kicker">مقاول جديد</p>
+                    <h3>إضافة مقاول جديد</h3>
+                </div>
                 <button type="button" id="closeVendorModal" class="btn btn-dark">إغلاق <i class="fa-solid fa-xmark"></i></button>
             </div>
 
@@ -89,51 +88,20 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
                 
                 <div style="margin-bottom:15px">
                     <label style="color:#aaa; display:block; margin-bottom:5px">الاسم</label>
-                    <input type="text" name="name" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555" required>
+                    <input type="text" name="name" class="inp modal-input" style="width:100%; padding:10px; background:#222; color:white; border:1px solid #3a3a3a" required>
                 </div>
                 
                 <div style="margin-bottom:15px">
                     <label style="color:#aaa; display:block; margin-bottom:5px">التخصص</label>
-                    <input type="text" name="type" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555" required>
+                    <input type="text" name="type" class="inp modal-input" style="width:100%; padding:10px; background:#222; color:white; border:1px solid #3a3a3a" required>
                 </div>
                 
                 <div style="margin-bottom:25px">
                     <label style="color:#aaa; display:block; margin-bottom:5px">الجوال</label>
-                    <input type="text" name="phone" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555" required>
+                    <input type="text" name="phone" class="inp modal-input" style="width:100%; padding:10px; background:#222; color:white; border:1px solid #3a3a3a" required>
                 </div>
                 
-                <button class="btn btn-primary" style="width:100%; justify-content:center; padding:12px">حفظ البيانات</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="vendorModal" class="modal-backdrop" style="display:none">
-        <div class="modal-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:15px">
-                <h3>إضافة مقاول جديد</h3>
-                <button type="button" id="closeVendorModal" class="btn btn-dark">إغلاق <i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <form method="POST" action="index.php?p=vendors">
-                <input type="hidden" name="save_vendor" value="1">
-                <input type="hidden" name="vid" value="">
-                
-                <div style="margin-bottom:15px">
-                    <label style="color:#aaa; display:block; margin-bottom:5px">الاسم</label>
-                    <input type="text" name="name" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555" required>
-                </div>
-                
-                <div style="margin-bottom:15px">
-                    <label style="color:#aaa; display:block; margin-bottom:5px">التخصص</label>
-                    <input type="text" name="type" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555" required>
-                </div>
-                
-                <div style="margin-bottom:25px">
-                    <label style="color:#aaa; display:block; margin-bottom:5px">الجوال</label>
-                    <input type="text" name="phone" class="inp" style="width:100%; padding:10px; background:#333; color:white; border:1px solid #555" required>
-                </div>
-                
-                <button class="btn btn-primary" style="width:100%; justify-content:center; padding:12px">حفظ البيانات</button>
+                <button class="btn btn-primary modal-submit" style="width:100%; justify-content:center; padding:12px">حفظ البيانات</button>
             </form>
         </div>
     </div>
@@ -170,7 +138,8 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
     .modal-backdrop {
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.6);
+        background: radial-gradient(circle at top, rgba(56, 189, 248, 0.18), rgba(0,0,0,0.75));
+        backdrop-filter: blur(4px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -179,18 +148,62 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
     }
     .modal-card {
         width: min(650px, 100%);
-        background: #1f1f1f;
-        border: 1px solid #333;
-        border-radius: 14px;
-        padding: 25px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        background: linear-gradient(160deg, #1e1f24 0%, #171717 100%);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 18px;
+        padding: 26px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+        animation: modalFadeIn 0.25s ease-out;
+    }
+    .modal-card--glow {
+        position: relative;
+        overflow: hidden;
+    }
+    .modal-card--glow::before {
+        content: "";
+        position: absolute;
+        inset: -40% -40% auto auto;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(14,165,233,0.35), transparent 70%);
+        pointer-events: none;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        padding-bottom: 15px;
+        gap: 15px;
+    }
+    .modal-kicker {
+        margin: 0 0 6px;
+        color: #7dd3fc;
+        font-size: 12px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    .modal-input:focus {
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 3px rgba(56,189,248,0.18);
+        outline: none;
+    }
+    .modal-submit {
+        box-shadow: 0 12px 24px rgba(14,116,144,0.25);
+    }
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(12px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
     }
 </style>
 <script>
     const vendorModal = document.getElementById('vendorModal');
     const openVendorModal = document.getElementById('openVendorModal');
     const closeVendorModal = document.getElementById('closeVendorModal');
-
+    const closeVendorModalHandler = () => {
+        vendorModal.style.display = 'none';
+    };
 
     if (vendorModal && openVendorModal && closeVendorModal) {
         openVendorModal.addEventListener('click', (event) => {
@@ -198,30 +211,20 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
             vendorModal.style.display = 'flex';
         });
 
-        closeVendorModal.addEventListener('click', () => {
-            vendorModal.style.display = 'none';
-        });
+        closeVendorModal.addEventListener('click', closeVendorModalHandler);
 
         vendorModal.addEventListener('click', (event) => {
             if (event.target === vendorModal) {
-                vendorModal.style.display = 'none';
+                closeVendorModalHandler();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && vendorModal.style.display === 'flex') {
+                closeVendorModalHandler();
             }
         });
     }
-
-    openVendorModal.addEventListener('click', () => {
-        vendorModal.style.display = 'flex';
-    });
-
-    closeVendorModal.addEventListener('click', () => {
-        vendorModal.style.display = 'none';
-    });
-
-    vendorModal.addEventListener('click', (event) => {
-        if (event.target === vendorModal) {
-            vendorModal.style.display = 'none';
-        }
-    });
 
 </script>
 <?php endif; ?>
