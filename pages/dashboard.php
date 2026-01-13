@@ -48,6 +48,18 @@ $tenantRiskSnapshot = [
     'max_overdue_days' => 0,
     'items' => [],
 ];
+$portfolioMetrics = [
+    'vacant_units' => 0,
+    'vacancy_rate' => 0,
+    'paid_30' => 0,
+    'paid_per_rented' => 0,
+    'avg_payment' => 0,
+    'renewals_30' => 0,
+    'renewals_60' => 0,
+    'overdue_ratio' => 0,
+];
+$propertyPerformance = [];
+$smartAlerts = [];
 $settings = [
     'target_occupancy' => 90,
     'target_collection' => 95,
@@ -94,6 +106,12 @@ try {
             GROUP BY DATE_FORMAT(paid_date, '%Y-%m')
         ) t")->fetchColumn();
         $insights['avg_paid_3m'] = $avgPaid ?: 0;
+
+        $paidDateColumn = table_has_column($pdo, 'payments', 'paid_date') ? 'paid_date' : 'due_date';
+        $portfolioMetrics['paid_30'] = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='paid' AND {$paidDateColumn} BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()")->fetchColumn() ?: 0;
+        $portfolioMetrics['avg_payment'] = $pdo->query("SELECT COALESCE(AVG(amount),0) FROM payments")->fetchColumn() ?: 0;
+        $portfolioMetrics['renewals_30'] = $pdo->query("SELECT COUNT(*) FROM contracts WHERE end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)")->fetchColumn() ?: 0;
+        $portfolioMetrics['renewals_60'] = $pdo->query("SELECT COUNT(*) FROM contracts WHERE end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 60 DAY)")->fetchColumn() ?: 0;
 
         $startDate = (new DateTime('first day of this month'))->modify('-5 months')->format('Y-m-d');
         $paidRows = $pdo->prepare("SELECT DATE_FORMAT(paid_date,'%Y-%m') AS ym, COALESCE(SUM(amount),0) AS total
@@ -143,6 +161,14 @@ try {
             LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
 
         $recentActivity = get_recent_activity($pdo, 6);
+        $propertyPerformance = $pdo->query("SELECT p.name,
+            COUNT(u.id) AS units_total,
+            SUM(CASE WHEN u.status='rented' THEN 1 ELSE 0 END) AS units_rented
+            FROM properties p
+            LEFT JOIN units u ON u.property_id = p.id
+            GROUP BY p.id
+            ORDER BY units_total DESC
+            LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
         if (isset($AI)) {
             $cashflow = $AI->getCashflowForecast();
             $maintenancePulse = $AI->getMaintenancePulse();
@@ -160,6 +186,10 @@ try {
         $targetOccupancy = (float) ($settings['target_occupancy'] ?? 90);
         $targetCollection = (float) ($settings['target_collection'] ?? 95);
         $overdueThreshold = (int) ($settings['overdue_threshold'] ?? 5);
+        $portfolioMetrics['vacant_units'] = max($stats['units'] - $stats['rented'], 0);
+        $portfolioMetrics['vacancy_rate'] = $stats['units'] > 0 ? round(($portfolioMetrics['vacant_units'] / $stats['units']) * 100, 1) : 0;
+        $portfolioMetrics['paid_per_rented'] = $stats['rented'] > 0 ? round($portfolioMetrics['paid_30'] / $stats['rented'], 1) : 0;
+        $portfolioMetrics['overdue_ratio'] = $totalInvoiced > 0 ? round(($cashflow['overdue'] / $totalInvoiced) * 100, 1) : 0;
         $insights['occupancy_gap'] = round($insights['occupancy_rate'] - $targetOccupancy, 1);
         $insights['collection_gap'] = round($insights['collection_rate'] - $targetCollection, 1);
 
@@ -186,6 +216,19 @@ try {
         }
         if ($tenantRiskSnapshot['high_risk_count'] > 0) {
             $recommendations[] = 'متابعة المستأجرين مرتفعي المخاطر بجدولة خطط سداد.';
+        }
+
+        if ($portfolioMetrics['vacancy_rate'] >= 20) {
+            $smartAlerts[] = 'نسبة الشواغر مرتفعة، فعّل عروض التأجير السريع للوحدات الشاغرة.';
+        }
+        if ($portfolioMetrics['renewals_30'] > 0) {
+            $smartAlerts[] = 'يوجد عقود تنتهي خلال 30 يوماً، جهّز عروض تجديد مخصصة.';
+        }
+        if ($portfolioMetrics['overdue_ratio'] >= 15) {
+            $smartAlerts[] = 'نسبة المتأخرات مرتفعة، راجع خطط التحصيل وجدولة المدفوعات.';
+        }
+        if ($maintenancePulse['emergency'] ?? 0) {
+            $smartAlerts[] = 'هناك طلبات صيانة عاجلة، رتب الأولويات مع المقاولين.';
         }
     }
 } catch (Exception $e) {
@@ -293,6 +336,98 @@ if (empty($financeLabels)) {
         <div style="height:280px; width:100%; display:flex; align-items:center; justify-content:center">
             <canvas id="unitsChart"></canvas>
         </div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:30px;">
+    <div class="card" style="padding:20px;">
+        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-bolt"></i> نبض المحفظة</h4>
+        <div style="display:grid; gap:12px; color:#e2e8f0;">
+            <div style="display:flex; justify-content:space-between;">
+                <span>وحدات شاغرة</span>
+                <strong><?= $portfolioMetrics['vacant_units'] ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>معدل الشواغر</span>
+                <strong><?= $portfolioMetrics['vacancy_rate'] ?>%</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>تحصيل آخر 30 يوم</span>
+                <strong><?= number_format($portfolioMetrics['paid_30']) ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>متوسط التحصيل للوحدة المؤجرة</span>
+                <strong><?= number_format($portfolioMetrics['paid_per_rented']) ?></strong>
+            </div>
+        </div>
+    </div>
+    <div class="card" style="padding:20px;">
+        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-arrows-spin"></i> دوران العقود</h4>
+        <div style="display:grid; gap:12px; color:#e2e8f0;">
+            <div style="display:flex; justify-content:space-between;">
+                <span>تجديد خلال 30 يوم</span>
+                <strong><?= $portfolioMetrics['renewals_30'] ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>تجديد خلال 60 يوم</span>
+                <strong><?= $portfolioMetrics['renewals_60'] ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>متوسط قيمة الدفعة</span>
+                <strong><?= number_format($portfolioMetrics['avg_payment']) ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>نسبة المتأخرات</span>
+                <strong><?= $portfolioMetrics['overdue_ratio'] ?>%</strong>
+            </div>
+        </div>
+    </div>
+    <div class="card" style="padding:20px;">
+        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-sliders"></i> إجراءات سريعة</h4>
+        <div style="display:grid; gap:10px;">
+            <a href="index.php?p=contracts" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-file-pen"></i> متابعة التجديدات</a>
+            <a href="index.php?p=tenants" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-user-check"></i> مراجعة المستأجرين</a>
+            <a href="index.php?p=maintenance" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-toolbox"></i> تنظيم الصيانة</a>
+            <a href="index.php?p=alerts" class="btn btn-primary" style="justify-content:center;"><i class="fa-solid fa-bell"></i> تفعيل التنبيهات</a>
+        </div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; margin-bottom:30px;">
+    <div class="card" style="padding:20px;">
+        <h3 style="margin-top:0"><i class="fa-solid fa-warehouse"></i> أداء العقارات الأعلى نشاطاً</h3>
+        <?php if (!empty($propertyPerformance)): ?>
+            <?php foreach ($propertyPerformance as $property): ?>
+                <?php
+                $totalUnits = (int) ($property['units_total'] ?? 0);
+                $rentedUnits = (int) ($property['units_rented'] ?? 0);
+                $rate = $totalUnits > 0 ? round(($rentedUnits / $totalUnits) * 100, 1) : 0;
+                ?>
+                <div style="padding:12px 0; border-bottom:1px dashed #333;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong><?= htmlspecialchars($property['name']) ?></strong>
+                        <span style="color:#94a3b8; font-size:12px;"><?= $rentedUnits ?>/<?= $totalUnits ?> مؤجر</span>
+                    </div>
+                    <div style="margin-top:6px; background:#1f2937; border-radius:8px; overflow:hidden;">
+                        <div style="height:6px; width:<?= $rate ?>%; background:#22c55e;"></div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div style="color:#94a3b8; text-align:center; padding:20px;">أضف عقارات لعرض الأداء التفصيلي.</div>
+        <?php endif; ?>
+    </div>
+    <div class="card" style="padding:20px;">
+        <h3 style="margin-top:0"><i class="fa-solid fa-sparkles"></i> تنبيهات المالك الذكية</h3>
+        <?php if (!empty($smartAlerts)): ?>
+            <ul style="padding-inline-start:18px; color:#e2e8f0; margin:0;">
+                <?php foreach ($smartAlerts as $alert): ?>
+                    <li style="margin-bottom:10px;"><?= htmlspecialchars($alert) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <div style="color:#94a3b8;">لا توجد تنبيهات حرجة حالياً.</div>
+        <?php endif; ?>
     </div>
 </div>
 
