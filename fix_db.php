@@ -62,6 +62,24 @@ try {
         echo "<p style='color:green'>✅ تم تحديث جدول العقود (إضافة التوقيع الإلكتروني).</p>";
     } catch (PDOException $e) {}
 
+    // 4.1 إضافة جدول قراءات العدادات
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS meter_readings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            contract_id INT,
+            unit_id INT,
+            reading_type ENUM('check_in','check_out','periodic') DEFAULT 'periodic',
+            elec_reading DECIMAL(12,2) DEFAULT NULL,
+            water_reading DECIMAL(12,2) DEFAULT NULL,
+            reading_date DATE,
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE,
+            FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE CASCADE
+        )");
+        echo "<p style='color:green'>✅ تم إضافة جدول قراءات العدادات.</p>";
+    } catch (PDOException $e) {}
+
     // 5. التأكد من وجود مستخدم Admin
     $pass = password_hash('12345678910', PASSWORD_DEFAULT);
 

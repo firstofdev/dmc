@@ -11,7 +11,7 @@ $id = $_GET['id'] ?? 0;
 
 // جلب البيانات بأمان (LEFT JOIN لتجنب الأخطاء إذا كانت بعض البيانات ناقصة)
 $stmt = $pdo->prepare("
-    SELECT c.*, t.name as tname, t.phone, u.unit_name, u.type 
+    SELECT c.*, t.name as tname, t.phone, u.unit_name, u.type, u.elec_meter_no, u.water_meter_no
     FROM contracts c 
     LEFT JOIN tenants t ON c.tenant_id = t.id 
     LEFT JOIN units u ON c.unit_id = u.id 
@@ -54,6 +54,38 @@ if (isset($_POST['save_photo'])) {
         $pdo->prepare("INSERT INTO inspection_photos (contract_id, photo_type, photo_path) VALUES (?, ?, ?)")->execute([$id, $type, $file]);
         echo "<script>window.location.href='index.php?p=contract_view&id=$id';</script>";
     }
+}
+
+$meterError = '';
+if (isset($_POST['save_meter'])) {
+    $readingType = $_POST['reading_type'] ?? 'periodic';
+    $allowedTypes = ['check_in', 'check_out', 'periodic'];
+    if (!in_array($readingType, $allowedTypes, true)) {
+        $readingType = 'periodic';
+    }
+    $readingDate = $_POST['reading_date'] ?: date('Y-m-d');
+    $elecReading = trim($_POST['elec_reading'] ?? '');
+    $waterReading = trim($_POST['water_reading'] ?? '');
+    $notes = trim($_POST['notes'] ?? '');
+    $elecValue = $elecReading === '' ? null : (float) $elecReading;
+    $waterValue = $waterReading === '' ? null : (float) $waterReading;
+
+    try {
+        $stmt = $pdo->prepare("INSERT INTO meter_readings (contract_id, unit_id, reading_type, elec_reading, water_reading, reading_date, notes) VALUES (?,?,?,?,?,?,?)");
+        $stmt->execute([$id, $c['unit_id'], $readingType, $elecValue, $waterValue, $readingDate, $notes]);
+        echo "<script>window.location.href='index.php?p=contract_view&id=$id';</script>";
+    } catch (Exception $e) {
+        $meterError = 'تعذر حفظ قراءة العداد. تأكد من إنشاء جدول القراءات.';
+    }
+}
+
+$meterRows = [];
+try {
+    $meterStmt = $pdo->prepare("SELECT * FROM meter_readings WHERE contract_id = ? ORDER BY reading_date DESC, id DESC");
+    $meterStmt->execute([$id]);
+    $meterRows = $meterStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $meterRows = [];
 }
 ?>
 
@@ -105,6 +137,7 @@ if (isset($_POST['save_photo'])) {
     <button onclick="switchTab('sig')" class="nav-btn active" id="btn-sig">✍️ التوقيع الإلكتروني</button>
     <button onclick="switchTab('in')" class="nav-btn" id="btn-in">📷 صور الاستلام (قبل)</button>
     <button onclick="switchTab('out')" class="nav-btn" id="btn-out">📸 صور التسليم (بعد)</button>
+    <button onclick="switchTab('meters')" class="nav-btn" id="btn-meters">⚡ عدادات الكهرباء والماء</button>
 </div>
 
 <div id="tab-sig" style="display:block;">
@@ -216,6 +249,118 @@ if (isset($_POST['save_photo'])) {
     </div>
 </div>
 
+<div id="tab-meters" style="display:none;">
+    <div style="display:grid; grid-template-columns: 1.1fr 1fr; gap:20px;">
+        <div class="card">
+            <h4><i class="fa-solid fa-gauge-high"></i> تسجيل قراءة جديدة</h4>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:15px;">
+                <div style="background:#0f172a; padding:10px; border-radius:10px;">
+                    <div style="font-size:12px; color:#94a3b8;">عداد الكهرباء</div>
+                    <div style="font-size:18px; font-weight:700;"><?= htmlspecialchars($c['elec_meter_no'] ?? '-') ?></div>
+                </div>
+                <div style="background:#0f172a; padding:10px; border-radius:10px;">
+                    <div style="font-size:12px; color:#94a3b8;">عداد المياه</div>
+                    <div style="font-size:18px; font-weight:700;"><?= htmlspecialchars($c['water_meter_no'] ?? '-') ?></div>
+                </div>
+            </div>
+            <?php if ($meterError): ?>
+                <div style="background:#fee2e2; color:#991b1b; padding:10px; border-radius:8px; margin-bottom:12px;">
+                    <?= htmlspecialchars($meterError) ?>
+                </div>
+            <?php endif; ?>
+            <form method="POST">
+                <input type="hidden" name="save_meter" value="1">
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px;">
+                    <div>
+                        <label class="inp-label">نوع القراءة</label>
+                        <select name="reading_type" class="inp" required>
+                            <option value="check_in">استلام</option>
+                            <option value="check_out">تسليم</option>
+                            <option value="periodic">دورية</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="inp-label">تاريخ القراءة</label>
+                        <input type="date" name="reading_date" class="inp" value="<?= date('Y-m-d') ?>" required>
+                    </div>
+                    <div>
+                        <label class="inp-label">قراءة الكهرباء</label>
+                        <input type="number" step="0.01" name="elec_reading" class="inp" placeholder="مثال: 1250.5">
+                    </div>
+                    <div>
+                        <label class="inp-label">قراءة المياه</label>
+                        <input type="number" step="0.01" name="water_reading" class="inp" placeholder="مثال: 320.2">
+                    </div>
+                </div>
+                <div style="margin-top:12px;">
+                    <label class="inp-label">ملاحظات</label>
+                    <textarea name="notes" class="inp" rows="3" placeholder="أي ملاحظات حول الاستهلاك أو حالة العدادات"></textarea>
+                </div>
+                <button class="btn btn-primary" style="margin-top:12px; width:100%; justify-content:center;">
+                    حفظ القراءة الذكية
+                </button>
+            </form>
+        </div>
+        <div class="card">
+            <h4><i class="fa-solid fa-bolt"></i> سجل القراءات</h4>
+            <?php if (!empty($meterRows)): ?>
+                <div style="overflow:auto;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr style="background:#111827; text-align:right;">
+                                <th style="padding:8px;">التاريخ</th>
+                                <th style="padding:8px;">النوع</th>
+                                <th style="padding:8px;">الكهرباء</th>
+                                <th style="padding:8px;">المياه</th>
+                                <th style="padding:8px;">الاستهلاك</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php for ($i = 0; $i < count($meterRows); $i++): ?>
+                                <?php
+                                    $row = $meterRows[$i];
+                                    $nextRow = $meterRows[$i + 1] ?? null;
+                                    $elecDelta = ($nextRow && $row['elec_reading'] !== null && $nextRow['elec_reading'] !== null)
+                                        ? $row['elec_reading'] - $nextRow['elec_reading'] : null;
+                                    $waterDelta = ($nextRow && $row['water_reading'] !== null && $nextRow['water_reading'] !== null)
+                                        ? $row['water_reading'] - $nextRow['water_reading'] : null;
+                                ?>
+                                <tr style="border-bottom:1px solid #1f2937;">
+                                    <td style="padding:8px;"><?= htmlspecialchars($row['reading_date']) ?></td>
+                                    <td style="padding:8px;">
+                                        <?= $row['reading_type'] === 'check_in' ? 'استلام' : ($row['reading_type'] === 'check_out' ? 'تسليم' : 'دورية') ?>
+                                    </td>
+                                    <td style="padding:8px;"><?= $row['elec_reading'] !== null ? number_format((float) $row['elec_reading'], 2) : '-' ?></td>
+                                    <td style="padding:8px;"><?= $row['water_reading'] !== null ? number_format((float) $row['water_reading'], 2) : '-' ?></td>
+                                    <td style="padding:8px; color:#38bdf8;">
+                                        <?php
+                                            $parts = [];
+                                            if ($elecDelta !== null) {
+                                                $parts[] = '⚡ ' . number_format($elecDelta, 2);
+                                            }
+                                            if ($waterDelta !== null) {
+                                                $parts[] = '💧 ' . number_format($waterDelta, 2);
+                                            }
+                                            echo $parts ? implode(' | ', $parts) : '-';
+                                        ?>
+                                    </td>
+                                </tr>
+                                <?php if (!empty($row['notes'])): ?>
+                                    <tr>
+                                        <td colspan="5" style="padding:8px; color:#94a3b8; font-size:12px;"><?= htmlspecialchars($row['notes']) ?></td>
+                                    </tr>
+                                <?php endif; ?>
+                            <?php endfor; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <div style="color:#94a3b8;">لا توجد قراءات محفوظة بعد. ابدأ بتسجيل أول قراءة.</div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
 <form id="photoForm" method="POST" style="display:none;">
     <input type="hidden" name="save_photo" value="1">
     <input type="hidden" name="photo_type" id="p-type-input">
@@ -230,11 +375,13 @@ if (isset($_POST['save_photo'])) {
         document.getElementById('tab-sig').style.display = 'none';
         document.getElementById('tab-in').style.display = 'none';
         document.getElementById('tab-out').style.display = 'none';
+        document.getElementById('tab-meters').style.display = 'none';
         
         // إزالة الكلاس النشط
         document.getElementById('btn-sig').classList.remove('active');
         document.getElementById('btn-in').classList.remove('active');
         document.getElementById('btn-out').classList.remove('active');
+        document.getElementById('btn-meters').classList.remove('active');
         
         // تفعيل المطلوب
         document.getElementById('tab-'+tabId).style.display = 'block';
