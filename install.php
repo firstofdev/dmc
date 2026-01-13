@@ -80,10 +80,10 @@ try {
     foreach($defaults as $k=>$v) $pdo->prepare("INSERT IGNORE INTO settings (k,v) VALUES (?,?)")->execute([$k,$v]);
     
     // إنشاء مدير
-    $chk = $pdo->query("SELECT count(*) FROM users WHERE username='admin'")->fetchColumn();
+    $chk = $pdo->query("SELECT count(*) FROM users WHERE username='admin101'")->fetchColumn();
     if($chk == 0){
         $pdo->prepare("INSERT INTO users (username, password, full_name, role) VALUES (?,?,?,?)")
-            ->execute(['admin', password_hash('123456', PASSWORD_DEFAULT), 'المدير العام', 'admin']);
+            ->execute(['admin101', password_hash('12345678910', PASSWORD_DEFAULT), 'المدير العام', 'admin']);
     }
 
     echo "<h1>✅ تم تثبيت النظام بنجاح</h1>";
