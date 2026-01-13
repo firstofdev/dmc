@@ -19,8 +19,10 @@ while($r = $stmt->fetch()){
     $paymentLink = $AI->buildPaymentLink(isset($r['id']) ? (int) $r['id'] : null);
     $linkText = $paymentLink ? " رابط السداد: $paymentLink" : '';
     $msg = "مرحباً {$r['full_name']}، نذكرك باستحقاق دفعة إيجار لوحدة {$r['unit_name']} غداً بمبلغ {$r['amount']}.$linkText";
-    $AI->sendWhatsApp($r['phone'], $msg);
-    echo "Sent to {$r['full_name']}\n";
+    $sent = $AI->sendWhatsApp($r['phone'], $msg);
+    if ($sent) {
+        echo "Sent to {$r['full_name']}\n";
+    }
 }
 
 // 2. تذكير بالدفعات المتأخرة (بعد 3 أيام)
@@ -35,8 +37,10 @@ while ($r = $stmt->fetch()) {
         $paymentLink = $AI->buildPaymentLink(isset($r['id']) ? (int) $r['id'] : null);
         $linkText = $paymentLink ? " رابط السداد: $paymentLink" : '';
         $msg = "مرحباً {$r['full_name']}، لديك دفعة متأخرة منذ {$r['overdue_days']} أيام لوحدة {$r['unit_name']} بمبلغ {$r['amount']}.$linkText";
-        $AI->sendWhatsApp($r['phone'], $msg);
-        echo "Overdue reminder sent to {$r['full_name']}\n";
+        $sent = $AI->sendWhatsApp($r['phone'], $msg);
+        if ($sent) {
+            echo "Overdue reminder sent to {$r['full_name']}\n";
+        }
     }
 }
 
@@ -80,8 +84,10 @@ if (ADMIN_WHATSAPP) {
     $summary .= "مخاطر الصيانة: {$maintenancePulse['risk_score']}/100\n";
     $summary .= "مستأجرون عالي المخاطر: {$tenantRisk['high_risk_count']}\n";
 
-    $AI->sendWhatsApp(ADMIN_WHATSAPP, $summary);
-    log_activity($pdo, 'تم إرسال ملخص تشغيلي عبر واتساب', 'automation');
+    $sent = $AI->sendWhatsApp(ADMIN_WHATSAPP, $summary);
+    if ($sent) {
+        log_activity($pdo, 'تم إرسال ملخص تشغيلي عبر واتساب', 'automation');
+    }
 }
 
 echo "Done.";

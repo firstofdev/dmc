@@ -53,15 +53,6 @@ class SmartSystem {
     // تحليل الهوية (OCR)
     public function analyzeIDCard($imagePath) {
         if (!OCR_API_URL || !OCR_API_KEY) {
-            if (smart_features_force_enabled()) {
-                return [
-                    'success' => true,
-                    'mode' => 'simulated',
-                    'data' => [
-                        'note' => 'OCR محلي (محاكاة) - يرجى ضبط OCR_API_URL و OCR_API_KEY للحصول على قراءة فعلية.',
-                    ],
-                ];
-            }
             return [
                 'success' => false,
                 'error' => 'OCR غير مُعد. تأكد من ضبط OCR_API_URL و OCR_API_KEY.',
@@ -101,13 +92,10 @@ class SmartSystem {
 
     // إرسال واتساب (تسجيل في activity_log المرفق)
     public function sendWhatsApp($phone, $message) {
-        if (!WHATSAPP_TOKEN) {
-            if (smart_features_force_enabled()) {
-                $stmt = $this->pdo->prepare("INSERT INTO activity_log (description, type) VALUES (?, 'whatsapp_simulated')");
-                $stmt->execute(["تم إرسال رسالة (محاكاة) لـ $phone: $message"]);
-                return;
-            }
-            throw new RuntimeException('WHATSAPP_TOKEN غير مُعد.');
+        if (!WHATSAPP_TOKEN || WHATSAPP_TOKEN === 'your_token_here') {
+            $stmt = $this->pdo->prepare("INSERT INTO activity_log (description, type) VALUES (?, 'whatsapp_error')");
+            $stmt->execute(["تعذر إرسال رسالة واتساب لعدم ضبط التوكن."]);
+            return false;
         }
 
         $payload = [
@@ -118,11 +106,14 @@ class SmartSystem {
 
         $result = $this->postJson(WHATSAPP_API_URL, $payload);
         if ($result['error'] || $result['status'] >= 400) {
-            throw new RuntimeException('فشل إرسال رسالة واتساب.');
+            $stmt = $this->pdo->prepare("INSERT INTO activity_log (description, type) VALUES (?, 'whatsapp_error')");
+            $stmt->execute(["فشل إرسال رسالة واتساب إلى $phone."]);
+            return false;
         }
 
         $stmt = $this->pdo->prepare("INSERT INTO activity_log (description, type) VALUES (?, 'whatsapp_sent')");
         $stmt->execute(["تم إرسال رسالة لـ $phone: $message"]);
+        return true;
     }
 
     public function getCashflowForecast(): array {
@@ -245,9 +236,6 @@ class SmartSystem {
             return null;
         }
         if (!PAYMENT_PORTAL_URL) {
-            if (smart_features_force_enabled()) {
-                return 'index.php?p=payments&payment_id='.urlencode((string) $paymentId);
-            }
             return null;
         }
         $separator = str_contains(PAYMENT_PORTAL_URL, '?') ? '&' : '?';
