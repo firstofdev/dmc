@@ -1,7 +1,11 @@
 <?php
 if(isset($_POST['save_settings'])){
     check_csrf();
-    $keys = ['company_name','phone','email','address','currency','vat_no','vat_percent','cr_no','invoice_prefix','invoice_terms','alert_days'];
+    $keys = [
+        'company_name','phone','email','address','currency','vat_no','vat_percent','cr_no',
+        'invoice_prefix','invoice_terms','alert_days','target_occupancy','target_collection',
+        'overdue_threshold','whatsapp_number','reporting_email'
+    ];
     foreach($keys as $k){ if(isset($_POST[$k])) { $pdo->prepare("REPLACE INTO settings (k,v) VALUES (?,?)")->execute([$k, $_POST[$k]]); } }
     if(!empty($_FILES['logo']['name'])){
         $path = upload($_FILES['logo']);
@@ -70,6 +74,28 @@ $logo = $sets['logo'] ?? 'logo.png';
             <div style="padding:20px;">
                 <label class="inp-label">التنبيه قبل موعد المطالبة (يوم)</label>
                 <input type="number" name="alert_days" class="inp" value="<?= $sets['alert_days'] ?? '30' ?>">
+            </div>
+        </div>
+
+        <div class="card" style="padding:0; overflow:hidden; border:none;">
+            <div style="background:#0ea5e9; padding:15px; color:white; font-weight:bold"><i class="fa-solid fa-chart-line"></i> مؤشرات الأداء الذكية</div>
+            <div style="padding:20px;">
+                <label class="inp-label">هدف نسبة الإشغال %</label>
+                <input type="number" name="target_occupancy" class="inp" value="<?= $sets['target_occupancy'] ?? '90' ?>" step="0.1">
+                <label class="inp-label">هدف معدل التحصيل %</label>
+                <input type="number" name="target_collection" class="inp" value="<?= $sets['target_collection'] ?? '95' ?>" step="0.1">
+                <label class="inp-label">حد تنبيه الدفعات المتأخرة (عدد)</label>
+                <input type="number" name="overdue_threshold" class="inp" value="<?= $sets['overdue_threshold'] ?? '5' ?>">
+            </div>
+        </div>
+
+        <div class="card" style="padding:0; overflow:hidden; border:none;">
+            <div style="background:#22c55e; padding:15px; color:white; font-weight:bold"><i class="fa-solid fa-robot"></i> قنوات التنبيه الذكية</div>
+            <div style="padding:20px;">
+                <label class="inp-label">رقم واتساب للتنبيهات</label>
+                <input type="text" name="whatsapp_number" class="inp" value="<?= $sets['whatsapp_number'] ?? '' ?>" placeholder="+9665XXXXXXX">
+                <label class="inp-label">بريد التقارير الذكية</label>
+                <input type="email" name="reporting_email" class="inp" value="<?= $sets['reporting_email'] ?? '' ?>" placeholder="reports@example.com">
             </div>
         </div>
 
