@@ -15,9 +15,17 @@
                 <td style="font-weight:bold"><?= $r['full_name'] ?></td>
                 <td>#<?= $r['cid'] ?></td>
                 <td style="color:#ef4444"><?= number_format($r['amount']) ?></td>
-                <td><?= $r['due_date'] ?></td>
+                <td><?= format_date($r['due_date']) ?></td>
                 <td>
-                    <a href="https://wa.me/<?= $r['phone'] ?>?text=عزيزي <?= $r['full_name'] ?> نرجو سداد الدفعة المستحقة" target="_blank" class="btn btn-primary" style="padding:8px 15px; font-size:12px; background:#25D366"><i class="fa-brands fa-whatsapp"></i> تذكير</a>
+                    <?php
+                    $paymentLink = isset($AI) ? $AI->buildPaymentLink($r['id']) : null;
+                    $message = "عزيزي {$r['full_name']}، نذكرك بوجود دفعة مستحقة بقيمة " . number_format($r['amount']) . " تستحق بتاريخ " . format_date($r['due_date']) . ".";
+                    if ($paymentLink) {
+                        $message .= " يمكنك السداد عبر الرابط: " . $paymentLink;
+                    }
+                    $waUrl = "https://wa.me/" . $r['phone'] . "?text=" . rawurlencode($message);
+                    ?>
+                    <a href="<?= $waUrl ?>" target="_blank" class="btn btn-primary" style="padding:8px 15px; font-size:12px; background:#25D366"><i class="fa-brands fa-whatsapp"></i> تذكير</a>
                 </td>
             </tr>
             <?php endwhile; ?>
@@ -35,7 +43,7 @@
             <tr>
                 <td>#<?= $r['id'] ?></td>
                 <td><?= $r['full_name'] ?></td>
-                <td><?= $r['end_date'] ?></td>
+                <td><?= format_date($r['end_date']) ?></td>
                 <td><span style="color:#f59e0b; background:rgba(245,158,11,0.1); padding:5px 10px; border-radius:10px">ينتهي قريباً</span></td>
             </tr>
             <?php endwhile; ?>

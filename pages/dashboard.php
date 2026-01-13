@@ -58,6 +58,21 @@ $portfolioMetrics = [
     'renewals_60' => 0,
     'overdue_ratio' => 0,
 ];
+$dataQuality = [
+    'tenants_missing_contact' => 0,
+    'units_missing_price' => 0,
+    'contracts_missing_payments' => 0,
+    'properties_without_units' => 0,
+    'score' => 100,
+];
+$qualityActions = [];
+$paymentAging = [
+    'current' => 0,
+    'late_1_30' => 0,
+    'late_31_60' => 0,
+    'late_61_plus' => 0,
+    'overdue_total' => 0,
+];
 $propertyPerformance = [];
 $smartAlerts = [];
 $settings = [
@@ -193,6 +208,40 @@ try {
         $insights['occupancy_gap'] = round($insights['occupancy_rate'] - $targetOccupancy, 1);
         $insights['collection_gap'] = round($insights['collection_rate'] - $targetCollection, 1);
 
+        $phoneMissing = "(phone IS NULL OR phone = '')";
+        $contactConditions = [$phoneMissing];
+        if (table_has_column($pdo, 'tenants', 'email')) {
+            $contactConditions[] = "(email IS NULL OR email = '')";
+        }
+        $dataQuality['tenants_missing_contact'] = $pdo->query("SELECT COUNT(*) FROM tenants WHERE " . implode(' OR ', $contactConditions))->fetchColumn() ?: 0;
+        $dataQuality['units_missing_price'] = $pdo->query("SELECT COUNT(*) FROM units WHERE yearly_price IS NULL OR yearly_price <= 0")->fetchColumn() ?: 0;
+        $dataQuality['contracts_missing_payments'] = $pdo->query("SELECT COUNT(*) FROM contracts c LEFT JOIN payments p ON p.contract_id = c.id WHERE p.id IS NULL")->fetchColumn() ?: 0;
+        $dataQuality['properties_without_units'] = $pdo->query("SELECT COUNT(*) FROM properties p LEFT JOIN units u ON u.property_id = p.id WHERE u.id IS NULL")->fetchColumn() ?: 0;
+        $issueScore = min(100, ($dataQuality['tenants_missing_contact'] * 3)
+            + ($dataQuality['units_missing_price'] * 4)
+            + ($dataQuality['contracts_missing_payments'] * 8)
+            + ($dataQuality['properties_without_units'] * 5));
+        $dataQuality['score'] = max(0, 100 - $issueScore);
+
+        if ($dataQuality['tenants_missing_contact'] > 0) {
+            $qualityActions[] = 'استكمال بيانات الاتصال للمستأجرين لتسهيل التنبيهات والتحصيل.';
+        }
+        if ($dataQuality['units_missing_price'] > 0) {
+            $qualityActions[] = 'تحديث أسعار الوحدات لضمان صحة تقارير الدخل.';
+        }
+        if ($dataQuality['contracts_missing_payments'] > 0) {
+            $qualityActions[] = 'إنشاء جداول الدفعات للعقود غير المولدة لضبط التدفق النقدي.';
+        }
+        if ($dataQuality['properties_without_units'] > 0) {
+            $qualityActions[] = 'إضافة وحدات للعقارات الخالية لزيادة فرص الإشغال.';
+        }
+
+        $paymentAging['current'] = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status!='paid' AND due_date >= CURDATE()")->fetchColumn() ?: 0;
+        $paymentAging['late_1_30'] = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status!='paid' AND due_date < CURDATE() AND due_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)")->fetchColumn() ?: 0;
+        $paymentAging['late_31_60'] = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status!='paid' AND due_date < DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND due_date >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)")->fetchColumn() ?: 0;
+        $paymentAging['late_61_plus'] = $pdo->query("SELECT COALESCE(SUM(amount),0) FROM payments WHERE status!='paid' AND due_date < DATE_SUB(CURDATE(), INTERVAL 60 DAY)")->fetchColumn() ?: 0;
+        $paymentAging['overdue_total'] = $paymentAging['late_1_30'] + $paymentAging['late_31_60'] + $paymentAging['late_61_plus'];
+
         if ($insights['occupancy_rate'] < $targetOccupancy && $stats['units'] > 0) {
             $recommendations[] = 'رفع نسبة الإشغال عبر حملات تسويق أو تحسين التسعير.';
         }
@@ -217,6 +266,9 @@ try {
         if ($tenantRiskSnapshot['high_risk_count'] > 0) {
             $recommendations[] = 'متابعة المستأجرين مرتفعي المخاطر بجدولة خطط سداد.';
         }
+        if ($dataQuality['score'] < 85) {
+            $recommendations[] = 'تحسين جودة البيانات لرفع كفاءة التنبيهات والتقارير الذكية.';
+        }
 
         if ($portfolioMetrics['vacancy_rate'] >= 20) {
             $smartAlerts[] = 'نسبة الشواغر مرتفعة، فعّل عروض التأجير السريع للوحدات الشاغرة.';
@@ -229,6 +281,9 @@ try {
         }
         if ($maintenancePulse['emergency'] ?? 0) {
             $smartAlerts[] = 'هناك طلبات صيانة عاجلة، رتب الأولويات مع المقاولين.';
+        }
+        if ($paymentAging['late_61_plus'] > 0) {
+            $smartAlerts[] = 'جزء من المتأخرات تجاوز 60 يوماً، فعّل خطة تحصيل خاصة.';
         }
     }
 } catch (Exception $e) {
@@ -395,6 +450,69 @@ if (empty($financeLabels)) {
 
 <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px;">
+        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-layer-group"></i> توزيع المتأخرات حسب العمر</h4>
+        <div style="display:grid; gap:12px; color:#e2e8f0;">
+            <div style="display:flex; justify-content:space-between;">
+                <span>مستحقات حالية</span>
+                <strong><?= number_format($paymentAging['current']) ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>متأخرات 1-30 يوماً</span>
+                <strong><?= number_format($paymentAging['late_1_30']) ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>متأخرات 31-60 يوماً</span>
+                <strong><?= number_format($paymentAging['late_31_60']) ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>متأخرات أكثر من 60 يوماً</span>
+                <strong><?= number_format($paymentAging['late_61_plus']) ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>إجمالي المتأخرات</span>
+                <strong style="color:#f97316"><?= number_format($paymentAging['overdue_total']) ?></strong>
+            </div>
+        </div>
+    </div>
+    <div class="card" style="padding:20px;">
+        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-clipboard-check"></i> جودة البيانات والجاهزية</h4>
+        <div style="display:grid; gap:12px; color:#e2e8f0;">
+            <div style="display:flex; justify-content:space-between;">
+                <span>مستأجرون ببيانات ناقصة</span>
+                <strong><?= $dataQuality['tenants_missing_contact'] ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>وحدات بدون سعر</span>
+                <strong><?= $dataQuality['units_missing_price'] ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>عقود بلا جداول دفعات</span>
+                <strong><?= $dataQuality['contracts_missing_payments'] ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>عقارات بلا وحدات</span>
+                <strong><?= $dataQuality['properties_without_units'] ?></strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>مؤشر الجاهزية</span>
+                <strong style="color:<?= $dataQuality['score'] >= 85 ? '#10b981' : '#f59e0b' ?>"><?= $dataQuality['score'] ?>/100</strong>
+            </div>
+        </div>
+        <?php if (!empty($qualityActions)): ?>
+            <div style="margin-top:12px; background:#111827; border-radius:12px; padding:12px; color:#cbd5f5; font-size:13px;">
+                <strong style="display:block; margin-bottom:6px;">خطوات مقترحة</strong>
+                <ul style="padding-inline-start:18px; margin:0;">
+                    <?php foreach ($qualityActions as $action): ?>
+                        <li style="margin-bottom:6px;"><?= htmlspecialchars($action) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; margin-bottom:30px;">
+    <div class="card" style="padding:20px;">
         <h3 style="margin-top:0"><i class="fa-solid fa-warehouse"></i> أداء العقارات الأعلى نشاطاً</h3>
         <?php if (!empty($propertyPerformance)): ?>
             <?php foreach ($propertyPerformance as $property): ?>
@@ -469,7 +587,7 @@ if (empty($financeLabels)) {
             <?php foreach($lists['ending'] as $c): ?>
                 <div style="padding:10px; border-bottom:1px dashed #333; display:flex; justify-content:space-between">
                     <span><?= htmlspecialchars($c['tenant_name']) ?></span>
-                    <span style="color:#ef4444; font-size:12px"><?= $c['end_date'] ?></span>
+                    <span style="color:#ef4444; font-size:12px"><?= format_date($c['end_date']) ?></span>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
