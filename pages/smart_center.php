@@ -76,10 +76,10 @@ try {
 }
 
 $forceSmart = smart_features_force_enabled();
-$integrations['whatsapp'] = $forceSmart ? true : (WHATSAPP_TOKEN && WHATSAPP_TOKEN !== 'your_token_here');
-$integrations['ocr'] = $forceSmart ? true : (OCR_API_URL && OCR_API_KEY);
-$integrations['payment_portal'] = $forceSmart ? true : (bool) PAYMENT_PORTAL_URL;
-$integrations['admin_whatsapp'] = $forceSmart ? true : (bool) ADMIN_WHATSAPP;
+$integrations['whatsapp'] = $forceSmart ? true : is_whatsapp_configured();
+$integrations['ocr'] = $forceSmart ? true : is_ocr_configured();
+$integrations['payment_portal'] = $forceSmart ? true : is_payment_portal_configured();
+$integrations['admin_whatsapp'] = $forceSmart ? true : is_admin_whatsapp_configured();
 
 
 $readinessInputs = [

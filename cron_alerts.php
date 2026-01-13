@@ -72,7 +72,7 @@ if ($hasPriority || $hasAnalysis) {
 }
 
 // 4. إشعار إدارة النظام بملخص تشغيلي عبر واتساب
-if (ADMIN_WHATSAPP) {
+if (is_admin_whatsapp_configured()) {
     $cashflow = $AI->getCashflowForecast();
     $maintenancePulse = $AI->getMaintenancePulse();
     $tenantRisk = $AI->getTenantRiskSnapshot();
@@ -84,7 +84,7 @@ if (ADMIN_WHATSAPP) {
     $summary .= "مخاطر الصيانة: {$maintenancePulse['risk_score']}/100\n";
     $summary .= "مستأجرون عالي المخاطر: {$tenantRisk['high_risk_count']}\n";
 
-    $sent = $AI->sendWhatsApp(ADMIN_WHATSAPP, $summary);
+    $sent = $AI->sendWhatsApp(admin_whatsapp_number(), $summary);
     if ($sent) {
         log_activity($pdo, 'تم إرسال ملخص تشغيلي عبر واتساب', 'automation');
     }

@@ -2,9 +2,11 @@
 if(isset($_POST['save_settings'])){
     check_csrf();
     $keys = [
-        'company_name','phone','email','address','currency','vat_no','vat_percent','cr_no',
+        'company_name','phone','email','address','currency','currency_code','vat_no','vat_percent','cr_no',
         'invoice_prefix','invoice_terms','alert_days','target_occupancy','target_collection',
-        'overdue_threshold','whatsapp_number','reporting_email'
+        'overdue_threshold','whatsapp_number','reporting_email',
+        'whatsapp_token','whatsapp_api_url','ocr_api_url','ocr_api_key','admin_whatsapp','payment_portal_url',
+        'smart_features_mode'
     ];
     foreach($keys as $k){ if(isset($_POST[$k])) { $pdo->prepare("REPLACE INTO settings (k,v) VALUES (?,?)")->execute([$k, $_POST[$k]]); } }
     if(!empty($_FILES['logo']['name'])){
@@ -34,7 +36,7 @@ $logo = $sets['logo'] ?? 'logo.png';
                 <label class="inp-label">رمز العملة</label>
                 <input type="text" name="currency" class="inp" value="<?= $sets['currency'] ?? 'SAR' ?>">
                 <label class="inp-label">كود العملة</label>
-                <input type="text" class="inp" value="ر.س" disabled>
+                <input type="text" name="currency_code" class="inp" value="<?= $sets['currency_code'] ?? 'ر.س' ?>">
             </div>
         </div>
 
@@ -96,6 +98,30 @@ $logo = $sets['logo'] ?? 'logo.png';
                 <input type="text" name="whatsapp_number" class="inp" value="<?= $sets['whatsapp_number'] ?? '' ?>" placeholder="+9665XXXXXXX">
                 <label class="inp-label">بريد التقارير الذكية</label>
                 <input type="email" name="reporting_email" class="inp" value="<?= $sets['reporting_email'] ?? '' ?>" placeholder="reports@example.com">
+            </div>
+        </div>
+
+        <div class="card" style="padding:0; overflow:hidden; border:none;">
+            <div style="background:#0f172a; padding:15px; color:white; font-weight:bold"><i class="fa-solid fa-satellite-dish"></i> تكاملات التمكين الذكي</div>
+            <div style="padding:20px;">
+                <label class="inp-label">وضع التمكين الذكي</label>
+                <select name="smart_features_mode" class="inp">
+                    <?php $smartMode = $sets['smart_features_mode'] ?? 'force'; ?>
+                    <option value="force" <?= $smartMode === 'force' ? 'selected' : '' ?>>تمكين شامل (تفعيل جميع المميزات)</option>
+                    <option value="auto" <?= $smartMode === 'auto' ? 'selected' : '' ?>>حسب التكاملات الفعلية</option>
+                </select>
+                <label class="inp-label">رابط بوابة الدفع</label>
+                <input type="url" name="payment_portal_url" class="inp" value="<?= $sets['payment_portal_url'] ?? '' ?>" placeholder="https://payments.example.com">
+                <label class="inp-label">رقم واتساب للإدارة</label>
+                <input type="text" name="admin_whatsapp" class="inp" value="<?= $sets['admin_whatsapp'] ?? '' ?>" placeholder="+9665XXXXXXX">
+                <label class="inp-label">رابط واجهة واتساب</label>
+                <input type="url" name="whatsapp_api_url" class="inp" value="<?= $sets['whatsapp_api_url'] ?? '' ?>" placeholder="https://api.ultramsg.com/instance/messages/chat">
+                <label class="inp-label">توكن واتساب</label>
+                <input type="password" name="whatsapp_token" class="inp" value="<?= $sets['whatsapp_token'] ?? '' ?>" placeholder="••••••••">
+                <label class="inp-label">رابط OCR</label>
+                <input type="url" name="ocr_api_url" class="inp" value="<?= $sets['ocr_api_url'] ?? '' ?>" placeholder="https://ocr.example.com">
+                <label class="inp-label">مفتاح OCR</label>
+                <input type="password" name="ocr_api_key" class="inp" value="<?= $sets['ocr_api_key'] ?? '' ?>" placeholder="••••••••">
             </div>
         </div>
 
