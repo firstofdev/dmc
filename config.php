@@ -234,6 +234,14 @@ function table_has_column(PDO $pdo, string $table, string $column): bool {
     }
 }
 
+function tenant_name_column(PDO $pdo): string {
+    return table_has_column($pdo, 'tenants', 'full_name') ? 'full_name' : 'name';
+}
+
+function tenant_created_at_column(PDO $pdo): ?string {
+    return table_has_column($pdo, 'tenants', 'created_at') ? 'created_at' : null;
+}
+
 function smart_features_force_enabled(): bool {
     return smart_features_mode() === 'force';
 }

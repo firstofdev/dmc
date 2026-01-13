@@ -199,8 +199,9 @@ class SmartSystem {
     }
 
     public function getTenantRiskSnapshot(): array {
+        $tenantNameColumn = tenant_name_column($this->pdo);
         $rows = $this->safeFetchAll(
-            "SELECT t.id, t.full_name, t.phone,
+            "SELECT t.id, t.$tenantNameColumn AS full_name, t.phone,
                 COUNT(p.id) AS overdue_count,
                 COALESCE(SUM(p.amount),0) AS overdue_amount,
                 COALESCE(MAX(DATEDIFF(CURDATE(), p.due_date)),0) AS max_overdue_days

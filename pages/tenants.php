@@ -1,4 +1,5 @@
 <?php
+$tenantNameColumn = tenant_name_column($pdo);
 // الحذف
 if (isset($_POST['delete_id'])) {
     $pdo->prepare("DELETE FROM tenants WHERE id=?")->execute([$_POST['delete_id']]);
@@ -9,11 +10,11 @@ if (isset($_POST['delete_id'])) {
 // الحفظ (جديد / تعديل)
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_tenant'])) {
     if(!empty($_POST['tenant_id'])){
-        $stmt = $pdo->prepare("UPDATE tenants SET name=?, phone=?, id_number=?, email=? WHERE id=?");
+        $stmt = $pdo->prepare("UPDATE tenants SET $tenantNameColumn=?, phone=?, id_number=?, email=? WHERE id=?");
         $stmt->execute([$_POST['name'], $_POST['phone'], $_POST['idn'], $_POST['email'], $_POST['tenant_id']]);
         log_activity($pdo, "تحديث بيانات المستأجر #{$_POST['tenant_id']}", 'tenant');
     } else {
-        $stmt = $pdo->prepare("INSERT INTO tenants (name, phone, id_number, email) VALUES (?,?,?,?)");
+        $stmt = $pdo->prepare("INSERT INTO tenants ($tenantNameColumn, phone, id_number, email) VALUES (?,?,?,?)");
         $stmt->execute([$_POST['name'], $_POST['phone'], $_POST['idn'], $_POST['email']]);
         log_activity($pdo, "إضافة مستأجر جديد: ".$_POST['name'], 'tenant');
     }
@@ -28,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_tenant'])) {
     </div>
     
     <?php 
-    $tenants = $pdo->query("SELECT * FROM tenants ORDER BY id DESC");
+    $tenants = $pdo->query("SELECT id, $tenantNameColumn AS name, phone, id_number, email FROM tenants ORDER BY id DESC");
     if($tenants->rowCount() == 0): ?>
         <div style="text-align:center; padding:40px; color:#666">لا يوجد مستأجرين حالياً.</div>
     <?php else: ?>
