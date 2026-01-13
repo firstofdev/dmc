@@ -37,6 +37,7 @@ $automation = [
 
 $coverage = [];
 $actionItems = [];
+
 $readinessScore = 0;
 $quickActions = [
     [
@@ -60,6 +61,7 @@ $quickActions = [
         'icon' => 'fa-solid fa-file-contract',
     ],
 ];
+
 
 try {
     if (isset($pdo)) {
@@ -159,6 +161,7 @@ $readinessInputs = [
 ];
 $readinessScore = (int) round((array_sum(array_map('intval', $readinessInputs)) / max(1, count($readinessInputs))) * 100);
 
+
 if (!$integrations['whatsapp']) {
     $actionItems[] = 'تفعيل تكامل واتساب لإرسال التذكيرات والتحصيل.';
 }
@@ -213,6 +216,7 @@ if ($coreStats['maintenance'] === 0) {
         </div>
     </div>
 </div>
+
 
 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px;">
@@ -330,6 +334,7 @@ if ($coreStats['maintenance'] === 0) {
         <?php endforeach; ?>
     </div>
 </div>
+
 
 <div class="card" style="padding:25px;">
     <h3 style="margin-top:0"><i class="fa-solid fa-bolt"></i> خطوات تطبيق القوة الخارقة</h3>
