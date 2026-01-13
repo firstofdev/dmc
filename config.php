@@ -22,6 +22,9 @@ function send_security_headers(): void {
     header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
     header('Cross-Origin-Opener-Policy: same-origin');
     header('Cross-Origin-Resource-Policy: same-origin');
+    if (is_https_request()) {
+        header('Strict-Transport-Security: max-age=63072000; includeSubDomains; preload');
+    }
     $csp = [
         "default-src 'self'",
         "base-uri 'self'",
@@ -116,6 +119,89 @@ function log_activity(PDO $pdo, string $description, string $type = 'info'): voi
         $stmt->execute([$description, $type]);
     } catch (Exception $e) {
         // تجاهل الأخطاء في حال عدم وجود الجدول أو أي مشكلة في الاتصال
+    }
+}
+
+function get_client_ip(): string {
+    $candidates = [
+        $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '',
+        $_SERVER['HTTP_X_REAL_IP'] ?? '',
+        $_SERVER['REMOTE_ADDR'] ?? '',
+    ];
+
+    foreach ($candidates as $candidate) {
+        if ($candidate === '') {
+            continue;
+        }
+        $parts = array_map('trim', explode(',', $candidate));
+        foreach ($parts as $part) {
+            if (filter_var($part, FILTER_VALIDATE_IP)) {
+                return $part;
+            }
+        }
+    }
+
+    return '0.0.0.0';
+}
+
+function rate_limit_check(string $key, int $maxAttempts, int $windowSeconds, int $blockSeconds = 900): array {
+    $now = time();
+    $path = sys_get_temp_dir() . '/dmc_rate_' . hash('sha256', $key) . '.json';
+    $state = [
+        'count' => 0,
+        'reset' => $now + $windowSeconds,
+        'blocked_until' => 0,
+    ];
+
+    $fp = fopen($path, 'c+');
+    if ($fp !== false) {
+        if (flock($fp, LOCK_EX)) {
+            $contents = stream_get_contents($fp);
+            if ($contents !== false && $contents !== '') {
+                $decoded = json_decode($contents, true);
+                if (is_array($decoded)) {
+                    $state = array_merge($state, $decoded);
+                }
+            }
+            if (!empty($state['blocked_until']) && $now < (int) $state['blocked_until']) {
+                $retryAfter = (int) $state['blocked_until'] - $now;
+                flock($fp, LOCK_UN);
+                fclose($fp);
+                return ['allowed' => false, 'retry_after' => $retryAfter, 'remaining' => 0];
+            }
+            if ($now >= (int) $state['reset']) {
+                $state['count'] = 0;
+                $state['reset'] = $now + $windowSeconds;
+                $state['blocked_until'] = 0;
+            }
+            $state['count']++;
+            if ($state['count'] > $maxAttempts) {
+                $state['blocked_until'] = $now + $blockSeconds;
+            }
+            ftruncate($fp, 0);
+            rewind($fp);
+            fwrite($fp, json_encode($state));
+            fflush($fp);
+            flock($fp, LOCK_UN);
+        }
+        fclose($fp);
+    }
+
+    if (!empty($state['blocked_until']) && $now < (int) $state['blocked_until']) {
+        return ['allowed' => false, 'retry_after' => (int) $state['blocked_until'] - $now, 'remaining' => 0];
+    }
+
+    return [
+        'allowed' => true,
+        'retry_after' => 0,
+        'remaining' => max(0, $maxAttempts - (int) $state['count']),
+    ];
+}
+
+function rate_limit_clear(string $key): void {
+    $path = sys_get_temp_dir() . '/dmc_rate_' . hash('sha256', $key) . '.json';
+    if (is_file($path)) {
+        @unlink($path);
     }
 }
 
