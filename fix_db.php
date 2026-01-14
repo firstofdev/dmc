@@ -85,6 +85,26 @@ try {
         echo "<p style='color:green'>✅ تم تحديث جدول العقود (إضافة التوقيع الإلكتروني).</p>";
     } catch (PDOException $e) {}
 
+    // 4.2 إضافة أعمدة الضريبة للعقود
+    if (!table_has_column($pdo, 'contracts', 'tax_included')) {
+        try {
+            $pdo->exec("ALTER TABLE contracts ADD COLUMN tax_included TINYINT(1) DEFAULT 0 AFTER total_amount");
+            echo "<p style='color:green'>✅ تم إضافة عمود حالة الضريبة (tax_included) للعقود.</p>";
+        } catch (PDOException $e) { echo "<p style='color:orange'>⚠️ تعذر إضافة عمود tax_included (قد يكون موجوداً).</p>"; }
+    }
+    if (!table_has_column($pdo, 'contracts', 'tax_percent')) {
+        try {
+            $pdo->exec("ALTER TABLE contracts ADD COLUMN tax_percent DECIMAL(5,2) DEFAULT 0.00 AFTER tax_included");
+            echo "<p style='color:green'>✅ تم إضافة نسبة الضريبة (tax_percent) للعقود.</p>";
+        } catch (PDOException $e) { echo "<p style='color:orange'>⚠️ تعذر إضافة عمود tax_percent (قد يكون موجوداً).</p>"; }
+    }
+    if (!table_has_column($pdo, 'contracts', 'tax_amount')) {
+        try {
+            $pdo->exec("ALTER TABLE contracts ADD COLUMN tax_amount DECIMAL(15,2) DEFAULT 0.00 AFTER tax_percent");
+            echo "<p style='color:green'>✅ تم إضافة مبلغ الضريبة (tax_amount) للعقود.</p>";
+        } catch (PDOException $e) { echo "<p style='color:orange'>⚠️ تعذر إضافة عمود tax_amount (قد يكون موجوداً).</p>"; }
+    }
+
     // 4.1 إضافة جدول قراءات العدادات
     try {
         $pdo->exec("CREATE TABLE IF NOT EXISTS meter_readings (

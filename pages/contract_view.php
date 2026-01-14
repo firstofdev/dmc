@@ -87,6 +87,13 @@ try {
 } catch (Exception $e) {
     $meterRows = [];
 }
+
+$taxIncluded = isset($c['tax_included']) ? ((int) $c['tax_included'] === 1) : false;
+$taxAmount = isset($c['tax_amount']) ? (float) $c['tax_amount'] : 0;
+$taxPercent = isset($c['tax_percent']) ? (float) $c['tax_percent'] : 0;
+$baseAmount = (float) $c['total_amount'] - $taxAmount;
+if ($baseAmount < 0) { $baseAmount = (float) $c['total_amount']; }
+$currencyCode = get_setting('currency_code', 'ر.س');
 ?>
 
 <style>
@@ -131,6 +138,32 @@ try {
         </div>
     </div>
     <a href="index.php?p=contracts" class="btn btn-dark"><i class="fa-solid fa-arrow-right"></i> رجوع</a>
+</div>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:18px;">
+    <div class="card" style="padding:14px;">
+        <div style="font-size:12px; color:#9ca3af;">قيمة العقد الأساسية</div>
+        <div style="font-size:22px; font-weight:800; margin-top:6px; color:#a5b4fc;">
+            <?= number_format($baseAmount, 2) ?> <?= htmlspecialchars($currencyCode) ?>
+        </div>
+    </div>
+    <div class="card" style="padding:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; color:#9ca3af;">الضريبة</span>
+            <span style="padding:6px 10px; border-radius:999px; font-size:12px; background:<?= $taxIncluded ? '#14532d' : '#1f2937' ?>; color:<?= $taxIncluded ? '#bbf7d0' : '#e5e7eb' ?>;">
+                <?= $taxIncluded ? 'مشمول بالضريبة' : 'بدون ضريبة' ?>
+            </span>
+        </div>
+        <div style="font-size:22px; font-weight:800; margin-top:6px; color:#facc15;">
+            <?= $taxIncluded ? number_format($taxAmount, 2) . ' (' . $taxPercent . '%)' : '0.00' ?> <?= htmlspecialchars($currencyCode) ?>
+        </div>
+    </div>
+    <div class="card" style="padding:14px; background:linear-gradient(135deg, #6366f1, #0ea5e9); color:white;">
+        <div style="font-size:12px; opacity:0.8;">الإجمالي النهائي</div>
+        <div style="font-size:24px; font-weight:900; margin-top:6px;">
+            <?= number_format($c['total_amount'], 2) ?> <?= htmlspecialchars($currencyCode) ?>
+        </div>
+    </div>
 </div>
 
 <div class="nav-tabs">
