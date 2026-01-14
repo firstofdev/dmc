@@ -1,0 +1,35 @@
+/* FontAwesome Fallback - Unicode Icons */
+/* هذا الملف يوفر أيقونات Unicode بديلة في حالة عدم تحميل FontAwesome */
+
+.fa-gauge-high::before { content: "📊"; }
+.fa-building::before { content: "🏢"; }
+.fa-house-circle-check::before { content: "🏠"; }
+.fa-file-contract::before { content: "📄"; }
+.fa-users::before { content: "👥"; }
+.fa-calendar-days::before { content: "📅"; }
+.fa-bell::before { content: "🔔"; }
+.fa-wrench::before { content: "🔧"; }
+.fa-user-tie::before { content: "👔"; }
+.fa-chart-line::before { content: "📈"; }
+.fa-brain::before { content: "🧠"; }
+.fa-book-open::before { content: "📖"; }
+.fa-user-gear::before { content: "⚙️"; }
+.fa-sliders::before { content: "🎛️"; }
+.fa-power-off::before { content: "⏻"; }
+.fa-triangle-exclamation::before { content: "⚠️"; }
+.fa-bars::before { content: "☰"; }
+.fa-magnifying-glass::before { content: "🔍"; }
+.fa-xmark::before { content: "✖"; }
+.fa-wand-magic-sparkles::before { content: "✨"; }
+.fa-compass::before { content: "🧭"; }
+.fa-list-check::before { content: "✓"; }
+.fa-rotate::before { content: "🔄"; }
+
+/* نمط عام للأيقونات البديلة */
+.fa-solid, .fa-regular {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif !important;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}

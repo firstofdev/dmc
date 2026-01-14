@@ -52,7 +52,17 @@ $company_name_safe = htmlspecialchars($company_name);
     <meta charset="UTF-8">
     <title><?= $company_name_safe ?> - النظام المتكامل</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <?php
+    // استخدام FontAwesome المحلي إذا كان متوفراً، وإلا استخدم CDN
+    $localFA = 'resources/fontawesome/css/all.min.css';
+    $fallbackFA = 'resources/fontawesome/css/fallback.css';
+    if (file_exists($localFA)): ?>
+    <link rel="stylesheet" href="<?= $localFA ?>">
+    <?php else: ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" crossorigin="anonymous">
+    <!-- Fallback icons in case FontAwesome doesn't load -->
+    <link rel="stylesheet" href="<?= $fallbackFA ?>">
+    <?php endif; ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ENHANCED MODERN DARK THEME */
