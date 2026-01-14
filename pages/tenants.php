@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['scan_id'])) {
     </div>
     
     <?php 
-    $tenants = $pdo->query("SELECT id, $tenantNameColumn AS name, phone, id_number, email FROM tenants ORDER BY id DESC");
+    $tenants = $pdo->query("SELECT id, $tenantNameColumn AS name, phone, id_number, email, id_type, address FROM tenants ORDER BY id DESC");
     if($tenants->rowCount() == 0): ?>
         <div style="text-align:center; padding:40px; color:#666">لا يوجد مستأجرين حالياً.</div>
     <?php else: ?>
@@ -110,6 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['scan_id'])) {
                             data-phone="<?= $t['phone'] ?>" 
                             data-idn="<?= $t['id_number'] ?>" 
                             data-email="<?= $t['email'] ?>" 
+                            data-id-type="<?= $t['id_type'] ?? '' ?>" 
+                            data-address="<?= htmlspecialchars($t['address'] ?? '') ?>" 
                             class="btn btn-dark btn-sm"><i class="fa-solid fa-pen"></i></button>
                         
                         <form method="POST" onsubmit="return confirm('حذف المستأجر؟');" style="margin:0">
@@ -241,6 +243,8 @@ function openModal() {
     document.getElementById('t_phone').value='';
     document.getElementById('t_idn').value='';
     document.getElementById('t_email').value='';
+    document.getElementById('t_id_type').value='';
+    document.getElementById('t_address').value='';
 }
 function editTenant(btn) {
     document.getElementById('tenantModal').style.display='flex';
@@ -250,5 +254,7 @@ function editTenant(btn) {
     document.getElementById('t_phone').value = btn.getAttribute('data-phone');
     document.getElementById('t_idn').value = btn.getAttribute('data-idn');
     document.getElementById('t_email').value = btn.getAttribute('data-email');
+    document.getElementById('t_id_type').value = btn.getAttribute('data-id-type') || '';
+    document.getElementById('t_address').value = btn.getAttribute('data-address') || '';
 }
 </script>

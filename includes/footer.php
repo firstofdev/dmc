@@ -1,4 +1,35 @@
 </div> <script>
+    // Theme Switcher
+    (function() {
+        var themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                var body = document.body;
+                var isLight = body.classList.contains('light-theme');
+                var newTheme = isLight ? 'dark' : 'light';
+                
+                if (isLight) {
+                    body.classList.remove('light-theme');
+                } else {
+                    body.classList.add('light-theme');
+                }
+                
+                // Update icon
+                var icon = themeToggle.querySelector('i');
+                icon.className = 'fa-solid fa-' + (isLight ? 'sun' : 'moon');
+                
+                // Save to server
+                fetch('routes/toggle_theme.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({theme: newTheme})
+                }).catch(function(error) {
+                    console.error('Error saving theme:', error);
+                });
+            });
+        }
+    })();
+
     (function() {
         var body = document.body;
         var toggle = document.getElementById('sidebarToggle');
