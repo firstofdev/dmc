@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     $taxPercentInput = $_POST['tax_percent'] ?? 0;
     $taxAmountInput = $_POST['tax_amount'] ?? 0;
 
+    // أولوية الضريبة: النسبة أولاً، ثم المبلغ الثابت إن لم تُحدد النسبة
     $taxPercent = 0;
     if ($taxIncluded && is_numeric($taxPercentInput)) {
         $taxPercent = min(max((float) $taxPercentInput, 0), 100);
@@ -148,7 +149,7 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
             if (mode === 'with') {
                 if (taxPercent) { taxPercent.removeAttribute('disabled'); }
                 if (percent > 0) {
-                    tAmount = parseFloat((base * (percent / 100)).toFixed(2));
+                    tAmount = Math.round(base * percent) / 100;
                 }
             } else {
                 tAmount = 0;
