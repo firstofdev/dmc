@@ -34,6 +34,8 @@ $sql_commands = [
         property_id INT, unit_id INT, vendor_id INT,
         description TEXT, cost DECIMAL(15,2), status ENUM('pending','completed','paid') DEFAULT 'pending',
         request_date DATE,
+        priority ENUM('low','medium','high','emergency') DEFAULT 'medium',
+        ai_analysis TEXT,
         FOREIGN KEY (property_id) REFERENCES properties(id)
     )",
     "CREATE TABLE IF NOT EXISTS tenants (
@@ -41,6 +43,9 @@ $sql_commands = [
         full_name VARCHAR(255), phone VARCHAR(20), id_number VARCHAR(50), 
         id_type VARCHAR(50), cr_number VARCHAR(50), email VARCHAR(100), address TEXT,
         id_photo VARCHAR(255), personal_photo VARCHAR(255),
+        password VARCHAR(255),
+        last_login TIMESTAMP NULL,
+        document_data JSON,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )",
     "CREATE TABLE IF NOT EXISTS contracts (
@@ -84,6 +89,28 @@ $sql_commands = [
         payment_method VARCHAR(50), transaction_date DATE, notes TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE
+    )",
+    "CREATE TABLE IF NOT EXISTS activity_log (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        description TEXT,
+        type VARCHAR(50),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )",
+    "CREATE TABLE IF NOT EXISTS inspection_photos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        contract_id INT NOT NULL,
+        photo_type ENUM('check_in','check_out') NOT NULL,
+        photo_path VARCHAR(255) NOT NULL,
+        FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE
+    )",
+    "CREATE TABLE IF NOT EXISTS alerts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        alert_type VARCHAR(50),
+        title VARCHAR(255),
+        description TEXT,
+        related_id INT,
+        status ENUM('open','resolved') DEFAULT 'open',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )"
 ];
 
@@ -93,7 +120,18 @@ try {
     }
     
     // إعدادات افتراضية
-    $defaults = ['company_name'=>'', 'logo'=>'logo.png'];
+    $defaults = [
+        'company_name' => '',
+        'logo' => 'logo.png',
+        'currency' => 'SAR',
+        'smart_features_mode' => 'real',
+        'alerts_digest' => 'weekly',
+        'auto_backup' => 'weekly',
+        'backup_frequency' => '8',
+        'target_occupancy' => '90',
+        'target_collection' => '95',
+        'alert_days' => '30'
+    ];
     foreach($defaults as $k=>$v) $pdo->prepare("INSERT IGNORE INTO settings (k,v) VALUES (?,?)")->execute([$k,$v]);
     
     // إنشاء مدير
