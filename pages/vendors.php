@@ -72,11 +72,11 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:20px; flex-wrap:wrap">
         <div>
             <p style="margin:0; color:#94a3b8; font-size:13px">شبكة المقاولين الذكية</p>
-            <h3 style="margin:6px 0 0">👷 إدارة المقاولين</h3>
+            <h3 style="margin:6px 0 0"><i class="fa-solid fa-people-carry-box" style="margin-left:8px;color:var(--primary)"></i> إدارة المقاولين</h3>
         </div>
 
         <a href="index.php?p=vendors&act=add" id="openVendorModal" class="btn btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px">
-            <i class="fa-solid fa-plus"></i> إضافة مقاول
+            <i class="fa-solid fa-user-plus"></i> إضافة مقاول
         </a>
     </div>
 

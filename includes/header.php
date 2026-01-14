@@ -189,15 +189,15 @@ $company_name_safe = htmlspecialchars($company_name);
         <span class="tagline" style="font-size:12px; color:var(--primary); background:var(--tag-bg); padding:4px 10px; border-radius:20px">نظام الإدارة</span>
     </div>
     <div style="flex:1; overflow-y:auto; padding-left:5px">
-        <a href="index.php?p=dashboard" class="nav-link <?= $p=='dashboard'?'active':'' ?>"><i class="fa-solid fa-layer-group"></i> <span>لوحة القيادة</span></a>
-        <a href="index.php?p=properties" class="nav-link <?= $p=='properties'?'active':'' ?>"><i class="fa-solid fa-city"></i> <span>العقارات</span></a>
-        <a href="index.php?p=units" class="nav-link <?= $p=='units'?'active':'' ?>"><i class="fa-solid fa-door-open"></i> <span>الوحدات</span></a>
-        <a href="index.php?p=contracts" class="nav-link <?= $p=='contracts'?'active':'' ?>"><i class="fa-solid fa-file-contract"></i> <span>العقود</span></a>
-        <a href="index.php?p=tenants" class="nav-link <?= $p=='tenants'?'active':'' ?>"><i class="fa-solid fa-users"></i> <span>المستأجرين</span></a>
-        <a href="index.php?p=alerts" class="nav-link <?= $p=='alerts'?'active':'' ?>"><i class="fa-solid fa-bell"></i> <span>التنبيهات</span></a>
-        <a href="index.php?p=maintenance" class="nav-link <?= $p=='maintenance'?'active':'' ?>"><i class="fa-solid fa-screwdriver-wrench"></i> <span>الصيانة</span></a>
-        <a href="index.php?p=vendors" class="nav-link <?= $p=='vendors'?'active':'' ?>"><i class="fa-solid fa-helmet-safety"></i> <span>المقاولين</span></a>
-        <a href="index.php?p=smart_center" class="nav-link <?= $p=='smart_center'?'active':'' ?>"><i class="fa-solid fa-brain"></i> <span>التمكين الذكي</span></a>
+        <a href="index.php?p=dashboard" class="nav-link <?= $p=='dashboard'?'active':'' ?>"><i class="fa-solid fa-chart-line"></i> <span>لوحة القيادة</span></a>
+        <a href="index.php?p=properties" class="nav-link <?= $p=='properties'?'active':'' ?>"><i class="fa-solid fa-building"></i> <span>العقارات</span></a>
+        <a href="index.php?p=units" class="nav-link <?= $p=='units'?'active':'' ?>"><i class="fa-solid fa-house-laptop"></i> <span>الوحدات</span></a>
+        <a href="index.php?p=contracts" class="nav-link <?= $p=='contracts'?'active':'' ?>"><i class="fa-solid fa-file-signature"></i> <span>العقود</span></a>
+        <a href="index.php?p=tenants" class="nav-link <?= $p=='tenants'?'active':'' ?>"><i class="fa-solid fa-user-group"></i> <span>المستأجرين</span></a>
+        <a href="index.php?p=alerts" class="nav-link <?= $p=='alerts'?'active':'' ?>"><i class="fa-solid fa-bell-concierge"></i> <span>التنبيهات</span></a>
+        <a href="index.php?p=maintenance" class="nav-link <?= $p=='maintenance'?'active':'' ?>"><i class="fa-solid fa-toolbox"></i> <span>الصيانة</span></a>
+        <a href="index.php?p=vendors" class="nav-link <?= $p=='vendors'?'active':'' ?>"><i class="fa-solid fa-people-carry-box"></i> <span>المقاولين</span></a>
+        <a href="index.php?p=smart_center" class="nav-link <?= $p=='smart_center'?'active':'' ?>"><i class="fa-solid fa-microchip"></i> <span>التمكين الذكي</span></a>
         <?php if($role === 'admin'): ?>
         <a href="index.php?p=users" class="nav-link <?= $p=='users'?'active':'' ?>"><i class="fa-solid fa-user-shield"></i> <span>المستخدمين</span></a>
         <?php endif; ?>

@@ -78,9 +78,9 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
 
 <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-        <h3>📜 العقود الإيجارية</h3>
+        <h3><i class="fa-solid fa-file-signature" style="margin-left:10px;color:var(--primary)"></i> العقود الإيجارية</h3>
         <button onclick="document.getElementById('contModal').style.display='flex'" class="btn btn-primary">
-            <i class="fa-solid fa-plus"></i> إنشاء عقد جديد
+            <i class="fa-solid fa-file-circle-plus"></i> إنشاء عقد جديد
         </button>
     </div>
 
