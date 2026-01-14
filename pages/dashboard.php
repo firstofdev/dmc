@@ -308,71 +308,85 @@ if (empty($financeLabels)) {
 
 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
     
-    <div class="card" style="padding:20px; display:flex; justify-content:space-between; align-items:center;">
-        <div>
-            <h2 style="margin:0; font-size:28px; font-weight:800"><?= $stats['units'] ?></h2>
-            <span style="color:#888; font-size:13px">إجمالي الوحدات</span>
+    <div class="card" style="padding:20px; display:flex; justify-content:space-between; align-items:center; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:-20px; right:-20px; width:120px; height:120px; background:radial-gradient(circle, rgba(79,70,229,0.15), transparent); border-radius:50%; filter:blur(25px);"></div>
+        <div style="position:relative; z-index:1;">
+            <h2 style="margin:0; font-size:32px; font-weight:800; background:linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><?= $stats['units'] ?></h2>
+            <span style="color:#888; font-size:13px; font-weight:600; letter-spacing:0.5px;">إجمالي الوحدات</span>
         </div>
-        <div style="width:50px; height:50px; background:#4f46e5; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">
-            <i class="fa-solid fa-house-laptop"></i>
-        </div>
-    </div>
-
-    <div class="card" style="padding:20px; display:flex; justify-content:space-between; align-items:center;">
-        <div>
-            <h2 style="margin:0; font-size:28px; font-weight:800"><?= $stats['rented'] ?></h2>
-            <span style="color:#888; font-size:13px">وحدات مؤجرة</span>
-        </div>
-        <div style="width:50px; height:50px; background:#0ea5e9; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">
-            <i class="fa-solid fa-house-circle-check"></i>
+        <div style="width:60px; height:60px; background:linear-gradient(135deg, #4f46e5, #6366f1); border-radius:16px; display:flex; align-items:center; justify-content:center; color:white; font-size:28px; box-shadow:0 10px 30px rgba(79,70,229,0.4); transition:all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); position:relative; z-index:1;">
+            <i class="fa-solid fa-house-laptop" style="animation:iconFloat 3s ease-in-out infinite;"></i>
         </div>
     </div>
 
-    <div class="card" style="padding:20px; display:flex; justify-content:space-between; align-items:center;">
-        <div>
-            <h2 style="margin:0; font-size:28px; font-weight:800"><?= $stats['contracts'] ?></h2>
-            <span style="color:#888; font-size:13px">عقود نشطة</span>
+    <div class="card" style="padding:20px; display:flex; justify-content:space-between; align-items:center; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:-20px; right:-20px; width:120px; height:120px; background:radial-gradient(circle, rgba(14,165,233,0.15), transparent); border-radius:50%; filter:blur(25px);"></div>
+        <div style="position:relative; z-index:1;">
+            <h2 style="margin:0; font-size:32px; font-weight:800; background:linear-gradient(135deg, #0ea5e9, #06b6d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><?= $stats['rented'] ?></h2>
+            <span style="color:#888; font-size:13px; font-weight:600; letter-spacing:0.5px;">وحدات مؤجرة</span>
         </div>
-        <div style="width:50px; height:50px; background:#10b981; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">
-            <i class="fa-solid fa-file-signature"></i>
+        <div style="width:60px; height:60px; background:linear-gradient(135deg, #0ea5e9, #06b6d4); border-radius:16px; display:flex; align-items:center; justify-content:center; color:white; font-size:28px; box-shadow:0 10px 30px rgba(14,165,233,0.4); transition:all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); position:relative; z-index:1;">
+            <i class="fa-solid fa-house-circle-check" style="animation:iconFloat 3s ease-in-out infinite 0.2s;"></i>
         </div>
     </div>
 
-    <div class="card" style="padding:20px; display:flex; justify-content:space-between; align-items:center;">
-        <div>
-            <h2 style="margin:0; font-size:28px; font-weight:800"><?= $stats['tenants'] ?></h2>
-            <span style="color:#888; font-size:13px">المستأجرين</span>
+    <div class="card" style="padding:20px; display:flex; justify-content:space-between; align-items:center; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:-20px; right:-20px; width:120px; height:120px; background:radial-gradient(circle, rgba(16,185,129,0.15), transparent); border-radius:50%; filter:blur(25px);"></div>
+        <div style="position:relative; z-index:1;">
+            <h2 style="margin:0; font-size:32px; font-weight:800; background:linear-gradient(135deg, #10b981, #059669); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><?= $stats['contracts'] ?></h2>
+            <span style="color:#888; font-size:13px; font-weight:600; letter-spacing:0.5px;">عقود نشطة</span>
         </div>
-        <div style="width:50px; height:50px; background:#f59e0b; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">
-            <i class="fa-solid fa-user-group"></i>
+        <div style="width:60px; height:60px; background:linear-gradient(135deg, #10b981, #059669); border-radius:16px; display:flex; align-items:center; justify-content:center; color:white; font-size:28px; box-shadow:0 10px 30px rgba(16,185,129,0.4); transition:all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); position:relative; z-index:1;">
+            <i class="fa-solid fa-file-signature" style="animation:iconFloat 3s ease-in-out infinite 0.4s;"></i>
+        </div>
+    </div>
+
+    <div class="card" style="padding:20px; display:flex; justify-content:space-between; align-items:center; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:-20px; right:-20px; width:120px; height:120px; background:radial-gradient(circle, rgba(245,158,11,0.15), transparent); border-radius:50%; filter:blur(25px);"></div>
+        <div style="position:relative; z-index:1;">
+            <h2 style="margin:0; font-size:32px; font-weight:800; background:linear-gradient(135deg, #f59e0b, #d97706); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><?= $stats['tenants'] ?></h2>
+            <span style="color:#888; font-size:13px; font-weight:600; letter-spacing:0.5px;">المستأجرين</span>
+        </div>
+        <div style="width:60px; height:60px; background:linear-gradient(135deg, #f59e0b, #d97706); border-radius:16px; display:flex; align-items:center; justify-content:center; color:white; font-size:28px; box-shadow:0 10px 30px rgba(245,158,11,0.4); transition:all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); position:relative; z-index:1;">
+            <i class="fa-solid fa-user-group" style="animation:iconFloat 3s ease-in-out infinite 0.6s;"></i>
         </div>
     </div>
 </div>
 
+<style>
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-6px) scale(1.05); }
+}
+</style>
+
 <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; margin-bottom:30px;">
-    <div class="card" style="padding:20px;">
-        <h3 style="margin-top:0"><i class="fa-solid fa-wand-magic-sparkles"></i> لوحة التحكم الذكية للمالك</h3>
+    <div class="card" style="padding:20px; background:linear-gradient(135deg, rgba(99,102,241,0.05), rgba(168,85,247,0.03));">
+        <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-wand-magic-sparkles" style="color:#a855f7;"></i> لوحة التحكم الذكية للمالك</h3>
         <p style="color:#94a3b8; margin-top:6px;">مسار سريع لإدارة الأملاك بذكاء: تحديث الوحدات، متابعة العقود، وضبط الفواتير في أقل وقت.</p>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px; margin-top:15px;">
-            <a href="index.php?p=properties" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-building"></i> إدارة العقارات</a>
-            <a href="index.php?p=units" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-house-laptop"></i> إدارة الوحدات</a>
-            <a href="index.php?p=contracts" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-file-signature"></i> العقود الذكية</a>
-            <a href="index.php?p=reports" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-file-invoice-dollar"></i> التقارير المالية</a>
-            <a href="index.php?p=lease_calendar" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-calendar-check"></i> تقويم العقود</a>
-            <a href="index.php?p=smart_center" class="btn btn-primary" style="justify-content:center; width:100%;"><i class="fa-solid fa-microchip"></i> التمكين الذكي</a>
+            <a href="index.php?p=properties" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-building"></i> <span>إدارة العقارات</span></a>
+            <a href="index.php?p=units" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-house-laptop"></i> <span>إدارة الوحدات</span></a>
+            <a href="index.php?p=contracts" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-file-signature"></i> <span>العقود الذكية</span></a>
+            <a href="index.php?p=reports" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-file-invoice-dollar"></i> <span>التقارير المالية</span></a>
+            <a href="index.php?p=lease_calendar" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-calendar-check"></i> <span>تقويم العقود</span></a>
+            <a href="index.php?p=smart_center" class="btn btn-primary" style="justify-content:center; width:100%;"><i class="fa-solid fa-microchip"></i> <span>التمكين الذكي</span></a>
         </div>
     </div>
-    <div class="card" style="padding:20px;">
-        <h3 style="margin-top:0"><i class="fa-solid fa-lightbulb"></i> مساعد الإدارة الذكي</h3>
+    <div class="card" style="padding:20px; background:linear-gradient(135deg, rgba(34,211,238,0.05), rgba(14,165,233,0.03));">
+        <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-lightbulb" style="color:#22d3ee;"></i> مساعد الإدارة الذكي</h3>
         <div style="display:grid; gap:10px;">
-            <div style="background:#0f172a; padding:12px; border-radius:12px; color:#cbd5f5;">
-                ركّز اليوم على تجديد العقود القريبة والانتباه للدفعات المتأخرة.
+            <div style="background:rgba(15,23,42,0.8); padding:14px; border-radius:12px; color:#cbd5f5; border-left:3px solid #6366f1; display:flex; align-items:center; gap:10px; transition:all 0.3s ease;">
+                <i class="fa-solid fa-sync-alt" style="color:#6366f1; font-size:18px;"></i>
+                <span>ركّز اليوم على تجديد العقود القريبة والانتباه للدفعات المتأخرة.</span>
             </div>
-            <div style="background:#0f172a; padding:12px; border-radius:12px; color:#cbd5f5;">
-                راقب عدادات الكهرباء والماء لضبط الاستهلاك وتقليل الفاقد.
+            <div style="background:rgba(15,23,42,0.8); padding:14px; border-radius:12px; color:#cbd5f5; border-left:3px solid #10b981; display:flex; align-items:center; gap:10px; transition:all 0.3s ease;">
+                <i class="fa-solid fa-bolt" style="color:#10b981; font-size:18px;"></i>
+                <span>راقب عدادات الكهرباء والماء لضبط الاستهلاك وتقليل الفاقد.</span>
             </div>
-            <div style="background:#0f172a; padding:12px; border-radius:12px; color:#cbd5f5;">
-                فعّل تقارير واتساب الذكية للتذكير التلقائي بالمستحقات.
+            <div style="background:rgba(15,23,42,0.8); padding:14px; border-radius:12px; color:#cbd5f5; border-left:3px solid #22d3ee; display:flex; align-items:center; gap:10px; transition:all 0.3s ease;">
+                <i class="fa-brands fa-whatsapp" style="color:#22d3ee; font-size:18px;"></i>
+                <span>فعّل تقارير واتساب الذكية للتذكير التلقائي بالمستحقات.</span>
             </div>
         </div>
     </div>
@@ -396,111 +410,111 @@ if (empty($financeLabels)) {
 
 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-gauge-high"></i> نبض المحفظة</h4>
+        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-gauge-high"></i> نبض المحفظة</h4>
         <div style="display:grid; gap:12px; color:#e2e8f0;">
-            <div style="display:flex; justify-content:space-between;">
-                <span>وحدات شاغرة</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-house-crack" style="color:#6366f1; font-size:14px;"></i> وحدات شاغرة</span>
                 <strong><?= $portfolioMetrics['vacant_units'] ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>معدل الشواغر</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-chart-pie" style="color:#a855f7; font-size:14px;"></i> معدل الشواغر</span>
                 <strong><?= $portfolioMetrics['vacancy_rate'] ?>%</strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>تحصيل آخر 30 يوم</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-money-bill-trend-up" style="color:#10b981; font-size:14px;"></i> تحصيل آخر 30 يوم</span>
                 <strong><?= number_format($portfolioMetrics['paid_30']) ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>متوسط التحصيل للوحدة المؤجرة</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-calculator" style="color:#22d3ee; font-size:14px;"></i> متوسط التحصيل للوحدة</span>
                 <strong><?= number_format($portfolioMetrics['paid_per_rented']) ?></strong>
             </div>
         </div>
     </div>
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-rotate"></i> دوران العقود</h4>
+        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-rotate"></i> دوران العقود</h4>
         <div style="display:grid; gap:12px; color:#e2e8f0;">
-            <div style="display:flex; justify-content:space-between;">
-                <span>تجديد خلال 30 يوم</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-calendar-days" style="color:#f59e0b; font-size:14px;"></i> تجديد خلال 30 يوم</span>
                 <strong><?= $portfolioMetrics['renewals_30'] ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>تجديد خلال 60 يوم</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-calendar-week" style="color:#f59e0b; font-size:14px;"></i> تجديد خلال 60 يوم</span>
                 <strong><?= $portfolioMetrics['renewals_60'] ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>متوسط قيمة الدفعة</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-money-check-dollar" style="color:#10b981; font-size:14px;"></i> متوسط قيمة الدفعة</span>
                 <strong><?= number_format($portfolioMetrics['avg_payment']) ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>نسبة المتأخرات</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-clock-rotate-left" style="color:#ef4444; font-size:14px;"></i> نسبة المتأخرات</span>
                 <strong><?= $portfolioMetrics['overdue_ratio'] ?>%</strong>
             </div>
         </div>
     </div>
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-sliders"></i> إجراءات سريعة</h4>
+        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-sliders"></i> إجراءات سريعة</h4>
         <div style="display:grid; gap:10px;">
-            <a href="index.php?p=contracts" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-file-pen"></i> متابعة التجديدات</a>
-            <a href="index.php?p=tenants" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-user-check"></i> مراجعة المستأجرين</a>
-            <a href="index.php?p=maintenance" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-toolbox"></i> تنظيم الصيانة</a>
-            <a href="index.php?p=alerts" class="btn btn-primary" style="justify-content:center;"><i class="fa-solid fa-bell-concierge"></i> تفعيل التنبيهات</a>
+            <a href="index.php?p=contracts" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-file-pen"></i> <span>متابعة التجديدات</span></a>
+            <a href="index.php?p=tenants" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-user-check"></i> <span>مراجعة المستأجرين</span></a>
+            <a href="index.php?p=maintenance" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-toolbox"></i> <span>تنظيم الصيانة</span></a>
+            <a href="index.php?p=alerts" class="btn btn-primary" style="justify-content:center;"><i class="fa-solid fa-bell-concierge"></i> <span>تفعيل التنبيهات</span></a>
         </div>
     </div>
 </div>
 
 <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-layer-group"></i> توزيع المتأخرات حسب العمر</h4>
+        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-layer-group"></i> توزيع المتأخرات حسب العمر</h4>
         <div style="display:grid; gap:12px; color:#e2e8f0;">
-            <div style="display:flex; justify-content:space-between;">
-                <span>مستحقات حالية</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-check-circle" style="color:#10b981; font-size:14px;"></i> مستحقات حالية</span>
                 <strong><?= number_format($paymentAging['current']) ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>متأخرات 1-30 يوماً</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-clock" style="color:#f59e0b; font-size:14px;"></i> متأخرات 1-30 يوماً</span>
                 <strong><?= number_format($paymentAging['late_1_30']) ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>متأخرات 31-60 يوماً</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-hourglass-half" style="color:#f97316; font-size:14px;"></i> متأخرات 31-60 يوماً</span>
                 <strong><?= number_format($paymentAging['late_31_60']) ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>متأخرات أكثر من 60 يوماً</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-exclamation-triangle" style="color:#ef4444; font-size:14px;"></i> متأخرات أكثر من 60 يوماً</span>
                 <strong><?= number_format($paymentAging['late_61_plus']) ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>إجمالي المتأخرات</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(148,163,184,0.2);">
+                <span style="display:flex; align-items:center; gap:8px; font-weight:700;"><i class="fa-solid fa-calculator" style="color:#f97316; font-size:14px;"></i> إجمالي المتأخرات</span>
                 <strong style="color:#f97316"><?= number_format($paymentAging['overdue_total']) ?></strong>
             </div>
         </div>
     </div>
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-clipboard-check"></i> جودة البيانات والجاهزية</h4>
+        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-clipboard-check"></i> جودة البيانات والجاهزية</h4>
         <div style="display:grid; gap:12px; color:#e2e8f0;">
-            <div style="display:flex; justify-content:space-between;">
-                <span>مستأجرون ببيانات ناقصة</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-user-slash" style="color:#ef4444; font-size:14px;"></i> مستأجرون ببيانات ناقصة</span>
                 <strong><?= $dataQuality['tenants_missing_contact'] ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>وحدات بدون سعر</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-tag" style="color:#f59e0b; font-size:14px;"></i> وحدات بدون سعر</span>
                 <strong><?= $dataQuality['units_missing_price'] ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>عقود بلا جداول دفعات</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-file-circle-xmark" style="color:#f97316; font-size:14px;"></i> عقود بلا جداول دفعات</span>
                 <strong><?= $dataQuality['contracts_missing_payments'] ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>عقارات بلا وحدات</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-building-slash" style="color:#64748b; font-size:14px;"></i> عقارات بلا وحدات</span>
                 <strong><?= $dataQuality['properties_without_units'] ?></strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>مؤشر الجاهزية</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(148,163,184,0.2);">
+                <span style="display:flex; align-items:center; gap:8px; font-weight:700;"><i class="fa-solid fa-star" style="color:<?= $dataQuality['score'] >= 85 ? '#10b981' : '#f59e0b' ?>; font-size:14px;"></i> مؤشر الجاهزية</span>
                 <strong style="color:<?= $dataQuality['score'] >= 85 ? '#10b981' : '#f59e0b' ?>"><?= $dataQuality['score'] ?>/100</strong>
             </div>
         </div>
         <?php if (!empty($qualityActions)): ?>
-            <div style="margin-top:12px; background:#111827; border-radius:12px; padding:12px; color:#cbd5f5; font-size:13px;">
-                <strong style="display:block; margin-bottom:6px;">خطوات مقترحة</strong>
+            <div style="margin-top:12px; background:#111827; border-radius:12px; padding:12px; color:#cbd5f5; font-size:13px; border-left:3px solid #6366f1;">
+                <strong style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><i class="fa-solid fa-list-check"></i> خطوات مقترحة</strong>
                 <ul style="padding-inline-start:18px; margin:0;">
                     <?php foreach ($qualityActions as $action): ?>
                         <li style="margin-bottom:6px;"><?= htmlspecialchars($action) ?></li>
@@ -513,7 +527,7 @@ if (empty($financeLabels)) {
 
 <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px;">
-        <h3 style="margin-top:0"><i class="fa-solid fa-warehouse"></i> أداء العقارات الأعلى نشاطاً</h3>
+        <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-warehouse" style="color:#6366f1;"></i> أداء العقارات الأعلى نشاطاً</h3>
         <?php if (!empty($propertyPerformance)): ?>
             <?php foreach ($propertyPerformance as $property): ?>
                 <?php
@@ -521,30 +535,46 @@ if (empty($financeLabels)) {
                 $rentedUnits = (int) ($property['units_rented'] ?? 0);
                 $rate = $totalUnits > 0 ? round(($rentedUnits / $totalUnits) * 100, 1) : 0;
                 ?>
-                <div style="padding:12px 0; border-bottom:1px dashed #333;">
+                <div style="padding:14px 0; border-bottom:1px dashed #333; transition:all 0.3s ease;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong><?= htmlspecialchars($property['name']) ?></strong>
-                        <span style="color:#94a3b8; font-size:12px;"><?= $rentedUnits ?>/<?= $totalUnits ?> مؤجر</span>
+                        <strong style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-building-circle-check" style="color:#10b981; font-size:14px;"></i> <?= htmlspecialchars($property['name']) ?></strong>
+                        <span style="color:#94a3b8; font-size:12px; background:rgba(99,102,241,0.1); padding:4px 10px; border-radius:8px;"><i class="fa-solid fa-chart-simple"></i> <?= $rentedUnits ?>/<?= $totalUnits ?> مؤجر</span>
                     </div>
-                    <div style="margin-top:6px; background:#1f2937; border-radius:8px; overflow:hidden;">
-                        <div style="height:6px; width:<?= $rate ?>%; background:#22c55e;"></div>
+                    <div style="margin-top:8px; background:#1f2937; border-radius:10px; overflow:hidden; position:relative;">
+                        <div style="height:8px; width:<?= $rate ?>%; background:linear-gradient(90deg, #10b981, #059669); border-radius:10px; box-shadow:0 0 10px rgba(16,185,129,0.5); transition:all 0.8s ease;"></div>
                     </div>
+                    <div style="margin-top:4px; color:#94a3b8; font-size:11px; text-align:left;"><?= $rate ?>% إشغال</div>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <div style="color:#94a3b8; text-align:center; padding:20px;">أضف عقارات لعرض الأداء التفصيلي.</div>
+            <div style="color:#94a3b8; text-align:center; padding:30px; display:flex; flex-direction:column; align-items:center; gap:10px;">
+                <i class="fa-solid fa-building-slash" style="font-size:40px; opacity:0.3;"></i>
+                <span>أضف عقارات لعرض الأداء التفصيلي.</span>
+            </div>
         <?php endif; ?>
     </div>
-    <div class="card" style="padding:20px;">
-        <h3 style="margin-top:0"><i class="fa-solid fa-sparkles"></i> تنبيهات المالك الذكية</h3>
+    <div class="card" style="padding:20px; background:linear-gradient(135deg, rgba(168,85,247,0.05), rgba(99,102,241,0.03));">
+        <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-sparkles" style="color:#a855f7;"></i> تنبيهات المالك الذكية</h3>
         <?php if (!empty($smartAlerts)): ?>
-            <ul style="padding-inline-start:18px; color:#e2e8f0; margin:0;">
-                <?php foreach ($smartAlerts as $alert): ?>
-                    <li style="margin-bottom:10px;"><?= htmlspecialchars($alert) ?></li>
+            <ul style="padding-inline-start:0; color:#e2e8f0; margin:0; list-style:none;">
+                <?php foreach ($smartAlerts as $idx => $alert): ?>
+                    <?php 
+                    $icons = ['fa-fire', 'fa-bolt', 'fa-bell', 'fa-exclamation-circle', 'fa-triangle-exclamation'];
+                    $colors = ['#ef4444', '#f59e0b', '#22d3ee', '#a855f7', '#6366f1'];
+                    $icon = $icons[$idx % count($icons)];
+                    $color = $colors[$idx % count($colors)];
+                    ?>
+                    <li style="margin-bottom:12px; padding:10px; background:rgba(15,23,42,0.6); border-radius:10px; border-left:3px solid <?= $color ?>; display:flex; align-items:start; gap:10px; transition:all 0.3s ease;">
+                        <i class="fa-solid <?= $icon ?>" style="color:<?= $color ?>; font-size:16px; margin-top:2px;"></i>
+                        <span><?= htmlspecialchars($alert) ?></span>
+                    </li>
                 <?php endforeach; ?>
             </ul>
         <?php else: ?>
-            <div style="color:#94a3b8;">لا توجد تنبيهات حرجة حالياً.</div>
+            <div style="color:#94a3b8; text-align:center; padding:30px; display:flex; flex-direction:column; align-items:center; gap:10px;">
+                <i class="fa-solid fa-circle-check" style="font-size:40px; color:#10b981; opacity:0.3;"></i>
+                <span>لا توجد تنبيهات حرجة حالياً.</span>
+            </div>
         <?php endif; ?>
     </div>
 </div>
@@ -553,20 +583,32 @@ if (empty($financeLabels)) {
     
     <div class="card">
         <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
-            <h4 style="margin:0; color:#6366f1"><i class="fa-solid fa-clock-rotate-left"></i> آخر النشاطات</h4>
+            <h4 style="margin:0; color:#6366f1; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-clock-rotate-left"></i> آخر النشاطات</h4>
         </div>
         <div style="font-size:13px; color:#aaa;">
             <?php if (!empty($recentActivity)): ?>
-                <?php foreach ($recentActivity as $log): ?>
-                    <div style="padding:10px; border-bottom:1px dashed #333">
-                        <i class="fa-solid fa-circle-check" style="color:#10b981"></i>
-                        <?= htmlspecialchars($log['description']) ?>
-                        <div style="font-size:11px; color:#666; margin-top:2px"><?= $log['created_at'] ?></div>
+                <?php foreach ($recentActivity as $idx => $log): ?>
+                    <?php
+                    $activityIcons = ['fa-circle-check', 'fa-pen-to-square', 'fa-trash', 'fa-user-plus', 'fa-file-import', 'fa-sync'];
+                    $activityColors = ['#10b981', '#22d3ee', '#ef4444', '#a855f7', '#f59e0b', '#6366f1'];
+                    $icon = $activityIcons[$idx % count($activityIcons)];
+                    $color = $activityColors[$idx % count($activityColors)];
+                    ?>
+                    <div style="padding:10px; border-bottom:1px dashed #333; display:flex; align-items:start; gap:10px; transition:all 0.3s ease;">
+                        <i class="fa-solid <?= $icon ?>" style="color:<?= $color ?>; font-size:14px; margin-top:2px;"></i>
+                        <div style="flex:1;">
+                            <?= htmlspecialchars($log['description']) ?>
+                            <div style="font-size:11px; color:#666; margin-top:2px; display:flex; align-items:center; gap:4px;">
+                                <i class="fa-regular fa-clock" style="font-size:10px;"></i>
+                                <?= $log['created_at'] ?>
+                            </div>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div style="padding:10px; text-align:center; margin-top:20px; color:#666">
-                    لا توجد نشاطات أخرى
+                <div style="padding:20px; text-align:center; margin-top:20px; color:#666; display:flex; flex-direction:column; align-items:center; gap:10px;">
+                    <i class="fa-solid fa-inbox" style="font-size:32px; opacity:0.3;"></i>
+                    <span>لا توجد نشاطات أخرى</span>
                 </div>
             <?php endif; ?>
         </div>
@@ -574,20 +616,26 @@ if (empty($financeLabels)) {
 
     <div class="card">
         <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
-            <h4 style="margin:0; color:#6366f1"><i class="fa-solid fa-clock"></i> عقود تنتهي قريباً</h4>
-            <span style="font-size:11px; background:#333; padding:2px 8px; border-radius:4px">عرض الكل</span>
+            <h4 style="margin:0; color:#6366f1; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-clock"></i> عقود تنتهي قريباً</h4>
+            <span style="font-size:11px; background:#333; padding:2px 8px; border-radius:4px; cursor:pointer; transition:all 0.3s ease;" onmouseover="this.style.background='#6366f1'" onmouseout="this.style.background='#333'">عرض الكل</span>
         </div>
         
         <?php if(empty($lists['ending'])): ?>
-            <div style="text-align:center; padding:30px; color:#666">
-                <i class="fa-solid fa-check-circle" style="font-size:30px; margin-bottom:10px; display:block"></i>
-                لا توجد عقود تنتهي قريباً
+            <div style="text-align:center; padding:30px; color:#666; display:flex; flex-direction:column; align-items:center; gap:10px;">
+                <i class="fa-solid fa-check-circle" style="font-size:36px; color:#10b981; opacity:0.3;"></i>
+                <span>لا توجد عقود تنتهي قريباً</span>
             </div>
         <?php else: ?>
             <?php foreach($lists['ending'] as $c): ?>
-                <div style="padding:10px; border-bottom:1px dashed #333; display:flex; justify-content:space-between">
-                    <span><?= htmlspecialchars($c['tenant_name']) ?></span>
-                    <span style="color:#ef4444; font-size:12px"><?= format_date($c['end_date']) ?></span>
+                <div style="padding:10px; border-bottom:1px dashed #333; display:flex; justify-content:space-between; align-items:center; transition:all 0.3s ease;">
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-user-clock" style="color:#6366f1; font-size:14px;"></i>
+                        <?= htmlspecialchars($c['tenant_name']) ?>
+                    </span>
+                    <span style="color:#ef4444; font-size:12px; background:rgba(239,68,68,0.1); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:4px;">
+                        <i class="fa-regular fa-calendar-xmark" style="font-size:11px;"></i>
+                        <?= format_date($c['end_date']) ?>
+                    </span>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -595,105 +643,143 @@ if (empty($financeLabels)) {
 
     <div class="card">
         <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
-            <h4 style="margin:0; color:#6366f1"><i class="fa-solid fa-calendar-days"></i> دفعات قادمة</h4>
-            <span style="font-size:11px; background:#333; padding:2px 8px; border-radius:4px">عرض الكل</span>
+            <h4 style="margin:0; color:#6366f1; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-calendar-days"></i> دفعات قادمة</h4>
+            <span style="font-size:11px; background:#333; padding:2px 8px; border-radius:4px; cursor:pointer; transition:all 0.3s ease;" onmouseover="this.style.background='#6366f1'" onmouseout="this.style.background='#333'">عرض الكل</span>
         </div>
 
         <?php if(empty($lists['payments'])): ?>
-            <div style="text-align:center; padding:30px; color:#666">
-                <i class="fa-solid fa-check-circle" style="font-size:30px; margin-bottom:10px; display:block"></i>
-                لا توجد دفعات قادمة خلال 30 يوم
+            <div style="text-align:center; padding:30px; color:#666; display:flex; flex-direction:column; align-items:center; gap:10px;">
+                <i class="fa-solid fa-check-circle" style="font-size:36px; color:#10b981; opacity:0.3;"></i>
+                <span>لا توجد دفعات قادمة خلال 30 يوم</span>
             </div>
         <?php else: ?>
             <?php foreach($lists['payments'] as $p): ?>
-                <div style="padding:10px; border-bottom:1px dashed #333; display:flex; justify-content:space-between">
-                    <span>دفعة عقد #<?= $p['contract_id'] ?></span>
-                    <span style="color:#10b981; font-weight:bold"><?= number_format($p['amount']) ?></span>
+                <div style="padding:10px; border-bottom:1px dashed #333; display:flex; justify-content:space-between; align-items:center; transition:all 0.3s ease;">
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-file-invoice" style="color:#22d3ee; font-size:14px;"></i>
+                        دفعة عقد #<?= $p['contract_id'] ?>
+                    </span>
+                    <span style="color:#10b981; font-weight:bold; background:rgba(16,185,129,0.1); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:4px;">
+                        <i class="fa-solid fa-coins" style="font-size:11px;"></i>
+                        <?= number_format($p['amount']) ?>
+                    </span>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
 </div>
 
-<div class="card" style="margin-bottom:30px;">
+<div class="card" style="margin-bottom:30px; background:linear-gradient(135deg, rgba(99,102,241,0.03), rgba(168,85,247,0.02));">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-        <h3 style="margin:0"><i class="fa-solid fa-brain"></i> مركز الذكاء التشغيلي</h3>
-        <span style="font-size:11px; background:#312e81; padding:2px 8px; border-radius:4px">WhatsApp فقط للتكاملات</span>
+        <h3 style="margin:0; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-brain" style="color:#a855f7;"></i> مركز الذكاء التشغيلي</h3>
+        <span style="font-size:11px; background:#312e81; padding:4px 12px; border-radius:8px; display:flex; align-items:center; gap:6px;"><i class="fa-brands fa-whatsapp"></i> WhatsApp فقط للتكاملات</span>
     </div>
 
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom:20px;">
-        <div style="background:#111827; padding:15px; border-radius:12px;">
-            <div style="font-size:12px; color:#9ca3af">نسبة الإشغال</div>
-            <div style="font-size:24px; font-weight:700"><?= $insights['occupancy_rate'] ?>%</div>
+        <div style="background:rgba(17,24,39,0.8); padding:16px; border-radius:14px; border:1px solid rgba(99,102,241,0.2); transition:all 0.3s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(99,102,241,0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+            <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:radial-gradient(circle, rgba(99,102,241,0.15), transparent); border-radius:50%;"></div>
+            <div style="font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:6px; position:relative; z-index:1;"><i class="fa-solid fa-chart-pie" style="color:#6366f1;"></i> نسبة الإشغال</div>
+            <div style="font-size:26px; font-weight:700; position:relative; z-index:1;"><?= $insights['occupancy_rate'] ?>%</div>
         </div>
-        <div style="background:#111827; padding:15px; border-radius:12px;">
-            <div style="font-size:12px; color:#9ca3af">هدف الإشغال</div>
-            <div style="font-size:24px; font-weight:700"><?= number_format((float) ($settings['target_occupancy'] ?? 90), 1) ?>%</div>
-            <div style="font-size:12px; color:<?= ($insights['occupancy_gap'] ?? 0) >= 0 ? '#10b981' : '#f97316' ?>">فرق <?= $insights['occupancy_gap'] ?? 0 ?>%</div>
+        <div style="background:rgba(17,24,39,0.8); padding:16px; border-radius:14px; border:1px solid rgba(168,85,247,0.2); transition:all 0.3s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(168,85,247,0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+            <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:radial-gradient(circle, rgba(168,85,247,0.15), transparent); border-radius:50%;"></div>
+            <div style="font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:6px; position:relative; z-index:1;"><i class="fa-solid fa-bullseye" style="color:#a855f7;"></i> هدف الإشغال</div>
+            <div style="font-size:26px; font-weight:700; position:relative; z-index:1;"><?= number_format((float) ($settings['target_occupancy'] ?? 90), 1) ?>%</div>
+            <div style="font-size:12px; color:<?= ($insights['occupancy_gap'] ?? 0) >= 0 ? '#10b981' : '#f97316' ?>; position:relative; z-index:1;"><i class="fa-solid fa-<?= ($insights['occupancy_gap'] ?? 0) >= 0 ? 'arrow-up' : 'arrow-down' ?>"></i> فرق <?= $insights['occupancy_gap'] ?? 0 ?>%</div>
         </div>
-        <div style="background:#111827; padding:15px; border-radius:12px;">
-            <div style="font-size:12px; color:#9ca3af">معدل التحصيل</div>
-            <div style="font-size:24px; font-weight:700"><?= $insights['collection_rate'] ?>%</div>
+        <div style="background:rgba(17,24,39,0.8); padding:16px; border-radius:14px; border:1px solid rgba(16,185,129,0.2); transition:all 0.3s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(16,185,129,0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+            <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:radial-gradient(circle, rgba(16,185,129,0.15), transparent); border-radius:50%;"></div>
+            <div style="font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:6px; position:relative; z-index:1;"><i class="fa-solid fa-hand-holding-dollar" style="color:#10b981;"></i> معدل التحصيل</div>
+            <div style="font-size:26px; font-weight:700; position:relative; z-index:1;"><?= $insights['collection_rate'] ?>%</div>
         </div>
-        <div style="background:#111827; padding:15px; border-radius:12px;">
-            <div style="font-size:12px; color:#9ca3af">هدف التحصيل</div>
-            <div style="font-size:24px; font-weight:700"><?= number_format((float) ($settings['target_collection'] ?? 95), 1) ?>%</div>
-            <div style="font-size:12px; color:<?= ($insights['collection_gap'] ?? 0) >= 0 ? '#10b981' : '#f97316' ?>">فرق <?= $insights['collection_gap'] ?? 0 ?>%</div>
+        <div style="background:rgba(17,24,39,0.8); padding:16px; border-radius:14px; border:1px solid rgba(34,211,238,0.2); transition:all 0.3s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(34,211,238,0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+            <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:radial-gradient(circle, rgba(34,211,238,0.15), transparent); border-radius:50%;"></div>
+            <div style="font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:6px; position:relative; z-index:1;"><i class="fa-solid fa-crosshairs" style="color:#22d3ee;"></i> هدف التحصيل</div>
+            <div style="font-size:26px; font-weight:700; position:relative; z-index:1;"><?= number_format((float) ($settings['target_collection'] ?? 95), 1) ?>%</div>
+            <div style="font-size:12px; color:<?= ($insights['collection_gap'] ?? 0) >= 0 ? '#10b981' : '#f97316' ?>; position:relative; z-index:1;"><i class="fa-solid fa-<?= ($insights['collection_gap'] ?? 0) >= 0 ? 'arrow-up' : 'arrow-down' ?>"></i> فرق <?= $insights['collection_gap'] ?? 0 ?>%</div>
         </div>
-        <div style="background:#111827; padding:15px; border-radius:12px;">
-            <div style="font-size:12px; color:#9ca3af">توقع تحصيل 30 يوماً</div>
-            <div style="font-size:24px; font-weight:700"><?= number_format($insights['expected_30']) ?></div>
+        <div style="background:rgba(17,24,39,0.8); padding:16px; border-radius:14px; border:1px solid rgba(245,158,11,0.2); transition:all 0.3s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(245,158,11,0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+            <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:radial-gradient(circle, rgba(245,158,11,0.15), transparent); border-radius:50%;"></div>
+            <div style="font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:6px; position:relative; z-index:1;"><i class="fa-solid fa-calendar-days" style="color:#f59e0b;"></i> توقع تحصيل 30 يوماً</div>
+            <div style="font-size:26px; font-weight:700; position:relative; z-index:1;"><?= number_format($insights['expected_30']) ?></div>
         </div>
-        <div style="background:#111827; padding:15px; border-radius:12px;">
-            <div style="font-size:12px; color:#9ca3af">متوسط التحصيل الشهري (3 أشهر)</div>
-            <div style="font-size:24px; font-weight:700"><?= number_format($insights['avg_paid_3m']) ?></div>
+        <div style="background:rgba(17,24,39,0.8); padding:16px; border-radius:14px; border:1px solid rgba(99,102,241,0.2); transition:all 0.3s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(99,102,241,0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+            <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:radial-gradient(circle, rgba(99,102,241,0.15), transparent); border-radius:50%;"></div>
+            <div style="font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:6px; position:relative; z-index:1;"><i class="fa-solid fa-chart-line" style="color:#6366f1;"></i> متوسط التحصيل الشهري (3 أشهر)</div>
+            <div style="font-size:26px; font-weight:700; position:relative; z-index:1;"><?= number_format($insights['avg_paid_3m']) ?></div>
         </div>
-        <div style="background:#111827; padding:15px; border-radius:12px;">
-            <div style="font-size:12px; color:#9ca3af">توقع تحصيل 90 يوماً</div>
-            <div style="font-size:24px; font-weight:700"><?= number_format($cashflow['in_90']) ?></div>
+        <div style="background:rgba(17,24,39,0.8); padding:16px; border-radius:14px; border:1px solid rgba(34,211,238,0.2); transition:all 0.3s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(34,211,238,0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+            <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:radial-gradient(circle, rgba(34,211,238,0.15), transparent); border-radius:50%;"></div>
+            <div style="font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:6px; position:relative; z-index:1;"><i class="fa-solid fa-hourglass-half" style="color:#22d3ee;"></i> توقع تحصيل 90 يوماً</div>
+            <div style="font-size:26px; font-weight:700; position:relative; z-index:1;"><?= number_format($cashflow['in_90']) ?></div>
         </div>
-        <div style="background:#111827; padding:15px; border-radius:12px;">
-            <div style="font-size:12px; color:#9ca3af">المتأخرات الحالية</div>
-            <div style="font-size:24px; font-weight:700"><?= number_format($cashflow['overdue']) ?></div>
+        <div style="background:rgba(17,24,39,0.8); padding:16px; border-radius:14px; border:1px solid rgba(239,68,68,0.2); transition:all 0.3s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(239,68,68,0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+            <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:radial-gradient(circle, rgba(239,68,68,0.15), transparent); border-radius:50%;"></div>
+            <div style="font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:6px; position:relative; z-index:1;"><i class="fa-solid fa-exclamation-triangle" style="color:#ef4444;"></i> المتأخرات الحالية</div>
+            <div style="font-size:26px; font-weight:700; position:relative; z-index:1;"><?= number_format($cashflow['overdue']) ?></div>
         </div>
-        <div style="background:#111827; padding:15px; border-radius:12px;">
-            <div style="font-size:12px; color:#9ca3af">اتجاه التحصيل (30 يوم)</div>
-            <div style="font-size:24px; font-weight:700"><?= number_format($cashflow['collection_trend'], 1) ?>%</div>
+        <div style="background:rgba(17,24,39,0.8); padding:16px; border-radius:14px; border:1px solid rgba(168,85,247,0.2); transition:all 0.3s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(168,85,247,0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+            <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:radial-gradient(circle, rgba(168,85,247,0.15), transparent); border-radius:50%;"></div>
+            <div style="font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:6px; position:relative; z-index:1;"><i class="fa-solid fa-arrow-trend-up" style="color:#a855f7;"></i> اتجاه التحصيل (30 يوم)</div>
+            <div style="font-size:26px; font-weight:700; position:relative; z-index:1;"><?= number_format($cashflow['collection_trend'], 1) ?>%</div>
         </div>
-        <div style="background:#111827; padding:15px; border-radius:12px;">
-            <div style="font-size:12px; color:#9ca3af">مؤشر مخاطر الصيانة</div>
-            <div style="font-size:24px; font-weight:700"><?= $maintenancePulse['risk_score'] ?>/100</div>
+        <div style="background:rgba(17,24,39,0.8); padding:16px; border-radius:14px; border:1px solid rgba(245,158,11,0.2); transition:all 0.3s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(245,158,11,0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+            <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:radial-gradient(circle, rgba(245,158,11,0.15), transparent); border-radius:50%;"></div>
+            <div style="font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:6px; position:relative; z-index:1;"><i class="fa-solid fa-wrench" style="color:#f59e0b;"></i> مؤشر مخاطر الصيانة</div>
+            <div style="font-size:26px; font-weight:700; position:relative; z-index:1;"><?= $maintenancePulse['risk_score'] ?>/100</div>
         </div>
-        <div style="background:#111827; padding:15px; border-radius:12px;">
-            <div style="font-size:12px; color:#9ca3af">مستأجرون عالي المخاطر</div>
-            <div style="font-size:24px; font-weight:700"><?= $tenantRiskSnapshot['high_risk_count'] ?></div>
+        <div style="background:rgba(17,24,39,0.8); padding:16px; border-radius:14px; border:1px solid rgba(239,68,68,0.2); transition:all 0.3s ease; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(239,68,68,0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+            <div style="position:absolute; top:-10px; right:-10px; width:60px; height:60px; background:radial-gradient(circle, rgba(239,68,68,0.15), transparent); border-radius:50%;"></div>
+            <div style="font-size:12px; color:#9ca3af; display:flex; align-items:center; gap:6px; position:relative; z-index:1;"><i class="fa-solid fa-user-shield" style="color:#ef4444;"></i> مستأجرون عالي المخاطر</div>
+            <div style="font-size:26px; font-weight:700; position:relative; z-index:1;"><?= $tenantRiskSnapshot['high_risk_count'] ?></div>
         </div>
     </div>
 
     <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px;">
-        <div style="background:#0f172a; padding:15px; border-radius:12px;">
-            <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-list-check"></i> توصيات فورية</h4>
+        <div style="background:rgba(15,23,42,0.9); padding:18px; border-radius:14px; border:1px solid rgba(99,102,241,0.2);">
+            <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-list-check" style="color:#6366f1;"></i> توصيات فورية</h4>
             <?php if (!empty($recommendations)): ?>
-                <ul style="padding-inline-start:18px; color:#cbd5f5; margin:0">
-                    <?php foreach ($recommendations as $rec): ?>
-                        <li style="margin-bottom:8px;"><?= htmlspecialchars($rec) ?></li>
+                <ul style="padding-inline-start:0; color:#cbd5f5; margin:0; list-style:none;">
+                    <?php foreach ($recommendations as $idx => $rec): ?>
+                        <?php 
+                        $recIcons = ['fa-rocket', 'fa-bell-concierge', 'fa-wrench', 'fa-sync', 'fa-chart-line', 'fa-shield-halved', 'fa-money-bill-wave', 'fa-users-gear', 'fa-database'];
+                        $recColors = ['#6366f1', '#22d3ee', '#f59e0b', '#10b981', '#a855f7', '#ef4444', '#14b8a6', '#8b5cf6', '#06b6d4'];
+                        $icon = $recIcons[$idx % count($recIcons)];
+                        $color = $recColors[$idx % count($recColors)];
+                        ?>
+                        <li style="margin-bottom:10px; padding:10px; background:rgba(30,41,59,0.4); border-radius:10px; border-right:3px solid <?= $color ?>; display:flex; align-items:start; gap:10px; transition:all 0.3s ease;" onmouseover="this.style.background='rgba(30,41,59,0.7)'; this.style.transform='translateX(-4px)';" onmouseout="this.style.background='rgba(30,41,59,0.4)'; this.style.transform='translateX(0)';">
+                            <i class="fa-solid <?= $icon ?>" style="color:<?= $color ?>; font-size:16px; margin-top:2px;"></i>
+                            <span><?= htmlspecialchars($rec) ?></span>
+                        </li>
                     <?php endforeach; ?>
                 </ul>
             <?php else: ?>
-                <div style="color:#94a3b8">كل المؤشرات ضمن الحدود الطبيعية.</div>
+                <div style="color:#94a3b8; text-align:center; padding:20px; display:flex; flex-direction:column; align-items:center; gap:10px;">
+                    <i class="fa-solid fa-circle-check" style="font-size:36px; color:#10b981; opacity:0.3;"></i>
+                    <span>كل المؤشرات ضمن الحدود الطبيعية.</span>
+                </div>
             <?php endif; ?>
         </div>
-    <div style="background:#0f172a; padding:15px; border-radius:12px;">
-        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-triangle-exclamation"></i> أعلى مخاطر التعثر</h4>
+    <div style="background:rgba(15,23,42,0.9); padding:18px; border-radius:14px; border:1px solid rgba(239,68,68,0.2);">
+        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> أعلى مخاطر التعثر</h4>
         <?php if (!empty($riskTenants)): ?>
             <?php foreach ($riskTenants as $tenant): ?>
-                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #1f2937;">
-                    <span><?= htmlspecialchars($tenant['name']) ?></span>
-                    <span style="color:#f97316">متأخر <?= (int) $tenant['overdue_count'] ?> (<?= (int) $tenant['max_overdue_days'] ?> يوم)</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px dashed #1f2937; transition:all 0.3s ease;" onmouseover="this.style.background='rgba(30,41,59,0.4)'; this.style.paddingRight='8px'; this.style.paddingLeft='8px'; this.style.borderRadius='8px';" onmouseout="this.style.background='transparent'; this.style.paddingRight='0'; this.style.paddingLeft='0';">
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-user-xmark" style="color:#ef4444; font-size:14px;"></i>
+                        <?= htmlspecialchars($tenant['name']) ?>
+                    </span>
+                    <span style="color:#f97316; font-size:12px; background:rgba(249,115,22,0.15); padding:4px 10px; border-radius:8px; display:flex; align-items:center; gap:4px;">
+                        <i class="fa-solid fa-clock-rotate-left" style="font-size:11px;"></i>
+                        متأخر <?= (int) $tenant['overdue_count'] ?> (<?= (int) $tenant['max_overdue_days'] ?> يوم)
+                    </span>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <div style="color:#94a3b8">لا توجد حالات تعثر حالياً.</div>
+            <div style="color:#94a3b8; text-align:center; padding:20px; display:flex; flex-direction:column; align-items:center; gap:10px;">
+                <i class="fa-solid fa-shield-check" style="font-size:36px; color:#10b981; opacity:0.3;"></i>
+                <span>لا توجد حالات تعثر حالياً.</span>
+            </div>
             <?php endif; ?>
         </div>
     </div>
