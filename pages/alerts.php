@@ -1,5 +1,5 @@
 <div class="card">
-    <h2 style="margin-bottom:30px; border-bottom:1px solid #222; padding-bottom:15px">🔔 مركز التنبيهات</h2>
+    <h2 style="margin-bottom:30px; border-bottom:1px solid #222; padding-bottom:15px"><i class="fa-solid fa-bell-concierge" style="margin-left:10px;color:var(--primary)"></i> مركز التنبيهات</h2>
 
     <?php $tenantNameColumn = tenant_name_column($pdo); ?>
 

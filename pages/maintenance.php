@@ -106,11 +106,11 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:20px; flex-wrap:wrap">
         <div>
             <p style="margin:0; color:#94a3b8; font-size:13px">لوحة متابعة الصيانة الذكية</p>
-            <h3 style="margin:6px 0 0">🛠️ سجلات الصيانة</h3>
+            <h3 style="margin:6px 0 0"><i class="fa-solid fa-toolbox" style="margin-left:8px;color:var(--primary)"></i> سجلات الصيانة</h3>
         </div>
 
         <a href="index.php?p=maintenance&act=add" id="openMaintModal" class="btn btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px">
-            <i class="fa-solid fa-plus"></i> تسجيل طلب جديد
+            <i class="fa-solid fa-circle-plus"></i> تسجيل طلب جديد
         </a>
     </div>
 

@@ -314,7 +314,7 @@ if (empty($financeLabels)) {
             <span style="color:#888; font-size:13px">إجمالي الوحدات</span>
         </div>
         <div style="width:50px; height:50px; background:#4f46e5; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">
-            <i class="fa-solid fa-building"></i>
+            <i class="fa-solid fa-house-laptop"></i>
         </div>
     </div>
 
@@ -324,7 +324,7 @@ if (empty($financeLabels)) {
             <span style="color:#888; font-size:13px">وحدات مؤجرة</span>
         </div>
         <div style="width:50px; height:50px; background:#0ea5e9; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">
-            <i class="fa-solid fa-key"></i>
+            <i class="fa-solid fa-house-circle-check"></i>
         </div>
     </div>
 
@@ -334,7 +334,7 @@ if (empty($financeLabels)) {
             <span style="color:#888; font-size:13px">عقود نشطة</span>
         </div>
         <div style="width:50px; height:50px; background:#10b981; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">
-            <i class="fa-solid fa-check-circle"></i>
+            <i class="fa-solid fa-file-signature"></i>
         </div>
     </div>
 
@@ -344,7 +344,7 @@ if (empty($financeLabels)) {
             <span style="color:#888; font-size:13px">المستأجرين</span>
         </div>
         <div style="width:50px; height:50px; background:#f59e0b; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:24px;">
-            <i class="fa-solid fa-users"></i>
+            <i class="fa-solid fa-user-group"></i>
         </div>
     </div>
 </div>
@@ -354,16 +354,16 @@ if (empty($financeLabels)) {
         <h3 style="margin-top:0"><i class="fa-solid fa-wand-magic-sparkles"></i> لوحة التحكم الذكية للمالك</h3>
         <p style="color:#94a3b8; margin-top:6px;">مسار سريع لإدارة الأملاك بذكاء: تحديث الوحدات، متابعة العقود، وضبط الفواتير في أقل وقت.</p>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px; margin-top:15px;">
-            <a href="index.php?p=properties" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-city"></i> إدارة العقارات</a>
-            <a href="index.php?p=units" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-building"></i> إدارة الوحدات</a>
+            <a href="index.php?p=properties" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-building"></i> إدارة العقارات</a>
+            <a href="index.php?p=units" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-house-laptop"></i> إدارة الوحدات</a>
             <a href="index.php?p=contracts" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-file-signature"></i> العقود الذكية</a>
-            <a href="index.php?p=payments" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-money-check-dollar"></i> متابعة الدفعات</a>
-            <a href="index.php?p=maintenance" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-screwdriver-wrench"></i> طلبات الصيانة</a>
-            <a href="index.php?p=smart_center" class="btn btn-primary" style="justify-content:center; width:100%;"><i class="fa-solid fa-brain"></i> مركز التمكين الذكي</a>
+            <a href="index.php?p=reports" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-file-invoice-dollar"></i> التقارير المالية</a>
+            <a href="index.php?p=lease_calendar" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-calendar-check"></i> تقويم العقود</a>
+            <a href="index.php?p=smart_center" class="btn btn-primary" style="justify-content:center; width:100%;"><i class="fa-solid fa-microchip"></i> التمكين الذكي</a>
         </div>
     </div>
     <div class="card" style="padding:20px;">
-        <h3 style="margin-top:0"><i class="fa-solid fa-shield-heart"></i> مساعد الإدارة الذكي</h3>
+        <h3 style="margin-top:0"><i class="fa-solid fa-lightbulb"></i> مساعد الإدارة الذكي</h3>
         <div style="display:grid; gap:10px;">
             <div style="background:#0f172a; padding:12px; border-radius:12px; color:#cbd5f5;">
                 ركّز اليوم على تجديد العقود القريبة والانتباه للدفعات المتأخرة.
@@ -396,7 +396,7 @@ if (empty($financeLabels)) {
 
 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-bolt"></i> نبض المحفظة</h4>
+        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-gauge-high"></i> نبض المحفظة</h4>
         <div style="display:grid; gap:12px; color:#e2e8f0;">
             <div style="display:flex; justify-content:space-between;">
                 <span>وحدات شاغرة</span>
@@ -417,7 +417,7 @@ if (empty($financeLabels)) {
         </div>
     </div>
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-arrows-spin"></i> دوران العقود</h4>
+        <h4 style="margin-top:0; color:#a5b4fc"><i class="fa-solid fa-rotate"></i> دوران العقود</h4>
         <div style="display:grid; gap:12px; color:#e2e8f0;">
             <div style="display:flex; justify-content:space-between;">
                 <span>تجديد خلال 30 يوم</span>
@@ -443,7 +443,7 @@ if (empty($financeLabels)) {
             <a href="index.php?p=contracts" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-file-pen"></i> متابعة التجديدات</a>
             <a href="index.php?p=tenants" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-user-check"></i> مراجعة المستأجرين</a>
             <a href="index.php?p=maintenance" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-toolbox"></i> تنظيم الصيانة</a>
-            <a href="index.php?p=alerts" class="btn btn-primary" style="justify-content:center;"><i class="fa-solid fa-bell"></i> تفعيل التنبيهات</a>
+            <a href="index.php?p=alerts" class="btn btn-primary" style="justify-content:center;"><i class="fa-solid fa-bell-concierge"></i> تفعيل التنبيهات</a>
         </div>
     </div>
 </div>
