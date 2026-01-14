@@ -3,6 +3,13 @@
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     $start = $_POST['start_date'];
     $end = $_POST['end_date'];
+    $tenantId = isset($_POST['tid']) ? (int) $_POST['tid'] : 0;
+    $unitId = isset($_POST['uid']) ? (int) $_POST['uid'] : 0;
+
+    if ($tenantId <= 0 || $unitId <= 0) {
+        die("<div class='alert alert-danger'>الرجاء اختيار مستأجر ووحدة صحيحة.</div>");
+    }
+
     $amountInput = $_POST['amount'] ?? 0;
     $baseAmount = is_numeric($amountInput) ? max(0, (float) $amountInput) : 0;
     $taxMode = $_POST['tax_mode'] ?? 'without';
@@ -24,10 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     // إدخال العقد
     if (table_has_column($pdo, 'contracts', 'tax_included')) {
         $stmt = $pdo->prepare("INSERT INTO contracts (tenant_id, unit_id, start_date, end_date, total_amount, tax_included, tax_percent, tax_amount, status) VALUES (?,?,?,?,?,?,?,?,?)");
-        $stmt->execute([$_POST['tid'], $_POST['uid'], $start, $end, $totalAmount, $taxIncluded, $taxPercent, $taxAmount, $status]);
+        $stmt->execute([$tenantId, $unitId, $start, $end, $totalAmount, $taxIncluded, $taxPercent, $taxAmount, $status]);
     } else {
         $stmt = $pdo->prepare("INSERT INTO contracts (tenant_id, unit_id, start_date, end_date, total_amount, status) VALUES (?,?,?,?,?, ?)");
-        $stmt->execute([$_POST['tid'], $_POST['uid'], $start, $end, $totalAmount, $status]);
+        $stmt->execute([$tenantId, $unitId, $start, $end, $totalAmount, $status]);
     }
     $contract_id = $pdo->lastInsertId();
     
@@ -136,7 +143,7 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
             if (mode === 'with') {
                 if (taxPercent) { taxPercent.removeAttribute('disabled'); }
                 if (percent > 0) {
-                    tAmount = +(base * (percent / 100)).toFixed(2);
+                    tAmount = parseFloat((base * (percent / 100)).toFixed(2));
                 }
             } else {
                 tAmount = 0;

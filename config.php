@@ -498,7 +498,7 @@ function contract_amount_parts(array $row): array {
     $taxPercent = $taxPercentRaw > 0 ? min($taxPercentRaw, 100.0) : 0.0;
 
     $base = $taxIncluded ? ($total - $taxAmount) : $total;
-    if ($base < 0) { $base = $total; }
+    if ($base < 0) { $base = 0.0; }
 
     return [
         'total' => $total,
