@@ -67,6 +67,7 @@ $company_name_safe = htmlspecialchars($company_name);
             --muted:#64748b;
             --success:#10b981;
             --danger:#ef4444;
+            --warning:#f59e0b;
             --sidebar-bg:rgba(8, 8, 14, 0.9);
             --sidebar-shadow:8px 0 40px rgba(0,0,0,0.45);
             --logo-bg:radial-gradient(circle at center, rgba(99,102,241,0.25), rgba(0,0,0,0.9));
@@ -88,6 +89,7 @@ $company_name_safe = htmlspecialchars($company_name);
             --close-hover:#ef4444;
             --tag-bg:rgba(99,102,241,0.12);
             --glow:0 0 25px rgba(99,102,241,0.25);
+            --glow-strong:0 0 40px rgba(99,102,241,0.4);
         }
         * { box-sizing:border-box; outline:none; }
         body { font-family:'Tajawal'; background:var(--bg); color:var(--text); margin:0; display:flex; height:100vh; overflow:hidden; position:relative; }
@@ -147,22 +149,30 @@ $company_name_safe = htmlspecialchars($company_name);
         body.sidebar-collapsed .main { padding:35px; }
         
         /* Cards & Tables */
-        .card { background:var(--card); border:1px solid var(--border); border-radius:24px; padding:30px; margin-bottom:30px; position:relative; box-shadow:0 20px 45px rgba(2,6,23,0.2); transition:transform 0.35s ease, box-shadow 0.35s ease; }
-        .card:hover { transform:translateY(-6px); box-shadow:0 24px 60px rgba(2,6,23,0.35); }
+        .card { background:var(--card); border:1px solid var(--border); border-radius:24px; padding:30px; margin-bottom:30px; position:relative; box-shadow:0 20px 45px rgba(2,6,23,0.2); transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card::after { content:''; position:absolute; inset:0; border-radius:24px; background:linear-gradient(135deg, rgba(99,102,241,0.05), rgba(168,85,247,0.05)); opacity:0; transition:opacity 0.4s ease; pointer-events:none; }
+        .card:hover { transform:translateY(-8px) scale(1.01); box-shadow:0 30px 70px rgba(2,6,23,0.4), 0 0 40px rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.3); }
+        .card:hover::after { opacity:1; }
         table { width:100%; border-collapse:separate; border-spacing:0 8px; }
         th { text-align:right; color:var(--table-th); font-size:13px; padding:10px 20px; }
-        td { background:var(--table-td-bg); padding:20px; border:1px solid var(--table-td-border); border-left:none; border-right:none; }
+        td { background:var(--table-td-bg); padding:20px; border:1px solid var(--table-td-border); border-left:none; border-right:none; transition:all 0.3s ease; }
         td:first-child { border-radius:0 15px 15px 0; border-right:1px solid var(--table-td-border); }
         td:last-child { border-radius:15px 0 0 15px; border-left:1px solid var(--table-td-border); }
+        tbody tr:hover td { background:rgba(99,102,241,0.08); border-color:rgba(99,102,241,0.2); }
 
         /* Buttons & Badges */
-        .btn { padding:15px 24px; border:none; border-radius:14px; font-weight:bold; cursor:pointer; font-size:14px; transition:0.3s; display:inline-flex; align-items:center; gap:10px; color:white; position:relative; overflow:hidden; }
-        .btn::after { content:''; position:absolute; inset:0; background:linear-gradient(120deg, rgba(255,255,255,0.25), transparent); opacity:0; transition:0.3s; }
-        .btn:hover::after { opacity:1; }
-        .btn:hover { transform:translateY(-2px); }
+        .btn { padding:15px 24px; border:none; border-radius:14px; font-weight:bold; cursor:pointer; font-size:14px; transition:all 0.3s ease; display:inline-flex; align-items:center; gap:10px; color:white; position:relative; overflow:hidden; text-decoration:none; }
+        .btn::before { content:''; position:absolute; inset:0; background:linear-gradient(120deg, rgba(255,255,255,0), rgba(255,255,255,0.25), rgba(255,255,255,0)); transform:translateX(-100%); transition:0.6s; }
+        .btn:hover::before { transform:translateX(100%); }
+        .btn:hover { transform:translateY(-3px) scale(1.02); box-shadow:0 15px 35px rgba(0,0,0,0.3); }
+        .btn:active { transform:translateY(-1px) scale(0.98); }
         .btn-primary { background:linear-gradient(135deg, var(--primary), var(--accent)); box-shadow:0 10px 25px rgba(99,102,241,0.35); }
+        .btn-primary:hover { box-shadow:0 15px 35px rgba(99,102,241,0.5); }
         .btn-danger { background:linear-gradient(135deg, #ef4444, #b91c1c); box-shadow:0 10px 25px rgba(239,68,68,0.3); }
+        .btn-danger:hover { box-shadow:0 15px 35px rgba(239,68,68,0.45); }
         .btn-dark { background:var(--btn-dark-bg); border:1px solid var(--btn-dark-border); color:white; }
+        .btn-dark:hover { border-color:var(--primary); background:rgba(99,102,241,0.08); }
+        .btn-sm { padding:8px 16px; font-size:12px; }
         .badge { padding:5px 10px; border-radius:8px; font-size:12px; font-weight:bold; }
         
         /* Modal Styles (موحدة لكل النظام) */
