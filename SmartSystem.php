@@ -316,6 +316,219 @@ class SmartSystem {
 
         return $recommendations;
     }
+
+    /**
+     * تحليل أداء العقارات وتصنيفها
+     */
+    public function analyzePropertyPerformance(): array {
+        $properties = $this->safeFetchAll(
+            "SELECT p.id, p.name,
+                COUNT(DISTINCT u.id) AS total_units,
+                SUM(CASE WHEN u.status='rented' THEN 1 ELSE 0 END) AS rented_units,
+                COALESCE(SUM(CASE WHEN u.status='rented' THEN u.yearly_price ELSE 0 END), 0) AS potential_revenue,
+                COUNT(DISTINCT m.id) AS maintenance_count,
+                COALESCE(SUM(m.cost), 0) AS maintenance_cost
+            FROM properties p
+            LEFT JOIN units u ON u.property_id = p.id
+            LEFT JOIN maintenance m ON m.property_id = p.id AND m.request_date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
+            GROUP BY p.id
+            ORDER BY rented_units DESC, potential_revenue DESC",
+            []
+        );
+
+        foreach ($properties as &$prop) {
+            $total = (int) $prop['total_units'];
+            $rented = (int) $prop['rented_units'];
+            $prop['occupancy_rate'] = $total > 0 ? round(($rented / $total) * 100, 1) : 0;
+            $prop['maintenance_ratio'] = $prop['potential_revenue'] > 0 
+                ? round(($prop['maintenance_cost'] / $prop['potential_revenue']) * 100, 1) 
+                : 0;
+            
+            // تصنيف الأداء
+            if ($prop['occupancy_rate'] >= 90 && $prop['maintenance_ratio'] < 10) {
+                $prop['performance_grade'] = 'ممتاز';
+                $prop['grade_color'] = '#10b981';
+            } elseif ($prop['occupancy_rate'] >= 75 && $prop['maintenance_ratio'] < 15) {
+                $prop['performance_grade'] = 'جيد';
+                $prop['grade_color'] = '#3b82f6';
+            } elseif ($prop['occupancy_rate'] >= 60) {
+                $prop['performance_grade'] = 'مقبول';
+                $prop['grade_color'] = '#f59e0b';
+            } else {
+                $prop['performance_grade'] = 'يحتاج تحسين';
+                $prop['grade_color'] = '#ef4444';
+            }
+        }
+        unset($prop);
+
+        return $properties;
+    }
+
+    /**
+     * توقع الإيرادات للأشهر القادمة بناءً على البيانات التاريخية
+     */
+    public function predictRevenue(int $months = 3): array {
+        $historicalData = $this->safeFetchAll(
+            "SELECT DATE_FORMAT(paid_date, '%Y-%m') AS month, COALESCE(SUM(amount), 0) AS total
+            FROM payments
+            WHERE status = 'paid' AND paid_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+            GROUP BY DATE_FORMAT(paid_date, '%Y-%m')
+            ORDER BY month ASC",
+            []
+        );
+
+        if (count($historicalData) < 3) {
+            return ['error' => 'بيانات غير كافية للتوقع'];
+        }
+
+        // حساب المتوسط المتحرك
+        $amounts = array_map(function($row) { return (float) $row['total']; }, $historicalData);
+        $avg = array_sum($amounts) / count($amounts);
+        
+        // حساب الاتجاه (بسيط)
+        $lastThree = array_slice($amounts, -3);
+        $firstThree = array_slice($amounts, 0, 3);
+        $trendChange = (array_sum($lastThree) / 3) - (array_sum($firstThree) / 3);
+        $trendPercent = (array_sum($firstThree) / 3) > 0 
+            ? ($trendChange / (array_sum($firstThree) / 3)) * 100 
+            : 0;
+
+        $predictions = [];
+        $baseValue = end($amounts);
+        for ($i = 1; $i <= $months; $i++) {
+            $predicted = $baseValue + ($trendChange * ($i / 3));
+            $predictions[] = [
+                'month' => date('Y-m', strtotime("+{$i} month")),
+                'predicted_amount' => round(max(0, $predicted), 2),
+                'confidence' => count($historicalData) >= 6 ? 'متوسط' : 'منخفض'
+            ];
+        }
+
+        return [
+            'predictions' => $predictions,
+            'trend' => $trendPercent > 0 ? 'صاعد' : ($trendPercent < 0 ? 'نازل' : 'مستقر'),
+            'trend_percent' => round($trendPercent, 2),
+            'avg_monthly' => round($avg, 2)
+        ];
+    }
+
+    /**
+     * اقتراح أسعار الوحدات بناءً على السوق
+     */
+    public function suggestUnitPricing(int $unitId): array {
+        $unit = $this->safeFetchAll(
+            "SELECT u.*, p.type AS property_type, p.address
+            FROM units u
+            LEFT JOIN properties p ON u.property_id = p.id
+            WHERE u.id = ?",
+            [$unitId]
+        );
+
+        if (empty($unit)) {
+            return ['error' => 'الوحدة غير موجودة'];
+        }
+
+        $unit = $unit[0];
+        $currentPrice = (float) ($unit['yearly_price'] ?? 0);
+
+        // مقارنة مع وحدات مشابهة
+        $similarUnits = $this->safeFetchAll(
+            "SELECT AVG(yearly_price) AS avg_price, MIN(yearly_price) AS min_price, MAX(yearly_price) AS max_price
+            FROM units
+            WHERE type = ? AND yearly_price > 0 AND id != ?",
+            [$unit['type'], $unitId]
+        );
+
+        $avgMarket = !empty($similarUnits) ? (float) $similarUnits[0]['avg_price'] : $currentPrice;
+        $minMarket = !empty($similarUnits) ? (float) $similarUnits[0]['min_price'] : $currentPrice;
+        $maxMarket = !empty($similarUnits) ? (float) $similarUnits[0]['max_price'] : $currentPrice;
+
+        $suggestion = '';
+        $recommended = $currentPrice;
+
+        if ($currentPrice === 0) {
+            $suggestion = 'لم يتم تحديد سعر للوحدة. السعر المقترح بناءً على السوق: ' . number_format($avgMarket, 2);
+            $recommended = $avgMarket;
+        } elseif ($currentPrice < ($avgMarket * 0.85)) {
+            $suggestion = 'السعر الحالي أقل من السوق بنسبة كبيرة. يمكن رفع السعر إلى ' . number_format($avgMarket * 0.95, 2);
+            $recommended = $avgMarket * 0.95;
+        } elseif ($currentPrice > ($avgMarket * 1.15)) {
+            $suggestion = 'السعر الحالي أعلى من السوق. قد يؤثر على الإشغال. السعر المقترح: ' . number_format($avgMarket * 1.05, 2);
+            $recommended = $avgMarket * 1.05;
+        } else {
+            $suggestion = 'السعر الحالي مناسب ومتوافق مع السوق.';
+            $recommended = $currentPrice;
+        }
+
+        return [
+            'current_price' => $currentPrice,
+            'market_avg' => round($avgMarket, 2),
+            'market_range' => [round($minMarket, 2), round($maxMarket, 2)],
+            'recommended_price' => round($recommended, 2),
+            'suggestion' => $suggestion
+        ];
+    }
+
+    /**
+     * كشف أنماط السداد للمستأجرين
+     */
+    public function detectPaymentPatterns(int $tenantId): array {
+        $payments = $this->safeFetchAll(
+            "SELECT p.*, DATEDIFF(p.paid_date, p.due_date) AS days_delay
+            FROM payments p
+            JOIN contracts c ON p.contract_id = c.id
+            WHERE c.tenant_id = ? AND p.status = 'paid'
+            ORDER BY p.due_date DESC
+            LIMIT 12",
+            [$tenantId]
+        );
+
+        if (empty($payments)) {
+            return ['pattern' => 'لا توجد بيانات كافية', 'reliability' => 'غير معروف'];
+        }
+
+        $totalPayments = count($payments);
+        $onTimePayments = 0;
+        $totalDelay = 0;
+
+        foreach ($payments as $payment) {
+            $delay = (int) ($payment['days_delay'] ?? 0);
+            if ($delay <= 0) {
+                $onTimePayments++;
+            }
+            if ($delay > 0) {
+                $totalDelay += $delay;
+            }
+        }
+
+        $onTimeRate = round(($onTimePayments / $totalPayments) * 100, 1);
+        $avgDelay = $totalDelay > 0 ? round($totalDelay / max(1, $totalPayments - $onTimePayments), 1) : 0;
+
+        $reliability = 'ممتاز';
+        $pattern = 'يدفع في الوقت المحدد';
+        
+        if ($onTimeRate >= 90) {
+            $reliability = 'ممتاز';
+            $pattern = 'يدفع في الوقت المحدد دائماً';
+        } elseif ($onTimeRate >= 75) {
+            $reliability = 'جيد';
+            $pattern = 'يدفع في الوقت المحدد غالباً';
+        } elseif ($onTimeRate >= 50) {
+            $reliability = 'متوسط';
+            $pattern = 'يتأخر أحياناً في الدفع';
+        } else {
+            $reliability = 'ضعيف';
+            $pattern = 'يتأخر كثيراً في الدفع';
+        }
+
+        return [
+            'pattern' => $pattern,
+            'reliability' => $reliability,
+            'on_time_rate' => $onTimeRate,
+            'avg_delay_days' => $avgDelay,
+            'total_payments' => $totalPayments
+        ];
+    }
 }
 $AI = new SmartSystem($pdo);
 ?>

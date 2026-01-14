@@ -139,11 +139,11 @@ try {
     // نستخدم القيم الافتراضية
 }
 
-$forceSmart = smart_features_force_enabled();
-$integrations['whatsapp'] = $forceSmart ? true : is_whatsapp_configured();
-$integrations['ocr'] = $forceSmart ? true : is_ocr_configured();
-$integrations['payment_portal'] = $forceSmart ? true : is_payment_portal_configured();
-$integrations['admin_whatsapp'] = $forceSmart ? true : is_admin_whatsapp_configured();
+$forceSmart = false; // تم إلغاء وضع Force - جميع المميزات حقيقية الآن
+$integrations['whatsapp'] = is_whatsapp_configured();
+$integrations['ocr'] = is_ocr_configured();
+$integrations['payment_portal'] = is_payment_portal_configured();
+$integrations['admin_whatsapp'] = is_admin_whatsapp_configured();
 
 
 $readinessInputs = [
@@ -157,9 +157,7 @@ $readinessInputs = [
     $integrations['ocr'],
     $integrations['payment_portal'],
 ];
-$readinessScore = $forceSmart
-    ? 100
-    : (int) round((array_sum(array_map('intval', $readinessInputs)) / max(1, count($readinessInputs))) * 100);
+$readinessScore = (int) round((array_sum(array_map('intval', $readinessInputs)) / max(1, count($readinessInputs))) * 100);
 
 $smartSignals['occupancy_gap'] = round($insights['occupancy_rate'] - 90, 1);
 $smartSignals['collection_gap'] = round($insights['collection_rate'] - 95, 1);
@@ -199,7 +197,7 @@ $smartFeatures = [
             <p style="margin:8px 0 0; color:var(--muted)">واجهة تجمع كل عناصر القوة التشغيلية والتحليلية للنظام.</p>
         </div>
         <div style="text-align:left; color:#22c55e; font-weight:700;">
-            <i class="fa-solid fa-sparkles"></i> <?= $forceSmart ? 'وضع تمكين شامل (جميع المميزات مفعلة)' : 'وضع تشغيلي فعلي' ?>
+            <i class="fa-solid fa-sparkles"></i> وضع تشغيل حقيقي - جميع المميزات فعلية
         </div>
     </div>
 </div>

@@ -87,7 +87,7 @@ define('OCR_API_KEY', getenv('OCR_API_KEY') ?: '');
 define('UPLOAD_MAX_BYTES', (int) (getenv('UPLOAD_MAX_BYTES') ?: 5 * 1024 * 1024));
 define('ADMIN_WHATSAPP', getenv('ADMIN_WHATSAPP') ?: '');
 define('PAYMENT_PORTAL_URL', getenv('PAYMENT_PORTAL_URL') ?: '');
-define('SMART_FEATURES_MODE', getenv('SMART_FEATURES_MODE') ?: 'force');
+define('SMART_FEATURES_MODE', getenv('SMART_FEATURES_MODE') ?: 'real');
 define('SESSION_IDLE_TIMEOUT', (int) (getenv('SESSION_IDLE_TIMEOUT') ?: 1800));
 define('SESSION_MAX_LIFETIME', (int) (getenv('SESSION_MAX_LIFETIME') ?: 28800));
 define('SESSION_ROTATE_INTERVAL', (int) (getenv('SESSION_ROTATE_INTERVAL') ?: 900));
@@ -386,7 +386,7 @@ function payment_portal_url(): string {
 }
 
 function smart_features_mode(): string {
-    return runtime_setting('smart_features_mode', SMART_FEATURES_MODE, 'force');
+    return runtime_setting('smart_features_mode', SMART_FEATURES_MODE, 'real');
 }
 
 function is_whatsapp_configured(): bool {
@@ -447,7 +447,8 @@ function tenant_created_at_column(PDO $pdo): ?string {
 }
 
 function smart_features_force_enabled(): bool {
-    return smart_features_mode() === 'force';
+    // تم إلغاء وضع Force - الآن جميع المميزات حقيقية
+    return false;
 }
 
 function generate_backup_sql(PDO $pdo): string {
