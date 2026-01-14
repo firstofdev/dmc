@@ -388,9 +388,10 @@ class SmartSystem {
         // حساب الاتجاه (بسيط)
         $lastThree = array_slice($amounts, -3);
         $firstThree = array_slice($amounts, 0, 3);
-        $trendChange = (array_sum($lastThree) / 3) - (array_sum($firstThree) / 3);
-        $trendPercent = (array_sum($firstThree) / 3) > 0 
-            ? ($trendChange / (array_sum($firstThree) / 3)) * 100 
+        $firstThreeAvg = array_sum($firstThree) / 3;
+        $trendChange = (array_sum($lastThree) / 3) - $firstThreeAvg;
+        $trendPercent = $firstThreeAvg > 0 
+            ? ($trendChange / $firstThreeAvg) * 100 
             : 0;
 
         $predictions = [];

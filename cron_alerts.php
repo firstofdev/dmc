@@ -106,15 +106,20 @@ if (is_admin_whatsapp_configured()) {
                             LEFT JOIN properties p ON m.property_id=p.id
                             LEFT JOIN units u ON m.unit_id=u.id
                             WHERE m.status='pending' AND m.priority='emergency'
-                            AND m.request_date >= CURDATE()");
+                            AND m.request_date >= CURDATE()
+                            AND NOT EXISTS (
+                                SELECT 1 FROM activity_log 
+                                WHERE description LIKE CONCAT('%طلب صيانة عاجل%', m.id, '%')
+                                AND created_at >= CURDATE()
+                            )");
         while ($r = $stmt->fetch()) {
             $location = $r['unit_name'] ? "وحدة {$r['unit_name']}" : ($r['property_name'] ? "عقار {$r['property_name']}" : "موقع غير محدد");
             $msg = "⚠️ طلب صيانة عاجل: {$r['description']} في {$location}";
             $sent = $AI->sendWhatsApp(admin_whatsapp_number(), $msg);
             if ($sent) {
                 echo "Emergency maintenance alert sent to admin\n";
-                // تحديث الطلب لتجنب إعادة الإرسال
-                $pdo->prepare("UPDATE maintenance SET priority='high' WHERE id=?")->execute([$r['id']]);
+                // تسجيل الإرسال لتجنب التكرار
+                log_activity($pdo, "طلب صيانة عاجل #{$r['id']}: {$r['description']}", 'maintenance_alert');
             }
         }
     }
