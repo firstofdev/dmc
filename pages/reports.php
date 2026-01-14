@@ -40,26 +40,32 @@ try {
     if (isset($pdo)) {
         // Income Report
         if ($reportType === 'income') {
-            $incomeData['total_collected'] = (float) $pdo->prepare("
+            $stmt = $pdo->prepare("
                 SELECT COALESCE(SUM(amount), 0) 
                 FROM payments 
                 WHERE status = 'paid' 
                 AND paid_date BETWEEN ? AND ?
-            ")->execute([$dateFrom, $dateTo]) ? $pdo->query("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'paid' AND paid_date BETWEEN '{$dateFrom}' AND '{$dateTo}'")->fetchColumn() : 0;
+            ");
+            $stmt->execute([$dateFrom, $dateTo]);
+            $incomeData['total_collected'] = (float) $stmt->fetchColumn();
             
-            $incomeData['total_expected'] = (float) $pdo->query("
+            $stmt = $pdo->prepare("
                 SELECT COALESCE(SUM(amount), 0) 
                 FROM payments 
-                WHERE due_date BETWEEN '{$dateFrom}' AND '{$dateTo}'
-            ")->fetchColumn();
+                WHERE due_date BETWEEN ? AND ?
+            ");
+            $stmt->execute([$dateFrom, $dateTo]);
+            $incomeData['total_expected'] = (float) $stmt->fetchColumn();
             
-            $incomeData['pending_amount'] = (float) $pdo->query("
+            $stmt = $pdo->prepare("
                 SELECT COALESCE(SUM(amount), 0) 
                 FROM payments 
                 WHERE status != 'paid' 
-                AND due_date BETWEEN '{$dateFrom}' AND '{$dateTo}'
+                AND due_date BETWEEN ? AND ?
                 AND due_date >= CURDATE()
-            ")->fetchColumn();
+            ");
+            $stmt->execute([$dateFrom, $dateTo]);
+            $incomeData['pending_amount'] = (float) $stmt->fetchColumn();
             
             $incomeData['overdue_amount'] = (float) $pdo->query("
                 SELECT COALESCE(SUM(amount), 0) 
@@ -73,7 +79,7 @@ try {
             }
             
             // Income by property
-            $propertyIncomeQuery = $pdo->query("
+            $stmt = $pdo->prepare("
                 SELECT 
                     p.name AS property_name,
                     COALESCE(SUM(pay.amount), 0) AS total_income,
@@ -82,12 +88,13 @@ try {
                 FROM properties p
                 LEFT JOIN units u ON u.property_id = p.id
                 LEFT JOIN contracts c ON c.unit_id = u.id AND c.status = 'active'
-                LEFT JOIN payments pay ON pay.contract_id = c.id AND pay.status = 'paid' AND pay.paid_date BETWEEN '{$dateFrom}' AND '{$dateTo}'
+                LEFT JOIN payments pay ON pay.contract_id = c.id AND pay.status = 'paid' AND pay.paid_date BETWEEN ? AND ?
                 GROUP BY p.id
                 ORDER BY total_income DESC
             ");
+            $stmt->execute([$dateFrom, $dateTo]);
             
-            while ($row = $propertyIncomeQuery->fetch(PDO::FETCH_ASSOC)) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $incomeData['by_property'][] = $row;
             }
             
@@ -97,12 +104,14 @@ try {
                 $monthEnd = date('Y-m-t', strtotime("-{$i} months"));
                 $monthName = date('M Y', strtotime($monthStart));
                 
-                $monthIncome = (float) $pdo->query("
+                $stmt = $pdo->prepare("
                     SELECT COALESCE(SUM(amount), 0) 
                     FROM payments 
                     WHERE status = 'paid' 
-                    AND paid_date BETWEEN '{$monthStart}' AND '{$monthEnd}'
-                ")->fetchColumn();
+                    AND paid_date BETWEEN ? AND ?
+                ");
+                $stmt->execute([$monthStart, $monthEnd]);
+                $monthIncome = (float) $stmt->fetchColumn();
                 
                 $incomeData['by_month'][] = [
                     'month' => $monthName,

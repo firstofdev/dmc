@@ -59,9 +59,7 @@ try {
             $properties = $pdo->query("SELECT id, name FROM properties ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
             
             // Calculate ROI for selected property or all properties
-            $whereClause = $selectedProperty > 0 ? "WHERE p.id = {$selectedProperty}" : "";
-            
-            $roiQuery = $pdo->query("
+            $roiQuerySQL = "
                 SELECT 
                     p.id,
                     p.name AS property_name,
@@ -75,19 +73,29 @@ try {
                 LEFT JOIN contracts c ON c.unit_id = u.id AND c.status = 'active'
                 LEFT JOIN payments pay ON pay.contract_id = c.id AND pay.status = 'paid' 
                     AND pay.paid_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
-                {$whereClause}
-                GROUP BY p.id
-                ORDER BY total_collected DESC
-            ")->fetchAll(PDO::FETCH_ASSOC);
+            ";
+            
+            if ($selectedProperty > 0) {
+                $roiQuerySQL .= " WHERE p.id = ?";
+                $stmt = $pdo->prepare($roiQuerySQL . " GROUP BY p.id ORDER BY total_collected DESC");
+                $stmt->execute([$selectedProperty]);
+            } else {
+                $stmt = $pdo->prepare($roiQuerySQL . " GROUP BY p.id ORDER BY total_collected DESC");
+                $stmt->execute();
+            }
+            
+            $roiQuery = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             foreach ($roiQuery as &$property) {
                 // Calculate maintenance costs for the past year
-                $maintenanceCosts = (float) $pdo->query("
+                $stmt = $pdo->prepare("
                     SELECT COALESCE(SUM(cost), 0)
                     FROM maintenance
-                    WHERE property_id = {$property['id']}
+                    WHERE property_id = ?
                     AND request_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
-                ")->fetchColumn();
+                ");
+                $stmt->execute([$property['id']]);
+                $maintenanceCosts = (float) $stmt->fetchColumn();
                 
                 $property['maintenance_costs'] = $maintenanceCosts;
                 
