@@ -27,14 +27,14 @@ echo "<h2>🚀 ترقية قاعدة البيانات</h2>";
 
 $migrations = [
     // إضافة أعمدة جدول المستأجرين
-    "ALTER TABLE tenants ADD COLUMN IF NOT EXISTS id_type VARCHAR(50) DEFAULT NULL COMMENT 'نوع الهوية'",
-    "ALTER TABLE tenants ADD COLUMN IF NOT EXISTS address TEXT DEFAULT NULL COMMENT 'العنوان'",
-    "ALTER TABLE tenants ADD COLUMN IF NOT EXISTS id_photo VARCHAR(255) DEFAULT NULL COMMENT 'صورة الهوية'",
+    "ALTER TABLE tenants ADD COLUMN id_type VARCHAR(50) DEFAULT NULL COMMENT 'نوع الهوية'",
+    "ALTER TABLE tenants ADD COLUMN address TEXT DEFAULT NULL COMMENT 'العنوان'",
+    "ALTER TABLE tenants ADD COLUMN id_photo VARCHAR(255) DEFAULT NULL COMMENT 'صورة الهوية'",
     
     // إضافة أعمدة جدول الوحدات للمحلات
-    "ALTER TABLE units ADD COLUMN IF NOT EXISTS shop_name VARCHAR(200) DEFAULT NULL COMMENT 'اسم المحل'",
-    "ALTER TABLE units ADD COLUMN IF NOT EXISTS shop_logo VARCHAR(255) DEFAULT NULL COMMENT 'شعار المحل'",
-    "ALTER TABLE units ADD COLUMN IF NOT EXISTS tenant_name VARCHAR(200) DEFAULT NULL COMMENT 'اسم المستأجر الحالي'",
+    "ALTER TABLE units ADD COLUMN shop_name VARCHAR(200) DEFAULT NULL COMMENT 'اسم المحل'",
+    "ALTER TABLE units ADD COLUMN shop_logo VARCHAR(255) DEFAULT NULL COMMENT 'شعار المحل'",
+    "ALTER TABLE units ADD COLUMN tenant_name VARCHAR(200) DEFAULT NULL COMMENT 'اسم المستأجر الحالي'",
     
     // إضافة حقل المظهر في الإعدادات
     "INSERT IGNORE INTO settings (k, v) VALUES ('theme', 'dark')",
