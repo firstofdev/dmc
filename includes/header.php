@@ -137,7 +137,7 @@ $company_name_safe = htmlspecialchars($company_name);
         .search-clear:hover { border-color:var(--primary); color:var(--primary); box-shadow:var(--glow); transform:rotate(90deg); }
         .smart-meta { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:14px; }
         .page-pill { background:var(--tag-bg); color:var(--primary); padding:6px 12px; border-radius:14px; font-weight:bold; display:inline-flex; align-items:center; gap:8px; border:1px solid rgba(99,102,241,0.2); box-shadow:0 4px 12px rgba(99,102,241,0.15); position:relative; overflow:hidden; }
-        .page-pill::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transform:translateX(-100%); animation:shimmer 3s infinite; }
+        .page-pill::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); background-size:200% 100%; transform:translateX(-100%); animation:shimmer 3s infinite; }
         .page-pill i { animation:float 2s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
         .smart-assist { display:flex; align-items:center; gap:14px; background:var(--card); border:1px solid var(--border); padding:14px 18px; border-radius:18px; margin-bottom:24px; box-shadow:0 12px 35px rgba(15,23,42,0.18); position:relative; overflow:hidden; }
