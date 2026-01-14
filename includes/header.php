@@ -18,7 +18,8 @@ $page_titles = [
     'settings' => 'الإعدادات',
     'smart_center' => 'مركز التمكين الذكي',
 ];
-$page_title = $page_titles[$p] ?? 'لوحة القيادة';
+$page_key = array_key_exists($p, $page_titles) ? $p : 'dashboard';
+$page_title = $page_titles[$page_key] ?? 'لوحة القيادة';
 
 // جلب الشعار
 $settingsMap = [];
@@ -120,9 +121,16 @@ $company_name_safe = htmlspecialchars($company_name);
         .smart-search { flex:1; display:flex; align-items:center; gap:12px; background:var(--input-bg); border:1px solid var(--input-border); border-radius:16px; padding:12px 16px; min-width:260px; transition:0.3s; }
         .smart-search i { color:var(--muted); font-size:16px; }
         .smart-search input { background:transparent; border:none; color:var(--text); width:100%; font-size:15px; font-family:'Tajawal'; }
-        .smart-search-hint { background:var(--tag-bg); color:var(--primary); padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold; }
+        .smart-search-hint { background:var(--tag-bg); color:var(--primary); padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold; display:flex; align-items:center; gap:6px; }
+        .search-clear { width:38px; height:38px; border-radius:12px; border:1px solid var(--input-border); background:rgba(0,0,0,0.15); color:var(--muted); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:0.2s; }
+        .search-clear:hover { border-color:var(--primary); color:var(--primary); box-shadow:var(--glow); }
         .smart-meta { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:14px; }
         .page-pill { background:var(--tag-bg); color:var(--primary); padding:6px 12px; border-radius:14px; font-weight:bold; }
+        .smart-assist { display:flex; align-items:center; gap:14px; background:var(--card); border:1px solid var(--border); padding:14px 18px; border-radius:18px; margin-bottom:24px; box-shadow:0 12px 35px rgba(15,23,42,0.18); }
+        .assist-icon { width:46px; height:46px; border-radius:14px; display:grid; place-items:center; background:var(--tag-bg); color:var(--primary); box-shadow:var(--glow); }
+        .assist-title { font-size:15px; font-weight:800; color:var(--text); }
+        .assist-body { color:var(--muted); font-size:14px; }
+        .smart-assist.pulse { box-shadow:0 18px 45px rgba(99,102,241,0.25); }
         .maintenance-banner { background:linear-gradient(135deg, rgba(239,68,68,0.18), rgba(248,113,113,0.12)); border:1px solid rgba(239,68,68,0.45); color:#fecaca; padding:14px 18px; border-radius:16px; display:flex; align-items:center; gap:12px; margin-bottom:24px; box-shadow:0 12px 24px rgba(15,23,42,0.25); }
         .maintenance-banner i { color:#f87171; }
 
@@ -172,7 +180,7 @@ $company_name_safe = htmlspecialchars($company_name);
         @keyframes floatLogo { 0%, 100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
     </style>
 </head>
-<body>
+<body data-page="<?= htmlspecialchars($page_key) ?>">
 
     <div class="sidebar">
     <div style="text-align:center; margin-bottom:30px">
@@ -226,12 +234,25 @@ $company_name_safe = htmlspecialchars($company_name);
     <div class="smart-toolbar">
         <div class="smart-search">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input id="globalSearch" type="search" placeholder="بحث ذكي داخل الصفحة والجداول..." autocomplete="off">
-            <span class="smart-search-hint">Ctrl + /</span>
+            <input id="globalSearch" type="search" placeholder="بحث ذكي داخل الصفحة والجداول..." autocomplete="off" aria-label="البحث في محتوى الصفحة والجداول">
+            <button class="search-clear" type="button" id="clearSearch" title="مسح البحث">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <span class="smart-search-hint"><i class="fa-solid fa-wand-magic-sparkles"></i> Ctrl + /</span>
         </div>
         <div class="smart-meta">
             <span>الصفحة الحالية:</span>
-            <span class="page-pill"><?= $page_title ?></span>
-            <span id="searchCount">كل النتائج ظاهرة</span>
+            <span class="page-pill"><i class="fa-regular fa-compass"></i> <?= $page_title ?></span>
+            <span id="searchCount"><i class="fa-solid fa-list-check"></i> كل النتائج ظاهرة</span>
         </div>
+    </div>
+    <div class="smart-assist" id="smartAssist">
+        <div class="assist-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+        <div>
+            <div class="assist-title">اقتراح ذكي</div>
+            <div class="assist-body" id="smartHintText">ابدأ بالبحث للوصول السريع للمحتوى.</div>
+        </div>
+        <button class="btn btn-dark btn-icon" id="refreshHint" type="button" title="اقتراح آخر">
+            <i class="fa-solid fa-rotate"></i>
+        </button>
     </div>

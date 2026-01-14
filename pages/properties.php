@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_prop'])) {
 
 <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-        <h3>🏙️ إدارة العقارات</h3>
+        <h3><i class="fa-solid fa-building-columns"></i> إدارة العقارات</h3>
         <button onclick="openModal()" class="btn btn-primary">
             <i class="fa-solid fa-plus"></i> إضافة عقار
         </button>
