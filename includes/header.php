@@ -52,7 +52,7 @@ $company_name_safe = htmlspecialchars($company_name);
     <meta charset="UTF-8">
     <title><?= $company_name_safe ?> - النظام المتكامل</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" integrity="sha256-wJLjLggRyyA59mVDW8QiXJCs/jwu6LNAZ0UO9qcmO/E=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* GEMINI ULTIMATE DARK THEME */
