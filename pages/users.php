@@ -34,8 +34,8 @@ if(isset($_GET['del']) && $_GET['del'] != $_SESSION['uid']){
                 <td><?= $u['username'] ?></td>
                 <td><?= $u['email'] ?></td>
                 <td>
-                    <?php if($u['role']=='admin'): ?><span class="badge" style="background:rgba(99,102,241,0.2); color:#a5b4fc">مدير عام</span>
-                    <?php else: ?><span class="badge" style="background:rgba(16,185,129,0.2); color:#6ee7b7">موظف</span><?php endif; ?>
+                    <?php if($u['role']=='admin'): ?><span class="badge" style="background:rgba(99,102,241,0.2); color:var(--primary)">مدير عام</span>
+                    <?php else: ?><span class="badge" style="background:rgba(16,185,129,0.2); color:var(--success)">موظف</span><?php endif; ?>
                 </td>
                 <td>
                     <?php if($u['id'] != $_SESSION['uid']): ?>

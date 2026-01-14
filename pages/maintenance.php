@@ -349,7 +349,7 @@ $action = isset($_GET['act']) ? $_GET['act'] : 'list';
         border-radius: 999px;
         font-size: 12px;
         border: 1px solid transparent;
-        background: rgba(15,23,42,0.8);
+        background: var(--card);
         color: #e2e8f0;
     }
     .priority-chip--high {
