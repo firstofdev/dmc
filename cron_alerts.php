@@ -63,13 +63,64 @@ $stmt = $pdo->query("SELECT p.*, t.$tenantNameColumn AS full_name, t.phone, u.un
                      JOIN units u ON c.unit_id=u.id
                      WHERE p.status = 'pending' AND p.due_date < CURDATE()");
 while ($r = $stmt->fetch()) {
-    if ((int) $r['overdue_days'] === 3) {
+    if ((int) $r['overdue_days'] === 3 || (int) $r['overdue_days'] === 7 || (int) $r['overdue_days'] === 14) {
         $paymentLink = $AI->buildPaymentLink(isset($r['id']) ? (int) $r['id'] : null);
         $linkText = $paymentLink ? " رابط السداد: $paymentLink" : '';
         $msg = "مرحباً {$r['full_name']}، لديك دفعة متأخرة منذ {$r['overdue_days']} أيام لوحدة {$r['unit_name']} بمبلغ {$r['amount']}.$linkText";
         $sent = $AI->sendWhatsApp($r['phone'], $msg);
         if ($sent) {
             echo "Overdue reminder sent to {$r['full_name']}\n";
+        }
+    }
+}
+
+// 2b. تذكير بالعقود القريبة من الانتهاء (60 و 30 و 7 أيام)
+$stmt = $pdo->prepare("SELECT c.*, t.$tenantNameColumn AS full_name, t.phone, u.unit_name, DATEDIFF(c.end_date, CURDATE()) AS days_remaining
+                       FROM contracts c
+                       JOIN tenants t ON c.tenant_id=t.id
+                       JOIN units u ON c.unit_id=u.id
+                       WHERE c.status='active' AND c.end_date > CURDATE() AND c.end_date <= DATE_ADD(CURDATE(), INTERVAL 60 DAY)");
+$stmt->execute();
+while ($r = $stmt->fetch()) {
+    $daysLeft = (int) $r['days_remaining'];
+    if ($daysLeft === 60 || $daysLeft === 30 || $daysLeft === 7) {
+        $msg = "مرحباً {$r['full_name']}، ينتهي عقد إيجار وحدة {$r['unit_name']} خلال {$daysLeft} يوماً. يرجى التواصل لتجديد العقد.";
+        $sent = $AI->sendWhatsApp($r['phone'], $msg);
+        if ($sent) {
+            echo "Contract renewal reminder sent to {$r['full_name']} ({$daysLeft} days)\n";
+        }
+        // إرسال نسخة للإدارة
+        if (is_admin_whatsapp_configured() && $daysLeft === 30) {
+            $adminMsg = "تنبيه: عقد المستأجر {$r['full_name']} للوحدة {$r['unit_name']} ينتهي خلال 30 يوماً.";
+            $AI->sendWhatsApp(admin_whatsapp_number(), $adminMsg);
+        }
+    }
+}
+
+// 2c. تنبيه للإدارة بطلبات الصيانة العاجلة
+if (is_admin_whatsapp_configured()) {
+    $hasPriority = table_has_column($pdo, 'maintenance', 'priority');
+    if ($hasPriority) {
+        $stmt = $pdo->query("SELECT m.*, p.name AS property_name, u.unit_name
+                            FROM maintenance m
+                            LEFT JOIN properties p ON m.property_id=p.id
+                            LEFT JOIN units u ON m.unit_id=u.id
+                            WHERE m.status='pending' AND m.priority='emergency'
+                            AND m.request_date >= CURDATE()
+                            AND NOT EXISTS (
+                                SELECT 1 FROM activity_log 
+                                WHERE description LIKE CONCAT('%طلب صيانة عاجل%', m.id, '%')
+                                AND created_at >= CURDATE()
+                            )");
+        while ($r = $stmt->fetch()) {
+            $location = $r['unit_name'] ? "وحدة {$r['unit_name']}" : ($r['property_name'] ? "عقار {$r['property_name']}" : "موقع غير محدد");
+            $msg = "⚠️ طلب صيانة عاجل: {$r['description']} في {$location}";
+            $sent = $AI->sendWhatsApp(admin_whatsapp_number(), $msg);
+            if ($sent) {
+                echo "Emergency maintenance alert sent to admin\n";
+                // تسجيل الإرسال لتجنب التكرار
+                log_activity($pdo, "طلب صيانة عاجل #{$r['id']}: {$r['description']}", 'maintenance_alert');
+            }
         }
     }
 }

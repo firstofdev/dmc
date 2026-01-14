@@ -802,7 +802,10 @@ $company_name_safe = htmlspecialchars($company_name);
         <a href="index.php?p=reports" class="nav-link <?= $p=='reports'?'active':'' ?>"><i class="fa-solid fa-chart-line"></i> <span>التقارير المالية</span></a>
         <a href="index.php?p=smart_center" class="nav-link <?= $p=='smart_center'?'active':'' ?>"><i class="fa-solid fa-brain"></i> <span>التمكين الذكي</span></a>
         
-        <?php if($role === 'admin'): ?>
+
+        <a href="index.php?p=help" class="nav-link <?= $p=='help'?'active':'' ?>"><i class="fa-solid fa-book-open"></i> <span>المساعدة والدليل</span></a>
+
+      <?php if($role === 'admin'): ?>
         <div class="nav-divider"></div>
         <a href="index.php?p=users" class="nav-link <?= $p=='users'?'active':'' ?>"><i class="fa-solid fa-user-gear"></i> <span>المستخدمين</span></a>
         <?php endif; ?>

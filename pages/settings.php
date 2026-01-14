@@ -19,9 +19,9 @@ if(isset($_POST['save_settings'])){
 }
 $sets=[]; $q=$pdo->query("SELECT * FROM settings"); while($r=$q->fetch()) $sets[$r['k']]=$r['v'];
 $logo = $sets['logo'] ?? 'logo.png';
-$smartMode = $sets['smart_features_mode'] ?? 'force';
-$smartModeLabel = $smartMode === 'force' ? 'تمكين شامل' : 'حسب التكاملات';
-$smartModeHint = $smartMode === 'force' ? 'جميع المميزات فعالة' : 'يعتمد على الاتصالات المتاحة';
+$smartMode = $sets['smart_features_mode'] ?? 'real';
+$smartModeLabel = 'وضع حقيقي - جميع المميزات فعلية';
+$smartModeHint = 'يعتمد على التكاملات المضبوطة فعلياً';
 $alertChannelReady = !empty($sets['whatsapp_number']) || !empty($sets['reporting_email']);
 $companyReady = !empty($sets['company_name']) && !empty($sets['phone']) && !empty($sets['email']);
 $brandReady = !empty($sets['logo']);
@@ -69,7 +69,7 @@ $dateFormatExample = date($dateFormatValue);
     <div class="settings-header">
         <h2 class="settings-title">⚙ الإعدادات</h2>
         <div class="settings-actions">
-            <span class="settings-badge <?= $smartMode === 'force' ? '' : 'is-warning' ?>">
+            <span class="settings-badge">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> <?= $smartModeLabel ?>
             </span>
             <button class="btn btn-primary"><i class="fa-solid fa-save"></i> حفظ الإعدادات</button>
@@ -237,10 +237,10 @@ $dateFormatExample = date($dateFormatValue);
             <div class="settings-card-header slate"><i class="fa-solid fa-satellite-dish"></i> تكاملات التمكين الذكي</div>
             <div class="settings-card-body">
                 <label class="inp-label">وضع التمكين الذكي</label>
-                <select name="smart_features_mode" class="inp">
-                    <option value="force" <?= $smartMode === 'force' ? 'selected' : '' ?>>تمكين شامل (تفعيل جميع المميزات)</option>
-                    <option value="auto" <?= $smartMode === 'auto' ? 'selected' : '' ?>>حسب التكاملات الفعلية</option>
-                </select>
+                <input type="hidden" name="smart_features_mode" value="real">
+                <div style="padding:12px; background:rgba(16,185,129,0.1); border-radius:10px; color:#22c55e; margin-bottom:15px;">
+                    <i class="fa-solid fa-check-circle"></i> الوضع الحقيقي مفعل - جميع المميزات تعمل حسب التكاملات الفعلية
+                </div>
                 <label class="inp-label">رابط بوابة الدفع</label>
                 <input type="url" name="payment_portal_url" class="inp" value="<?= $sets['payment_portal_url'] ?? '' ?>" placeholder="https://payments.example.com">
                 <label class="inp-label">رقم واتساب للإدارة</label>
