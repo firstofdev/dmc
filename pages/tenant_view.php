@@ -89,7 +89,7 @@ $registeredAtLabel = $registeredAt !== '' ? format_date($registeredAt, $register
             <i class="fa-solid fa-file-contract"></i>
         </div>
         <h3 style="margin:0; font-size:24px; font-weight:bold"><?= $active_contracts ?></h3>
-        <span style="color:#888; font-size:13px">عقود نشطة</span>
+        <span style="color:var(--muted); font-size:13px">عقود نشطة</span>
     </div>
 
     <div class="card" style="text-align:center; padding:25px;">
@@ -97,7 +97,7 @@ $registeredAtLabel = $registeredAt !== '' ? format_date($registeredAt, $register
             <i class="fa-solid fa-coins"></i>
         </div>
         <h3 style="margin:0; font-size:24px; font-weight:bold"><?= number_format($total_contracts_value) ?></h3>
-        <span style="color:#888; font-size:13px">إجمالي قيمة العقود</span>
+        <span style="color:var(--muted); font-size:13px">إجمالي قيمة العقود</span>
     </div>
 
     <div class="card" style="text-align:center; padding:25px;">
@@ -105,7 +105,7 @@ $registeredAtLabel = $registeredAt !== '' ? format_date($registeredAt, $register
             <i class="fa-solid fa-check-double"></i>
         </div>
         <h3 style="margin:0; font-size:24px; font-weight:bold"><?= number_format($total_paid) ?></h3>
-        <span style="color:#888; font-size:13px">إجمالي المدفوع</span>
+        <span style="color:var(--muted); font-size:13px">إجمالي المدفوع</span>
     </div>
 
     <div class="card" style="text-align:center; padding:25px;">
@@ -113,7 +113,7 @@ $registeredAtLabel = $registeredAt !== '' ? format_date($registeredAt, $register
             <i class="fa-solid fa-hand-holding-dollar"></i>
         </div>
         <h3 style="margin:0; font-size:24px; font-weight:bold"><?= number_format($remaining) ?></h3>
-        <span style="color:#888; font-size:13px">المبالغ المتبقية</span>
+        <span style="color:var(--muted); font-size:13px">المبالغ المتبقية</span>
     </div>
 </div>
 
@@ -125,19 +125,19 @@ $registeredAtLabel = $registeredAt !== '' ? format_date($registeredAt, $register
         </h4>
         
         <div style="margin-bottom:15px;">
-            <label style="color:#888; font-size:12px; display:block">الاسم الكامل</label>
+            <label style="color:var(--muted); font-size:12px; display:block">الاسم الكامل</label>
             <div style="font-weight:bold"><?= htmlspecialchars($t['name']) ?></div>
         </div>
         <div style="margin-bottom:15px;">
-            <label style="color:#888; font-size:12px; display:block">رقم الجوال</label>
+            <label style="color:var(--muted); font-size:12px; display:block">رقم الجوال</label>
             <div style="font-weight:bold; font-family:monospace"><?= htmlspecialchars($t['phone']) ?></div>
         </div>
         <div style="margin-bottom:15px;">
-            <label style="color:#888; font-size:12px; display:block">البريد الإلكتروني</label>
+            <label style="color:var(--muted); font-size:12px; display:block">البريد الإلكتروني</label>
             <div style="font-weight:bold"><?= $t['email'] ?: '-' ?></div>
         </div>
         <div style="margin-bottom:15px;">
-            <label style="color:#888; font-size:12px; display:block">رقم الهوية / السجل</label>
+            <label style="color:var(--muted); font-size:12px; display:block">رقم الهوية / السجل</label>
             <div style="font-weight:bold; font-family:monospace"><?= $t['id_number'] ?: '-' ?></div>
         </div>
     </div>

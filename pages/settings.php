@@ -46,15 +46,15 @@ $dateFormatExample = date($dateFormatValue);
         .settings-overview-title { font-size:13px; color:var(--muted); margin-bottom:6px; }
         .settings-overview-value { font-size:16px; font-weight:700; }
         .settings-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; background:rgba(34,211,238,0.12); color:var(--accent-2); }
-        .settings-badge.is-warning { background:rgba(239,68,68,0.12); color:#f87171; }
-        .settings-badge.is-neutral { background:rgba(148,163,184,0.12); color:#cbd5f5; }
+        .settings-badge.is-warning { background:rgba(239,68,68,0.12); color:var(--danger); }
+        .settings-badge.is-neutral { background:var(--tag-bg); color:var(--muted); }
         .settings-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; }
         .settings-card { padding:0; overflow:hidden; border:none; }
         .settings-card-header { display:flex; align-items:center; gap:10px; padding:16px 18px; color:white; font-weight:700; background:linear-gradient(135deg, var(--primary), var(--accent)); }
         .settings-card-header.secondary { background:linear-gradient(135deg, rgba(34,211,238,0.85), rgba(14,165,233,0.85)); }
         .settings-card-header.success { background:linear-gradient(135deg, rgba(16,185,129,0.85), rgba(34,197,94,0.85)); }
         .settings-card-header.danger { background:linear-gradient(135deg, rgba(239,68,68,0.9), rgba(185,28,28,0.9)); }
-        .settings-card-header.slate { background:linear-gradient(135deg, rgba(15,23,42,0.9), rgba(71,85,105,0.9)); }
+        .settings-card-header.slate { background:linear-gradient(135deg, var(--card), rgba(71,85,105,0.9)); }
         .settings-card-body { padding:20px; }
         .settings-tip { margin-top:12px; padding:12px 14px; border-radius:14px; background:rgba(99,102,241,0.08); color:var(--muted); font-size:13px; line-height:1.6; }
         .settings-section-title { color:var(--primary); margin:30px 0 15px; border-bottom:1px dashed var(--border); padding-bottom:10px; display:flex; align-items:center; gap:8px; }

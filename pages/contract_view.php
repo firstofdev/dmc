@@ -118,9 +118,9 @@ $currencyCode = get_setting('currency_code', 'ر.س');
     /* منطقة الكاميرا */
     .cam-wrapper { background: black; border-radius: 10px; overflow: hidden; position: relative; height: 300px; }
     .cam-overlay { position:absolute; inset:0; pointer-events:none; background-image: linear-gradient(to right, rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.2) 1px, transparent 1px); background-size: 33.333% 33.333%; mix-blend-mode: soft-light; }
-    .cam-badge { position:absolute; bottom:10px; left:10px; padding:6px 10px; border-radius:999px; font-size:12px; background:rgba(17,24,39,0.75); color:#fff; }
-    .cam-hint { margin-top:8px; font-size:13px; color:#6b7280; }
-    .quality-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-size:12px; background:#111827; color:#fff; margin-top:10px; }
+    .cam-badge { position:absolute; bottom:10px; left:10px; padding:6px 10px; border-radius:999px; font-size:12px; background:var(--card); color:var(--text); border:1px solid var(--border); }
+    .cam-hint { margin-top:8px; font-size:13px; color:var(--muted); }
+    .quality-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-size:12px; background:var(--card); color:var(--text); margin-top:10px; border:1px solid var(--border); }
     .quality-chip strong { color:#fbbf24; }
     video { width: 100%; height: 100%; object-fit: cover; }
     

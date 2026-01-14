@@ -312,7 +312,7 @@ if (empty($financeLabels)) {
         <div style="position:absolute; top:-20px; right:-20px; width:120px; height:120px; background:radial-gradient(circle, rgba(79,70,229,0.15), transparent); border-radius:50%; filter:blur(25px);"></div>
         <div style="position:relative; z-index:1;">
             <h2 style="margin:0; font-size:32px; font-weight:800; background:linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><?= $stats['units'] ?></h2>
-            <span style="color:#888; font-size:13px; font-weight:600; letter-spacing:0.5px;">إجمالي الوحدات</span>
+            <span class="theme-text-muted" style="font-size:13px; font-weight:600; letter-spacing:0.5px;">إجمالي الوحدات</span>
         </div>
         <div style="width:60px; height:60px; background:linear-gradient(135deg, #4f46e5, #6366f1); border-radius:16px; display:flex; align-items:center; justify-content:center; color:white; font-size:28px; box-shadow:0 10px 30px rgba(79,70,229,0.4); transition:all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); position:relative; z-index:1;">
             <i class="fa-solid fa-house-laptop" style="animation:iconFloat 3s ease-in-out infinite;"></i>
@@ -323,7 +323,7 @@ if (empty($financeLabels)) {
         <div style="position:absolute; top:-20px; right:-20px; width:120px; height:120px; background:radial-gradient(circle, rgba(14,165,233,0.15), transparent); border-radius:50%; filter:blur(25px);"></div>
         <div style="position:relative; z-index:1;">
             <h2 style="margin:0; font-size:32px; font-weight:800; background:linear-gradient(135deg, #0ea5e9, #06b6d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><?= $stats['rented'] ?></h2>
-            <span style="color:#888; font-size:13px; font-weight:600; letter-spacing:0.5px;">وحدات مؤجرة</span>
+            <span class="theme-text-muted" style="font-size:13px; font-weight:600; letter-spacing:0.5px;">وحدات مؤجرة</span>
         </div>
         <div style="width:60px; height:60px; background:linear-gradient(135deg, #0ea5e9, #06b6d4); border-radius:16px; display:flex; align-items:center; justify-content:center; color:white; font-size:28px; box-shadow:0 10px 30px rgba(14,165,233,0.4); transition:all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); position:relative; z-index:1;">
             <i class="fa-solid fa-house-circle-check" style="animation:iconFloat 3s ease-in-out infinite 0.2s;"></i>
@@ -334,7 +334,7 @@ if (empty($financeLabels)) {
         <div style="position:absolute; top:-20px; right:-20px; width:120px; height:120px; background:radial-gradient(circle, rgba(16,185,129,0.15), transparent); border-radius:50%; filter:blur(25px);"></div>
         <div style="position:relative; z-index:1;">
             <h2 style="margin:0; font-size:32px; font-weight:800; background:linear-gradient(135deg, #10b981, #059669); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><?= $stats['contracts'] ?></h2>
-            <span style="color:#888; font-size:13px; font-weight:600; letter-spacing:0.5px;">عقود نشطة</span>
+            <span class="theme-text-muted" style="font-size:13px; font-weight:600; letter-spacing:0.5px;">عقود نشطة</span>
         </div>
         <div style="width:60px; height:60px; background:linear-gradient(135deg, #10b981, #059669); border-radius:16px; display:flex; align-items:center; justify-content:center; color:white; font-size:28px; box-shadow:0 10px 30px rgba(16,185,129,0.4); transition:all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); position:relative; z-index:1;">
             <i class="fa-solid fa-file-signature" style="animation:iconFloat 3s ease-in-out infinite 0.4s;"></i>
@@ -345,7 +345,7 @@ if (empty($financeLabels)) {
         <div style="position:absolute; top:-20px; right:-20px; width:120px; height:120px; background:radial-gradient(circle, rgba(245,158,11,0.15), transparent); border-radius:50%; filter:blur(25px);"></div>
         <div style="position:relative; z-index:1;">
             <h2 style="margin:0; font-size:32px; font-weight:800; background:linear-gradient(135deg, #f59e0b, #d97706); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><?= $stats['tenants'] ?></h2>
-            <span style="color:#888; font-size:13px; font-weight:600; letter-spacing:0.5px;">المستأجرين</span>
+            <span class="theme-text-muted" style="font-size:13px; font-weight:600; letter-spacing:0.5px;">المستأجرين</span>
         </div>
         <div style="width:60px; height:60px; background:linear-gradient(135deg, #f59e0b, #d97706); border-radius:16px; display:flex; align-items:center; justify-content:center; color:white; font-size:28px; box-shadow:0 10px 30px rgba(245,158,11,0.4); transition:all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); position:relative; z-index:1;">
             <i class="fa-solid fa-user-group" style="animation:iconFloat 3s ease-in-out infinite 0.6s;"></i>
@@ -363,7 +363,7 @@ if (empty($financeLabels)) {
 <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px; background:linear-gradient(135deg, rgba(99,102,241,0.05), rgba(168,85,247,0.03));">
         <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-wand-magic-sparkles" style="color:#a855f7;"></i> لوحة التحكم الذكية للمالك</h3>
-        <p style="color:#94a3b8; margin-top:6px;">مسار سريع لإدارة الأملاك بذكاء: تحديث الوحدات، متابعة العقود، وضبط الفواتير في أقل وقت.</p>
+        <p class="theme-text-secondary" style="margin-top:6px;">مسار سريع لإدارة الأملاك بذكاء: تحديث الوحدات، متابعة العقود، وضبط الفواتير في أقل وقت.</p>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px; margin-top:15px;">
             <a href="index.php?p=properties" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-building"></i> <span>إدارة العقارات</span></a>
             <a href="index.php?p=units" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-house-laptop"></i> <span>إدارة الوحدات</span></a>
@@ -376,15 +376,15 @@ if (empty($financeLabels)) {
     <div class="card" style="padding:20px; background:linear-gradient(135deg, rgba(34,211,238,0.05), rgba(14,165,233,0.03));">
         <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-lightbulb" style="color:#22d3ee;"></i> مساعد الإدارة الذكي</h3>
         <div style="display:grid; gap:10px;">
-            <div style="background:rgba(15,23,42,0.8); padding:14px; border-radius:12px; color:#cbd5f5; border-left:3px solid #6366f1; display:flex; align-items:center; gap:10px; transition:all 0.3s ease;">
+            <div class="theme-bg-card" style="padding:14px; border-radius:12px; border-left:3px solid #6366f1; display:flex; align-items:center; gap:10px; transition:all 0.3s ease;">
                 <i class="fa-solid fa-sync-alt" style="color:#6366f1; font-size:18px;"></i>
                 <span>ركّز اليوم على تجديد العقود القريبة والانتباه للدفعات المتأخرة.</span>
             </div>
-            <div style="background:rgba(15,23,42,0.8); padding:14px; border-radius:12px; color:#cbd5f5; border-left:3px solid #10b981; display:flex; align-items:center; gap:10px; transition:all 0.3s ease;">
+            <div class="theme-bg-card" style="padding:14px; border-radius:12px; border-left:3px solid #10b981; display:flex; align-items:center; gap:10px; transition:all 0.3s ease;">
                 <i class="fa-solid fa-bolt" style="color:#10b981; font-size:18px;"></i>
                 <span>راقب عدادات الكهرباء والماء لضبط الاستهلاك وتقليل الفاقد.</span>
             </div>
-            <div style="background:rgba(15,23,42,0.8); padding:14px; border-radius:12px; color:#cbd5f5; border-left:3px solid #22d3ee; display:flex; align-items:center; gap:10px; transition:all 0.3s ease;">
+            <div class="theme-bg-card" style="padding:14px; border-radius:12px; border-left:3px solid #22d3ee; display:flex; align-items:center; gap:10px; transition:all 0.3s ease;">
                 <i class="fa-brands fa-whatsapp" style="color:#22d3ee; font-size:18px;"></i>
                 <span>فعّل تقارير واتساب الذكية للتذكير التلقائي بالمستحقات.</span>
             </div>
@@ -410,8 +410,8 @@ if (empty($financeLabels)) {
 
 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-gauge-high"></i> نبض المحفظة</h4>
-        <div style="display:grid; gap:12px; color:#e2e8f0;">
+        <h4 class="theme-text-accent" style="margin-top:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-gauge-high"></i> نبض المحفظة</h4>
+        <div class="theme-text-light" style="display:grid; gap:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-house-crack" style="color:#6366f1; font-size:14px;"></i> وحدات شاغرة</span>
                 <strong><?= $portfolioMetrics['vacant_units'] ?></strong>
@@ -431,8 +431,8 @@ if (empty($financeLabels)) {
         </div>
     </div>
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-rotate"></i> دوران العقود</h4>
-        <div style="display:grid; gap:12px; color:#e2e8f0;">
+        <h4 class="theme-text-accent" style="margin-top:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-rotate"></i> دوران العقود</h4>
+        <div class="theme-text-light" style="display:grid; gap:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-calendar-days" style="color:#f59e0b; font-size:14px;"></i> تجديد خلال 30 يوم</span>
                 <strong><?= $portfolioMetrics['renewals_30'] ?></strong>
@@ -452,7 +452,7 @@ if (empty($financeLabels)) {
         </div>
     </div>
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-sliders"></i> إجراءات سريعة</h4>
+        <h4 class="theme-text-accent" style="margin-top:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-sliders"></i> إجراءات سريعة</h4>
         <div style="display:grid; gap:10px;">
             <a href="index.php?p=contracts" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-file-pen"></i> <span>متابعة التجديدات</span></a>
             <a href="index.php?p=tenants" class="btn btn-dark" style="justify-content:center;"><i class="fa-solid fa-user-check"></i> <span>مراجعة المستأجرين</span></a>
@@ -464,8 +464,8 @@ if (empty($financeLabels)) {
 
 <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-layer-group"></i> توزيع المتأخرات حسب العمر</h4>
-        <div style="display:grid; gap:12px; color:#e2e8f0;">
+        <h4 class="theme-text-accent" style="margin-top:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-layer-group"></i> توزيع المتأخرات حسب العمر</h4>
+        <div class="theme-text-light" style="display:grid; gap:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-check-circle" style="color:#10b981; font-size:14px;"></i> مستحقات حالية</span>
                 <strong><?= number_format($paymentAging['current']) ?></strong>
@@ -489,8 +489,8 @@ if (empty($financeLabels)) {
         </div>
     </div>
     <div class="card" style="padding:20px;">
-        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-clipboard-check"></i> جودة البيانات والجاهزية</h4>
-        <div style="display:grid; gap:12px; color:#e2e8f0;">
+        <h4 class="theme-text-accent" style="margin-top:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-clipboard-check"></i> جودة البيانات والجاهزية</h4>
+        <div class="theme-text-light" style="display:grid; gap:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-user-slash" style="color:#ef4444; font-size:14px;"></i> مستأجرون ببيانات ناقصة</span>
                 <strong><?= $dataQuality['tenants_missing_contact'] ?></strong>
@@ -736,8 +736,8 @@ if (empty($financeLabels)) {
     </div>
 
     <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px;">
-        <div style="background:rgba(15,23,42,0.9); padding:18px; border-radius:14px; border:1px solid rgba(99,102,241,0.2);">
-            <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-list-check" style="color:#6366f1;"></i> توصيات فورية</h4>
+        <div class="theme-bg-section" style=" padding:18px; border-radius:14px; border:1px solid rgba(99,102,241,0.2);">
+            <h4 class="theme-text-accent" style="margin-top:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-list-check" style="color:#6366f1;"></i> توصيات فورية</h4>
             <?php if (!empty($recommendations)): ?>
                 <ul style="padding-inline-start:0; color:#cbd5f5; margin:0; list-style:none;">
                     <?php foreach ($recommendations as $idx => $rec): ?>
@@ -760,8 +760,8 @@ if (empty($financeLabels)) {
                 </div>
             <?php endif; ?>
         </div>
-    <div style="background:rgba(15,23,42,0.9); padding:18px; border-radius:14px; border:1px solid rgba(239,68,68,0.2);">
-        <h4 style="margin-top:0; color:#a5b4fc; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> أعلى مخاطر التعثر</h4>
+    <div class="theme-bg-section" style=" padding:18px; border-radius:14px; border:1px solid rgba(239,68,68,0.2);">
+        <h4 class="theme-text-accent" style="margin-top:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> أعلى مخاطر التعثر</h4>
         <?php if (!empty($riskTenants)): ?>
             <?php foreach ($riskTenants as $tenant): ?>
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px dashed #1f2937; transition:all 0.3s ease;" onmouseover="this.style.background='rgba(30,41,59,0.4)'; this.style.paddingRight='8px'; this.style.paddingLeft='8px'; this.style.borderRadius='8px';" onmouseout="this.style.background='transparent'; this.style.paddingRight='0'; this.style.paddingLeft='0';">
