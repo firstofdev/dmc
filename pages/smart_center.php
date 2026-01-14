@@ -195,7 +195,7 @@ $smartFeatures = [
 <div class="card" style="margin-bottom:30px;">
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-            <h2 style="margin:0; font-size:24px"><i class="fa-solid fa-brain"></i> مركز التمكين الذكي الشامل</h2>
+            <h2 style="margin:0; font-size:24px"><i class="fa-solid fa-microchip" style="margin-left:10px;color:var(--primary)"></i> مركز التمكين الذكي الشامل</h2>
             <p style="margin:8px 0 0; color:var(--muted)">واجهة تجمع كل عناصر القوة التشغيلية والتحليلية للنظام.</p>
         </div>
         <div style="text-align:left; color:#22c55e; font-weight:700;">

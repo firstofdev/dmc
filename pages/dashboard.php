@@ -357,9 +357,9 @@ if (empty($financeLabels)) {
             <a href="index.php?p=properties" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-building"></i> إدارة العقارات</a>
             <a href="index.php?p=units" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-house-laptop"></i> إدارة الوحدات</a>
             <a href="index.php?p=contracts" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-file-signature"></i> العقود الذكية</a>
-            <a href="index.php?p=payments" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-money-bill-trend-up"></i> متابعة الدفعات</a>
-            <a href="index.php?p=maintenance" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-toolbox"></i> طلبات الصيانة</a>
-            <a href="index.php?p=smart_center" class="btn btn-primary" style="justify-content:center; width:100%;"><i class="fa-solid fa-microchip"></i> مركز التمكين الذكي</a>
+            <a href="index.php?p=reports" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-file-invoice-dollar"></i> التقارير المالية</a>
+            <a href="index.php?p=lease_calendar" class="btn btn-dark" style="justify-content:center; width:100%;"><i class="fa-solid fa-calendar-check"></i> تقويم العقود</a>
+            <a href="index.php?p=smart_center" class="btn btn-primary" style="justify-content:center; width:100%;"><i class="fa-solid fa-microchip"></i> التمكين الذكي</a>
         </div>
     </div>
     <div class="card" style="padding:20px;">

@@ -18,6 +18,7 @@ $page_titles = [
     'settings' => 'الإعدادات',
     'smart_center' => 'مركز التمكين الذكي',
     'reports' => 'التقارير المالية',
+    'lease_calendar' => 'تقويم العقود و ROI',
 ];
 $page_key = array_key_exists($p, $page_titles) ? $p : 'dashboard';
 $page_title = $page_titles[$page_key] ?? 'لوحة القيادة';
