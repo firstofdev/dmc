@@ -874,6 +874,16 @@ $current_theme = $settingsMap['theme'] ?? 'dark';
             50% { transform: scale(1.15) rotate(5deg); }
             75% { transform: scale(1.25) rotate(-5deg); }
         }
+        
+        /* Unit Card Styles */
+        .unit-card {
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .unit-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(99,102,241,0.3);
+            border-color: rgba(99,102,241,0.4);
+        }
     </style>
 </head>
 <body data-page="<?= htmlspecialchars($page_key) ?>" class="<?= $current_theme === 'light' ? 'light-theme' : '' ?>">

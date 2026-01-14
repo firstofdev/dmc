@@ -58,8 +58,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     }
     $contract_id = $pdo->lastInsertId();
     
-    // تحديث حالة الوحدة إلى مؤجرة
-    $pdo->prepare("UPDATE units SET status='rented' WHERE id=?")->execute([$_POST['uid']]);
+    // تحديث حالة الوحدة إلى مؤجرة وتحديث اسم المستأجر
+    $tenantNameColumn = tenant_name_column($pdo);
+    $tenantData = $pdo->prepare("SELECT $tenantNameColumn AS name FROM tenants WHERE id=?");
+    $tenantData->execute([$tenantId]);
+    $tenant = $tenantData->fetch();
+    
+    if ($tenant) {
+        $pdo->prepare("UPDATE units SET status='rented', tenant_name=? WHERE id=?")->execute([$tenant['name'], $unitId]);
+    } else {
+        $pdo->prepare("UPDATE units SET status='rented' WHERE id=?")->execute([$unitId]);
+    }
     
     // التوجيه فوراً لصفحة التوقيع والتصوير
     echo "<script>window.location='index.php?p=contract_view&id=$contract_id';</script>";
@@ -68,7 +77,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
 // الحذف
 if (isset($_POST['delete_id'])) {
     $c = $pdo->query("SELECT unit_id FROM contracts WHERE id=".$_POST['delete_id'])->fetch();
-    if($c) $pdo->prepare("UPDATE units SET status='available' WHERE id=?")->execute([$c['unit_id']]);
+    if($c) {
+        // إعادة تعيين حالة الوحدة إلى خالية ومسح اسم المستأجر
+        $pdo->prepare("UPDATE units SET status='available', tenant_name=NULL WHERE id=?")->execute([$c['unit_id']]);
+    }
     $pdo->prepare("DELETE FROM contracts WHERE id=?")->execute([$_POST['delete_id']]);
     echo "<script>window.location='index.php?p=contracts';</script>";
 }
