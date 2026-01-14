@@ -3,11 +3,59 @@
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     $start = $_POST['start_date'];
     $end = $_POST['end_date'];
-    $amount = $_POST['amount'];
+    $tenantId = isset($_POST['tid']) ? (int) $_POST['tid'] : 0;
+    $unitId = isset($_POST['uid']) ? (int) $_POST['uid'] : 0;
+
+    if ($tenantId <= 0 || $unitId <= 0) {
+        die("<div class='alert alert-danger'>الرجاء اختيار مستأجر ووحدة صحيحة.</div>");
+    }
+
+    $amountInput = $_POST['amount'] ?? 0;
+    $baseAmount = is_numeric($amountInput) ? max(0, (float) $amountInput) : 0;
+    $taxMode = $_POST['tax_mode'] ?? 'without';
+    $taxIncluded = $taxMode === 'with' ? 1 : 0;
+    $taxPercentInput = $_POST['tax_percent'] ?? 0;
+    $taxAmountInput = $_POST['tax_amount'] ?? 0;
+
+    // أولوية الضريبة: النسبة أولاً، ثم المبلغ الثابت إن لم تُحدد النسبة
+    $taxPercent = 0;
+    if ($taxIncluded && is_numeric($taxPercentInput)) {
+        $taxPercent = min(max((float) $taxPercentInput, 0), 100);
+    }
+
+    $taxAmount = 0;
+    if ($taxIncluded) {
+        if ($taxPercent > 0) {
+            $taxAmount = round($baseAmount * ($taxPercent / 100), 2);
+        } elseif (is_numeric($taxAmountInput)) {
+            $taxAmount = max(0, (float) $taxAmountInput);
+        }
+    }
+
+    $totalAmount = $taxIncluded ? ($baseAmount + $taxAmount) : $baseAmount;
+
+    // توحيد الحسبة مع الدوال المساعدة (لتقليل التكرار وضمان التطابق)
+    $normalized = contract_amount_parts([
+        'total_amount' => $totalAmount,
+        'tax_included' => $taxIncluded,
+        'tax_amount' => $taxAmount,
+        'tax_percent' => $taxPercent,
+    ]);
+    $taxIncluded = $normalized['tax_included'] ? 1 : 0;
+    $taxAmount = $normalized['tax_amount'];
+    $taxPercent = $normalized['tax_percent'];
+    $totalAmount = $normalized['total'];
+    $baseAmount = $normalized['base_amount'];
+    $status = 'active';
     
     // إدخال العقد
-    $stmt = $pdo->prepare("INSERT INTO contracts (tenant_id, unit_id, start_date, end_date, total_amount, status) VALUES (?,?,?,?,?, 'active')");
-    $stmt->execute([$_POST['tid'], $_POST['uid'], $start, $end, $amount]);
+    if (table_has_column($pdo, 'contracts', 'tax_included')) {
+        $stmt = $pdo->prepare("INSERT INTO contracts (tenant_id, unit_id, start_date, end_date, total_amount, tax_included, tax_percent, tax_amount, status) VALUES (?,?,?,?,?,?,?,?,?)");
+        $stmt->execute([$tenantId, $unitId, $start, $end, $totalAmount, $taxIncluded, $taxPercent, $taxAmount, $status]);
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO contracts (tenant_id, unit_id, start_date, end_date, total_amount, status) VALUES (?,?,?,?,?, ?)");
+        $stmt->execute([$tenantId, $unitId, $start, $end, $totalAmount, $status]);
+    }
     $contract_id = $pdo->lastInsertId();
     
     // تحديث حالة الوحدة إلى مؤجرة
@@ -24,6 +72,8 @@ if (isset($_POST['delete_id'])) {
     $pdo->prepare("DELETE FROM contracts WHERE id=?")->execute([$_POST['delete_id']]);
     echo "<script>window.location='index.php?p=contracts';</script>";
 }
+
+$defaultVatPercent = (float) get_setting('vat_percent', 15);
 ?>
 
 <div class="card">
@@ -52,12 +102,25 @@ if (isset($_POST['delete_id'])) {
                 </tr>
             </thead>
             <tbody>
-                <?php while($r = $conts->fetch()): ?>
+                <?php while($r = $conts->fetch()):
+                    $parts = contract_amount_parts($r);
+                    $taxIncluded = $parts['tax_included'];
+                    $taxAmount = $parts['tax_amount'];
+                    $taxPercent = $parts['tax_percent'];
+                    $baseAmount = $parts['base_amount'];
+                ?>
                 <tr style="border-bottom:1px solid #333">
                     <td style="padding:10px">#<?= $r['id'] ?></td>
                     <td style="padding:10px; font-weight:bold"><?= $r['tname'] ?></td>
                     <td style="padding:10px"><?= $r['unit_name'] ?> <small>(<?= $r['type'] ?>)</small></td>
-                    <td style="padding:10px"><?= number_format($r['total_amount']) ?></td>
+                    <td style="padding:10px">
+                        <?= number_format($r['total_amount']) ?>
+                        <?php if ($taxIncluded): ?>
+                            <div style="color:#a3e635; font-size:12px; margin-top:4px;">
+                                يشمل ضريبة <?= number_format($taxAmount) ?><?= $taxPercent > 0 ? ' (' . $taxPercent . '%)' : '' ?>
+                            </div>
+                        <?php endif; ?>
+                    </td>
                     <td style="padding:10px; display:flex; gap:5px">
                         <a href="index.php?p=contract_view&id=<?= $r['id'] ?>" class="btn btn-primary btn-sm">التفاصيل والتوقيع</a>
                         <form method="POST" onsubmit="return confirm('حذف العقد؟');" style="margin:0">
@@ -71,6 +134,56 @@ if (isset($_POST['delete_id'])) {
         </table>
     <?php endif; ?>
 </div>
+
+<script>
+    (function() {
+        const baseInput = document.getElementById('baseAmount');
+        const taxMode = document.getElementById('taxMode');
+        const taxPercent = document.getElementById('taxPercent');
+        const taxAmount = document.getElementById('taxAmount');
+        const totalPreview = document.getElementById('totalPreview');
+
+        function formatTotal(value) {
+            try {
+                return value.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } catch (e) {
+                return value.toFixed(2);
+            }
+        }
+
+        function refreshTax() {
+            const base = parseFloat(baseInput?.value || '0') || 0;
+            const mode = taxMode?.value || 'without';
+            let percent = parseFloat(taxPercent?.value || '0') || 0;
+            let tAmount = parseFloat(taxAmount?.value || '0') || 0;
+
+            percent = Math.min(Math.max(percent, 0), 100);
+
+            if (mode === 'with') {
+                if (taxPercent) { taxPercent.removeAttribute('disabled'); }
+                if (percent > 0) {
+                    tAmount = parseFloat((base * (percent / 100)).toFixed(2));
+                }
+            } else {
+                tAmount = 0;
+                if (taxPercent) { taxPercent.setAttribute('disabled', 'disabled'); }
+            }
+
+            if (taxAmount) { taxAmount.value = tAmount.toFixed(2); }
+            const total = base + tAmount;
+            if (totalPreview) { totalPreview.textContent = formatTotal(total); }
+        }
+
+        ['input', 'change'].forEach(evt => {
+            if (baseInput) baseInput.addEventListener(evt, refreshTax);
+            if (taxMode) taxMode.addEventListener(evt, refreshTax);
+            if (taxPercent) taxPercent.addEventListener(evt, refreshTax);
+            if (taxAmount) taxAmount.addEventListener(evt, refreshTax);
+        });
+
+        document.addEventListener('DOMContentLoaded', refreshTax);
+    })();
+</script>
 
 <div id="contModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; justify-content:center; align-items:center;">
     <div class="modal-content" style="background:#1a1a1a; padding:25px; border-radius:15px; width:500px;">
@@ -106,9 +219,34 @@ if (isset($_POST['delete_id'])) {
                 <div><label class="inp-label">تاريخ الانتهاء</label><input type="date" name="end_date" class="inp" required style="width:100%"></div>
             </div>
             
-            <div style="margin-bottom:20px">
-                <label class="inp-label">قيمة العقد الإجمالية</label>
-                <input type="number" name="amount" class="inp" required style="width:100%">
+            <div style="margin-bottom:12px">
+                <label class="inp-label">قيمة العقد الأساسية (بدون ضريبة)</label>
+                <input type="number" name="amount" id="baseAmount" class="inp" step="0.01" min="0" required style="width:100%">
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px">
+                <div>
+                    <label class="inp-label">الضريبة</label>
+                    <select name="tax_mode" id="taxMode" class="inp" required style="width:100%">
+                        <option value="without">بدون ضريبة</option>
+                        <option value="with">شامل ضريبة القيمة المضافة</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="inp-label">نسبة الضريبة %</label>
+                    <input type="number" name="tax_percent" id="taxPercent" class="inp" step="0.01" value="<?= $defaultVatPercent ?>" style="width:100%">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; align-items:end; margin-bottom:15px">
+                <div>
+                    <label class="inp-label">مبلغ الضريبة (قابل للتعديل)</label>
+                    <input type="number" name="tax_amount" id="taxAmount" class="inp" step="0.01" value="0.00" style="width:100%">
+                </div>
+                <div style="background:#0f172a; color:#e5e7eb; padding:12px; border-radius:10px;">
+                    <div style="font-size:12px; color:#9ca3af;">الإجمالي بعد الضريبة</div>
+                    <div id="totalPreview" style="font-size:20px; font-weight:800;">0.00</div>
+                </div>
             </div>
             
             <button class="btn btn-primary" style="width:100%; justify-content:center; padding:12px">حفظ ومتابعة للتوقيع <i class="fa-solid fa-arrow-left"></i></button>

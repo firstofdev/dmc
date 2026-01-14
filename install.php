@@ -46,7 +46,11 @@ $sql_commands = [
     "CREATE TABLE IF NOT EXISTS contracts (
         id INT AUTO_INCREMENT PRIMARY KEY,
         tenant_id INT, unit_id INT, start_date DATE, end_date DATE,
-        total_amount DECIMAL(15,2), payment_cycle VARCHAR(50),
+        total_amount DECIMAL(15,2),
+        tax_included TINYINT(1) DEFAULT 0,
+        tax_percent DECIMAL(5,2) DEFAULT 0.00,
+        tax_amount DECIMAL(15,2) DEFAULT 0.00,
+        payment_cycle VARCHAR(50),
         signature_img LONGTEXT, status VARCHAR(20) DEFAULT 'active',
         notes TEXT, services_cost DECIMAL(15,2) DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

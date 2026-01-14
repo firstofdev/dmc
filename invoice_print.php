@@ -8,6 +8,11 @@ $companyName = get_setting('company_name', 'اسم الشركة غير محدد'
 $currencyCode = get_setting('currency_code', 'ر.س');
 // رابط للتحقق من العقد (QR Data)
 $qrData = "CONTRACT-{$c['id']}-{$c['full_name']}-AMOUNT-{$c['total_amount']}";
+$amountParts = contract_amount_parts($c);
+$taxIncluded = $amountParts['tax_included'];
+$taxAmount = $amountParts['tax_amount'];
+$taxPercent = $amountParts['tax_percent'];
+$baseAmount = $amountParts['base_amount'];
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -42,7 +47,11 @@ $qrData = "CONTRACT-{$c['id']}-{$c['full_name']}-AMOUNT-{$c['total_amount']}";
         <h3>3. المدة والقيمة</h3>
         <table>
             <tr><th>مدة العقد</th><td>من: <b><?= $c['start_date'] ?></b> إلى: <b><?= $c['end_date'] ?></b></td></tr>
-            <tr><th>القيمة الإجمالية</th><td><b><?= number_format($c['total_amount']) ?></b> <?= htmlspecialchars($currencyCode) ?></td></tr>
+            <tr><th>القيمة الأساسية</th><td><b><?= number_format($baseAmount, 2) ?></b> <?= htmlspecialchars($currencyCode) ?></td></tr>
+            <?php if ($taxIncluded): ?>
+                <tr><th>ضريبة القيمة المضافة</th><td><b><?= number_format($taxAmount, 2) ?></b> (<?= $taxPercent ?>%)</td></tr>
+            <?php endif; ?>
+            <tr><th>الإجمالي النهائي</th><td><b><?= number_format($c['total_amount'], 2) ?></b> <?= htmlspecialchars($currencyCode) ?></td></tr>
         </table>
 
         <div style="display:flex; justify-content:space-between; margin-top:60px">

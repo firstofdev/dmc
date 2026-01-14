@@ -35,6 +35,9 @@ CREATE TABLE `contracts` (
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
   `total_amount` decimal(15,2) NOT NULL,
+  `tax_included` tinyint(1) DEFAULT '0',
+  `tax_percent` decimal(5,2) DEFAULT '0.00',
+  `tax_amount` decimal(15,2) DEFAULT '0.00',
   `paid_amount` decimal(15,2) DEFAULT '0.00',
   `status` enum('active','expired') DEFAULT 'active',
   `signature_img` longtext
