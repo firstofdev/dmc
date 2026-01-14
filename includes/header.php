@@ -791,19 +791,19 @@ $company_name_safe = htmlspecialchars($company_name);
         <a href="index.php?p=tenants" class="nav-link <?= $p=='tenants'?'active':'' ?>"><i class="fa-solid fa-users"></i> <span>المستأجرين</span></a>
         <a href="index.php?p=lease_calendar" class="nav-link <?= $p=='lease_calendar'?'active':'' ?>"><i class="fa-solid fa-calendar-days"></i> <span>تقويم العقود</span></a>
         
-        <div style="height:1px; background:var(--border); margin:12px 0; opacity:0.5"></div>
+        <div class="nav-divider"></div>
         
         <a href="index.php?p=alerts" class="nav-link <?= $p=='alerts'?'active':'' ?>"><i class="fa-solid fa-bell"></i> <span>التنبيهات</span></a>
         <a href="index.php?p=maintenance" class="nav-link <?= $p=='maintenance'?'active':'' ?>"><i class="fa-solid fa-wrench"></i> <span>الصيانة</span></a>
         <a href="index.php?p=vendors" class="nav-link <?= $p=='vendors'?'active':'' ?>"><i class="fa-solid fa-user-tie"></i> <span>المقاولين</span></a>
         
-        <div style="height:1px; background:var(--border); margin:12px 0; opacity:0.5"></div>
+        <div class="nav-divider"></div>
         
         <a href="index.php?p=reports" class="nav-link <?= $p=='reports'?'active':'' ?>"><i class="fa-solid fa-chart-line"></i> <span>التقارير المالية</span></a>
         <a href="index.php?p=smart_center" class="nav-link <?= $p=='smart_center'?'active':'' ?>"><i class="fa-solid fa-brain"></i> <span>التمكين الذكي</span></a>
         
         <?php if($role === 'admin'): ?>
-        <div style="height:1px; background:var(--border); margin:12px 0; opacity:0.5"></div>
+        <div class="nav-divider"></div>
         <a href="index.php?p=users" class="nav-link <?= $p=='users'?'active':'' ?>"><i class="fa-solid fa-user-gear"></i> <span>المستخدمين</span></a>
         <?php endif; ?>
         
