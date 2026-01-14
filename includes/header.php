@@ -54,14 +54,20 @@ $company_name_safe = htmlspecialchars($company_name);
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <?php
     // استخدام FontAwesome المحلي إذا كان متوفراً، وإلا استخدم CDN
-    $localFA = 'resources/fontawesome/css/all.min.css';
-    $fallbackFA = 'resources/fontawesome/css/fallback.css';
+    $localFA = __DIR__ . '/../resources/fontawesome/css/all.min.css';
+    $fallbackFA = __DIR__ . '/../resources/fontawesome/css/fallback.css';
+    $localFAPath = 'resources/fontawesome/css/all.min.css';
+    $fallbackFAPath = 'resources/fontawesome/css/fallback.css';
+    
     if (file_exists($localFA)): ?>
-    <link rel="stylesheet" href="<?= $localFA ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars($localFAPath, ENT_QUOTES, 'UTF-8') ?>">
     <?php else: ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" crossorigin="anonymous">
-    <!-- Fallback icons in case FontAwesome doesn't load -->
-    <link rel="stylesheet" href="<?= $fallbackFA ?>">
+    <?php endif;
+    
+    // Always load fallback CSS as a safety net
+    if (file_exists($fallbackFA)): ?>
+    <link rel="stylesheet" href="<?= htmlspecialchars($fallbackFAPath, ENT_QUOTES, 'UTF-8') ?>">
     <?php endif; ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>

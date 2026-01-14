@@ -26,8 +26,9 @@
 .fa-rotate::before { content: "🔄"; }
 
 /* نمط عام للأيقونات البديلة */
-.fa-solid, .fa-regular {
-    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif !important;
+.fa-solid:not([class*="fa-"]):not(.fa-loaded),
+.fa-regular:not([class*="fa-"]):not(.fa-loaded) {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
     font-style: normal;
     font-variant: normal;
     text-rendering: auto;
