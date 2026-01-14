@@ -52,7 +52,23 @@ $company_name_safe = htmlspecialchars($company_name);
     <meta charset="UTF-8">
     <title><?= $company_name_safe ?> - النظام المتكامل</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <?php
+    // استخدام FontAwesome المحلي إذا كان متوفراً، وإلا استخدم CDN
+    $localFA = __DIR__ . '/../resources/fontawesome/css/all.min.css';
+    $fallbackFA = __DIR__ . '/../resources/fontawesome/css/fallback.css';
+    $localFAPath = 'resources/fontawesome/css/all.min.css';
+    $fallbackFAPath = 'resources/fontawesome/css/fallback.css';
+    
+    if (file_exists($localFA)): ?>
+    <link rel="stylesheet" href="<?= htmlspecialchars($localFAPath, ENT_QUOTES, 'UTF-8') ?>">
+    <?php else: ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" crossorigin="anonymous">
+    <?php endif;
+    
+    // Always load fallback CSS as a safety net
+    if (file_exists($fallbackFA)): ?>
+    <link rel="stylesheet" href="<?= htmlspecialchars($fallbackFAPath, ENT_QUOTES, 'UTF-8') ?>">
+    <?php endif; ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ENHANCED MODERN DARK THEME */
@@ -105,27 +121,41 @@ $company_name_safe = htmlspecialchars($company_name);
         }
         ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-thumb { background:var(--scrollbar); border-radius:10px; }
 
-        /* Enhanced Sidebar with Modern Animations */
+        /* Revolutionary Floating Sidebar Design */
         .sidebar { 
-            width:280px; 
-            background:var(--sidebar-bg); 
-            border-left:1px solid var(--border); 
+            width:300px; 
+            background:transparent; 
+            border:none; 
             display:flex; 
             flex-direction:column; 
-            padding:30px 20px; 
+            padding:40px 25px; 
             z-index:20; 
-            box-shadow:var(--sidebar-shadow); 
-            backdrop-filter: blur(18px); 
             position:relative;
-            overflow:hidden;
+            overflow:visible;
         }
         .sidebar::before {
             content:'';
             position:absolute;
+            top:20px;
+            right:15px;
+            bottom:20px;
+            left:15px;
+            background:var(--sidebar-bg); 
+            border-radius:30px;
+            border:1px solid var(--border); 
+            box-shadow:var(--sidebar-shadow); 
+            backdrop-filter: blur(18px);
+            z-index:-1;
+        }
+        .sidebar::after {
+            content:'';
+            position:absolute;
             inset:0;
-            background:linear-gradient(180deg, rgba(99,102,241,0.03) 0%, transparent 50%, rgba(168,85,247,0.03) 100%);
+            background:linear-gradient(180deg, rgba(99,102,241,0.05) 0%, transparent 50%, rgba(168,85,247,0.05) 100%);
             opacity:0.6;
             animation:pulseGlow 8s ease-in-out infinite;
+            pointer-events:none;
+            border-radius:30px;
         }
         @keyframes pulseGlow {
             0%, 100% { opacity:0.4; }
@@ -137,7 +167,7 @@ $company_name_safe = htmlspecialchars($company_name);
             margin: 0 auto 20px; 
             border-radius: 50%; 
             background: var(--logo-bg); 
-            border: 2px solid var(--border); 
+            border: 3px solid var(--border); 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -147,11 +177,12 @@ $company_name_safe = htmlspecialchars($company_name);
             animation:floatLogo 6s ease-in-out infinite; 
             position:relative;
             cursor:pointer;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4), inset 0 2px 10px rgba(255,255,255,0.1);
         }
         .logo-wrapper::before { 
             content:''; 
             position:absolute; 
-            inset:-2px; 
+            inset:-3px; 
             border-radius:50%; 
             background:linear-gradient(135deg, var(--primary), var(--accent), var(--accent-2)); 
             opacity:0; 
@@ -159,11 +190,11 @@ $company_name_safe = htmlspecialchars($company_name);
             z-index:0; 
             animation:rotateBorder 8s linear infinite; 
         }
-        .logo-wrapper:hover::before { opacity:0.7; }
+        .logo-wrapper:hover::before { opacity:1; }
         .logo-wrapper:hover { 
             border-color: var(--primary); 
-            box-shadow: var(--glow-strong), 0 0 80px rgba(99,102,241,0.4), inset 0 0 30px rgba(99,102,241,0.1); 
-            transform: scale(1.12) rotate(-8deg); 
+            box-shadow: var(--glow-strong), 0 0 80px rgba(99,102,241,0.5), inset 0 0 30px rgba(99,102,241,0.15); 
+            transform: scale(1.15) rotate(-8deg); 
         }
         .logo-img { 
             width: 100%; 
@@ -172,28 +203,30 @@ $company_name_safe = htmlspecialchars($company_name);
             image-rendering: -webkit-optimize-contrast; 
             position:relative; 
             z-index:1;
-            filter: drop-shadow(0 4px 12px rgba(99,102,241,0.3));
+            filter: drop-shadow(0 4px 16px rgba(99,102,241,0.4));
             transition: all 0.5s ease;
         }
         .logo-wrapper:hover .logo-img {
-            transform: scale(1.05);
-            filter: drop-shadow(0 8px 24px rgba(99,102,241,0.6)) brightness(1.1);
+            transform: scale(1.08);
+            filter: drop-shadow(0 8px 24px rgba(99,102,241,0.7)) brightness(1.15);
         }
+        /* Revolutionary Navigation Links - No Boxes, Pure Icons */
         .nav-link { 
             display:flex; 
             align-items:center; 
-            gap:14px; 
-            padding:14px 16px; 
-            margin-bottom:8px; 
-            border-radius:12px; 
+            gap:18px; 
+            padding:16px 20px; 
+            margin-bottom:10px; 
+            border-radius:18px; 
             color:var(--muted); 
             text-decoration:none; 
             font-weight:500; 
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
             position:relative; 
-            overflow:hidden;
+            overflow:visible;
             opacity:0;
             animation: slideInRight 0.6s ease forwards;
+            background:transparent;
         }
         @keyframes slideInRight {
             from {
@@ -221,62 +254,63 @@ $company_name_safe = htmlspecialchars($company_name);
         .nav-link::before {
             content:'';
             position:absolute;
-            left:-100%;
-            top:0;
-            width:100%;
-            height:100%;
-            background:linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition:0.5s;
-        }
-        .nav-link:hover::before {
-            left:100%;
-        }
-        .nav-link::after { 
-            content:''; 
-            position:absolute; 
-            inset:0; 
-            background:linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.08)); 
+            inset:-2px;
+            background:linear-gradient(135deg, rgba(99,102,241,0.25), rgba(168,85,247,0.15)); 
             opacity:0; 
-            transition:opacity 0.4s ease; 
-            border-radius:14px;
+            transition:all 0.4s ease; 
+            border-radius:20px;
+            z-index:-1;
         }
-        .nav-link:hover::after, .nav-link.active::after { opacity:1; }
+        .nav-link:hover::before, .nav-link.active::before { 
+            opacity:1; 
+        }
+        .nav-link::after {
+            content:'';
+            position:absolute;
+            left:0;
+            top:50%;
+            transform:translateY(-50%);
+            width:4px;
+            height:0;
+            background:linear-gradient(180deg, var(--primary), var(--accent));
+            border-radius:0 4px 4px 0;
+            transition:height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            height:60%;
+        }
         .nav-link:hover, .nav-link.active { 
             color:var(--nav-hover-text); 
-            transform:translateX(-6px) scale(1.02); 
-            box-shadow: 0 8px 24px rgba(99,102,241,0.2);
+            transform:translateX(-8px); 
+            background:rgba(99,102,241,0.08);
+            box-shadow: 0 8px 30px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
         }
+        /* Pure Icons - NO Background Boxes! */
         .nav-link i { 
-            width:36px; 
-            height:36px; 
-            min-width:36px;
-            display:flex; 
-            align-items:center; 
-            justify-content:center; 
-            font-size:16px; 
-            background:linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.1)); 
-            border-radius:10px; 
-            color:var(--primary); 
+            font-size:20px; 
+            color:var(--muted); 
             position:relative; 
             z-index:1; 
             transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 4px 12px rgba(99,102,241,0.15);
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+            width:24px;
+            text-align:center;
         }
         .nav-link:hover i, .nav-link.active i { 
-            background:linear-gradient(135deg, var(--primary), var(--accent)); 
-            color:white; 
-            box-shadow:0 12px 28px rgba(99,102,241,0.5), inset 0 1px 3px rgba(255,255,255,0.2); 
-            transform:scale(1.15) rotate(-8deg); 
+            color:var(--primary); 
+            transform:scale(1.3) rotate(-8deg); 
+            filter: drop-shadow(0 4px 16px rgba(99,102,241,0.6)) drop-shadow(0 0 20px rgba(99,102,241,0.8));
         }
         .nav-link:active i {
-            transform:scale(1.05) rotate(-4deg);
+            transform:scale(1.2) rotate(-4deg);
         }
         .nav-link span { 
             position:relative; 
             z-index:1;
-            letter-spacing:0.3px;
-            font-size:14px;
+            letter-spacing:0.4px;
+            font-size:15px;
             line-height:1.4;
+            font-weight:600;
         }
 
         /* Main Content */
@@ -525,18 +559,33 @@ $company_name_safe = htmlspecialchars($company_name);
         /* Sidebar Divider */
         .nav-divider { 
             height:1px; 
-            background:var(--border); 
-            margin:12px 0; 
-            opacity:0.5;
-            transition: opacity 0.3s ease;
+            background:linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent); 
+            margin:20px 0; 
+            opacity:0.6;
+            transition: all 0.3s ease;
+            position:relative;
+        }
+        .nav-divider::before {
+            content:'';
+            position:absolute;
+            left:50%;
+            top:50%;
+            transform:translate(-50%, -50%);
+            width:6px;
+            height:6px;
+            background:var(--primary);
+            border-radius:50%;
+            box-shadow:0 0 10px rgba(99,102,241,0.6);
         }
 
         body.sidebar-collapsed .sidebar { width:90px; padding:20px 12px; }
-        body.sidebar-collapsed .sidebar .nav-link { justify-content:center; gap:0; padding:12px; }
+        body.sidebar-collapsed .sidebar::before { right:10px; left:10px; }
+        body.sidebar-collapsed .sidebar .nav-link { justify-content:center; gap:0; padding:14px; }
         body.sidebar-collapsed .sidebar .nav-link span { display:none; }
+        body.sidebar-collapsed .sidebar .nav-link i { font-size:22px; }
         body.sidebar-collapsed .sidebar .logo-wrapper { width:70px; height:70px; margin-bottom:16px; padding:10px; }
         body.sidebar-collapsed .sidebar h4, body.sidebar-collapsed .sidebar .tagline { display:none; }
-        body.sidebar-collapsed .sidebar .nav-divider { margin:8px auto; width:40px; }
+        body.sidebar-collapsed .sidebar .nav-divider { margin:12px auto; width:40px; }
         body.sidebar-collapsed .main { padding:35px; }
         
         /* Enhanced Cards & Tables with Advanced Effects */

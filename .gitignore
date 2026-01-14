@@ -1,0 +1,38 @@
+# Test files
+test_*.html
+test_*.php
+
+# Uploaded files (user content)
+uploads/*
+!uploads/.gitkeep
+
+# Backups
+backups/*
+!backups/.gitkeep
+
+# Logs
+*.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+/tmp/*
+*.tmp
+*.temp
+
+# FontAwesome local installation (will be installed by user)
+resources/fontawesome/css/all.min.css
+resources/fontawesome/css/fontawesome.min.css
+resources/fontawesome/webfonts/*.woff*
+resources/fontawesome/webfonts/*.ttf
+resources/fontawesome/webfonts/*.eot
+resources/fontawesome/webfonts/*.svg
