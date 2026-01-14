@@ -88,11 +88,11 @@ try {
     $meterRows = [];
 }
 
-$taxIncluded = isset($c['tax_included']) ? ((int) $c['tax_included'] === 1) : false;
-$taxAmount = isset($c['tax_amount']) ? (float) $c['tax_amount'] : 0;
-$taxPercent = isset($c['tax_percent']) ? (float) $c['tax_percent'] : 0;
-$baseAmount = (float) $c['total_amount'] - $taxAmount;
-if ($baseAmount < 0) { $baseAmount = (float) $c['total_amount']; }
+$amountParts = contract_amount_parts($c);
+$taxIncluded = $amountParts['tax_included'];
+$taxAmount = $amountParts['tax_amount'];
+$taxPercent = $amountParts['tax_percent'];
+$baseAmount = $amountParts['base_amount'];
 $currencyCode = get_setting('currency_code', 'ر.س');
 ?>
 

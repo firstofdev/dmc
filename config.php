@@ -485,4 +485,27 @@ function generate_backup_sql(PDO $pdo): string {
 
     return $sqlScript;
 }
+
+/**
+ * يحسب تفاصيل المبلغ للعقد (أساسي / ضريبة / إجمالي) مع حماية من القيم السالبة.
+ */
+function contract_amount_parts(array $row): array {
+    $total = isset($row['total_amount']) ? (float) $row['total_amount'] : 0.0;
+    $taxIncluded = isset($row['tax_included']) && (int) $row['tax_included'] === 1;
+    $taxAmountRaw = isset($row['tax_amount']) ? (float) $row['tax_amount'] : 0.0;
+    $taxPercentRaw = isset($row['tax_percent']) ? (float) $row['tax_percent'] : 0.0;
+    $taxAmount = $taxAmountRaw > 0 ? $taxAmountRaw : 0.0;
+    $taxPercent = $taxPercentRaw > 0 ? min($taxPercentRaw, 100.0) : 0.0;
+
+    $base = $taxIncluded ? ($total - $taxAmount) : $total;
+    if ($base < 0) { $base = $total; }
+
+    return [
+        'total' => $total,
+        'tax_included' => $taxIncluded,
+        'tax_amount' => $taxAmount,
+        'tax_percent' => $taxPercent,
+        'base_amount' => $base,
+    ];
+}
 ?>

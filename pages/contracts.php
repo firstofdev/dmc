@@ -3,18 +3,19 @@
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     $start = $_POST['start_date'];
     $end = $_POST['end_date'];
-    $baseAmount = max(0, (float) ($_POST['amount'] ?? 0));
+    $amountInput = $_POST['amount'] ?? 0;
+    $baseAmount = is_numeric($amountInput) ? max(0, (float) $amountInput) : 0;
     $taxMode = $_POST['tax_mode'] ?? 'without';
     $taxIncluded = $taxMode === 'with' ? 1 : 0;
-    $taxPercentInput = isset($_POST['tax_percent']) ? (float) $_POST['tax_percent'] : 0;
-    $taxAmountInput = isset($_POST['tax_amount']) ? (float) $_POST['tax_amount'] : 0;
-    $taxPercent = $taxIncluded ? max(0, $taxPercentInput) : 0;
+    $taxPercentInput = $_POST['tax_percent'] ?? 0;
+    $taxAmountInput = $_POST['tax_amount'] ?? 0;
+    $taxPercent = $taxIncluded && is_numeric($taxPercentInput) ? min(max((float) $taxPercentInput, 0), 100) : 0;
     $taxAmount = 0;
     if ($taxIncluded) {
         if ($taxPercent > 0) {
             $taxAmount = round($baseAmount * ($taxPercent / 100), 2);
         } else {
-            $taxAmount = max(0, $taxAmountInput);
+            $taxAmount = is_numeric($taxAmountInput) ? max(0, (float) $taxAmountInput) : 0;
         }
     }
     $totalAmount = $baseAmount + $taxAmount;
@@ -74,12 +75,12 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
                 </tr>
             </thead>
             <tbody>
-                <?php while($r = $conts->fetch()): 
-                    $taxIncluded = (int)($r['tax_included'] ?? 0) === 1;
-                    $taxAmount = (float)($r['tax_amount'] ?? 0);
-                    $taxPercent = (float)($r['tax_percent'] ?? 0);
-                    $baseAmount = (float)($r['total_amount'] ?? 0) - $taxAmount;
-                    if ($baseAmount < 0) { $baseAmount = (float)($r['total_amount'] ?? 0); }
+                <?php while($r = $conts->fetch()):
+                    $parts = contract_amount_parts($r);
+                    $taxIncluded = $parts['tax_included'];
+                    $taxAmount = $parts['tax_amount'];
+                    $taxPercent = $parts['tax_percent'];
+                    $baseAmount = $parts['base_amount'];
                 ?>
                 <tr style="border-bottom:1px solid #333">
                     <td style="padding:10px">#<?= $r['id'] ?></td>
@@ -88,7 +89,9 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
                     <td style="padding:10px">
                         <?= number_format($r['total_amount']) ?>
                         <?php if ($taxIncluded): ?>
-                            <div style="color:#a3e635; font-size:12px; margin-top:4px;">يشمل ضريبة <?= number_format($taxAmount) ?> (<?= $taxPercent ?>%)</div>
+                            <div style="color:#a3e635; font-size:12px; margin-top:4px;">
+                                يشمل ضريبة <?= number_format($taxAmount) ?><?= $taxPercent > 0 ? ' (' . $taxPercent . '%)' : '' ?>
+                            </div>
                         <?php endif; ?>
                     </td>
                     <td style="padding:10px; display:flex; gap:5px">
@@ -112,7 +115,6 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
         const taxPercent = document.getElementById('taxPercent');
         const taxAmount = document.getElementById('taxAmount');
         const totalPreview = document.getElementById('totalPreview');
-        const finalAmount = document.getElementById('finalAmount');
 
         function formatTotal(value) {
             try {
@@ -129,6 +131,7 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
             let tAmount = parseFloat(taxAmount?.value || '0') || 0;
 
             if (percent < 0) { percent = 0; }
+            if (percent > 100) { percent = 100; }
 
             if (mode === 'with') {
                 if (taxPercent) { taxPercent.removeAttribute('disabled'); }
@@ -143,7 +146,6 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
             if (taxAmount) { taxAmount.value = tAmount.toFixed(2); }
             const total = base + tAmount;
             if (totalPreview) { totalPreview.textContent = formatTotal(total); }
-            if (finalAmount) { finalAmount.value = total.toFixed(2); }
         }
 
         ['input', 'change'].forEach(evt => {
@@ -220,7 +222,6 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
                     <div id="totalPreview" style="font-size:20px; font-weight:800;">0.00</div>
                 </div>
             </div>
-            <input type="hidden" name="final_amount" id="finalAmount" value="0">
             
             <button class="btn btn-primary" style="width:100%; justify-content:center; padding:12px">حفظ ومتابعة للتوقيع <i class="fa-solid fa-arrow-left"></i></button>
         </form>
