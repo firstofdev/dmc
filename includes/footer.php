@@ -21,6 +21,62 @@
     (function() {
         var searchInput = document.getElementById('globalSearch');
         var resultLabel = document.getElementById('searchCount');
+        var clearButton = document.getElementById('clearSearch');
+        var pageContext = (document.body && document.body.dataset.page) ? document.body.dataset.page : 'dashboard';
+        var smartHintText = document.getElementById('smartHintText');
+        var smartAssist = document.getElementById('smartAssist');
+        var refreshHint = document.getElementById('refreshHint');
+        var smartHints = {
+            dashboard: [
+                'راقب العقود المنتهية هذا الشهر وابدأ بتجديدها مبكراً.',
+                'راجع تحصيل الشهر الحالي لمعرفة اتجاه التدفق النقدي.'
+            ],
+            properties: [
+                'استخدم زر التعديل لملء نموذج العقار تلقائياً ثم حدّث البيانات.',
+                'أضف العنوان ورقم المشرف لتسهيل الوصول الميداني.'
+            ],
+            units: [
+                'ابحث باسم العقار أو حالة الوحدة لفرز الشاغرة سريعاً.',
+                'حدّث سعر الإيجار الفارغ لتظهر مؤشرات الإشغال بدقة.'
+            ],
+            contracts: [
+                'ابحث برقم العقد أو اسم المستأجر لإيجاد البنود الحرجة.',
+                'تأكد من إنشاء جدول دفعات لكل عقد جديد.'
+            ],
+            tenants: [
+                'فلترة بالاسم أو الهاتف لتحديد الحسابات التي تحتاج تحديث بيانات الاتصال.',
+                'أضف البريد والجوال لإرسال تذكيرات تحصيل أسرع.'
+            ],
+            alerts: [
+                'ابدأ بالتنبيهات ذات الأولوية لمعالجة المتأخرات سريعاً.',
+                'استخدم البحث لتصفية التنبيهات حسب المستأجر أو العقار.'
+            ],
+            maintenance: [
+                'رتّب المهام بحسب الأولوية واغلق المكتملة لتصفية القائمة.',
+                'اربط كل بلاغ بوحدة محددة لسهولة التتبع.'
+            ],
+            vendors: [
+                'سجل أرقام التواصل للمقاولين لتسريع الإحالات.',
+                'أضف تخصص المقاول ليسهل إيجاده في البلاغات.'
+            ],
+            users: [
+                'تحقق من صلاحيات المستخدمين قبل إضافة حساب جديد.',
+                'امنح صلاحية المشاهدة فقط للحسابات التجريبية.'
+            ],
+            settings: [
+                'حدّث الشعار واسم الشركة ليظهر في جميع الصفحات.',
+                'اضبط المنطقة الزمنية لضمان دقة التذكيرات.'
+            ],
+            smart_center: [
+                'استخدم مركز التمكين لمراجعة المؤشرات الذكية والتوصيات.',
+                'جرب البحث الذكي للوصول لأي عنصر قبل فتحه.'
+            ],
+            default: [
+                'استخدم البحث الذكي لتصفية أي جدول فوراً.',
+                'اضغط Ctrl + / للانتقال مباشرة لحقل البحث.'
+            ]
+        };
+        var hintIndex = 0;
         if (!searchInput) return;
 
         function updateTables() {
@@ -61,22 +117,45 @@
 
             if (resultLabel) {
                 if (totalRows === 0) {
-                    resultLabel.textContent = 'لا توجد جداول للبحث';
+                    resultLabel.innerHTML = '<i class="fa-solid fa-circle-info"></i> لا توجد جداول للبحث';
                 } else if (filter === '') {
-                    resultLabel.textContent = 'كل النتائج ظاهرة';
+                    resultLabel.innerHTML = '<i class="fa-solid fa-list-check"></i> كل النتائج ظاهرة';
                 } else {
-                    resultLabel.textContent = 'نتائج مطابقة: ' + totalVisible + ' من ' + totalRows;
+                    resultLabel.innerHTML = '<i class="fa-solid fa-list-check"></i> نتائج مطابقة: ' + totalVisible + ' من ' + totalRows;
                 }
             }
         }
 
         searchInput.addEventListener('input', updateTables);
+        if (clearButton) {
+            clearButton.addEventListener('click', function() {
+                searchInput.value = '';
+                updateTables();
+                searchInput.focus();
+            });
+        }
         document.addEventListener('keydown', function(event) {
             if (event.ctrlKey && event.key === '/') {
                 event.preventDefault();
                 searchInput.focus();
             }
         });
+
+        function setSmartHint() {
+            if (!smartHintText) return;
+            var list = smartHints[pageContext] || smartHints.default;
+            if (!list.length) return;
+            smartHintText.textContent = list[hintIndex % list.length];
+            hintIndex++;
+            if (smartAssist) {
+                smartAssist.classList.add('pulse');
+                setTimeout(function(){ smartAssist.classList.remove('pulse'); }, 350);
+            }
+        }
+        setSmartHint();
+        if (refreshHint) {
+            refreshHint.addEventListener('click', setSmartHint);
+        }
     })();
 
     // وظيفة البحث القديمة (للتوافق إن وُجدت حقول بحث مخصصة)
