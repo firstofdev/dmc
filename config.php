@@ -488,6 +488,7 @@ function generate_backup_sql(PDO $pdo): string {
 
 /**
  * يحسب تفاصيل المبلغ للعقد (أساسي / ضريبة / إجمالي) مع حماية من القيم السالبة.
+ * total_amount يمثل المبلغ النهائي المستحق. عند tax_included=false لا توجد ضريبة.
  */
 function contract_amount_parts(array $row): array {
     $total = isset($row['total_amount']) ? (float) $row['total_amount'] : 0.0;

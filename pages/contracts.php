@@ -33,6 +33,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     }
 
     $totalAmount = $taxIncluded ? ($baseAmount + $taxAmount) : $baseAmount;
+
+    // توحيد الحسبة مع الدوال المساعدة (لتقليل التكرار وضمان التطابق)
+    $normalized = contract_amount_parts([
+        'total_amount' => $totalAmount,
+        'tax_included' => $taxIncluded,
+        'tax_amount' => $taxAmount,
+        'tax_percent' => $taxPercent,
+    ]);
+    $taxIncluded = $normalized['tax_included'] ? 1 : 0;
+    $taxAmount = $normalized['tax_amount'];
+    $taxPercent = $normalized['tax_percent'];
+    $totalAmount = $normalized['total'];
+    $baseAmount = $normalized['base_amount'];
     $status = 'active';
     
     // إدخال العقد
@@ -149,7 +162,7 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
             if (mode === 'with') {
                 if (taxPercent) { taxPercent.removeAttribute('disabled'); }
                 if (percent > 0) {
-                    tAmount = Math.round(base * (percent / 100) * 100) / 100;
+                    tAmount = parseFloat((base * (percent / 100)).toFixed(2));
                 }
             } else {
                 tAmount = 0;
