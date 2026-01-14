@@ -16,16 +16,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     $taxIncluded = $taxMode === 'with' ? 1 : 0;
     $taxPercentInput = $_POST['tax_percent'] ?? 0;
     $taxAmountInput = $_POST['tax_amount'] ?? 0;
-    $taxPercent = $taxIncluded && is_numeric($taxPercentInput) ? min(max((float) $taxPercentInput, 0), 100) : 0;
+
+    $taxPercent = 0;
+    if ($taxIncluded && is_numeric($taxPercentInput)) {
+        $taxPercent = min(max((float) $taxPercentInput, 0), 100);
+    }
+
     $taxAmount = 0;
     if ($taxIncluded) {
         if ($taxPercent > 0) {
             $taxAmount = round($baseAmount * ($taxPercent / 100), 2);
-        } else {
-            $taxAmount = is_numeric($taxAmountInput) ? max(0, (float) $taxAmountInput) : 0;
+        } elseif (is_numeric($taxAmountInput)) {
+            $taxAmount = max(0, (float) $taxAmountInput);
         }
     }
-    $totalAmount = $baseAmount + $taxAmount;
+
+    $totalAmount = $taxIncluded ? ($baseAmount + $taxAmount) : $baseAmount;
     $status = 'active';
     
     // إدخال العقد
@@ -137,8 +143,7 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
             let percent = parseFloat(taxPercent?.value || '0') || 0;
             let tAmount = parseFloat(taxAmount?.value || '0') || 0;
 
-            if (percent < 0) { percent = 0; }
-            if (percent > 100) { percent = 100; }
+            percent = Math.min(Math.max(percent, 0), 100);
 
             if (mode === 'with') {
                 if (taxPercent) { taxPercent.removeAttribute('disabled'); }
