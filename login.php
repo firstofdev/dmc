@@ -337,6 +337,8 @@ try {
         .login-card .form-label {
             color: var(--text-color);
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            display: block;
+            margin-bottom: 0.5rem;
         }
         .login-card .btn-primary{
             background: linear-gradient(135deg, #38bdf8, #6366f1);
@@ -393,11 +395,11 @@ try {
             <form method="POST" class="text-start">
                 <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
                 <div class="mb-3">
-                    <label class="form-label text-light">اسم المستخدم</label>
+                    <label class="form-label">اسم المستخدم</label>
                     <input class="form-control" type="text" name="user" placeholder="ادخل اسم المستخدم" required>
                 </div>
                 <div class="mb-4">
-                    <label class="form-label text-light">كلمة المرور</label>
+                    <label class="form-label">كلمة المرور</label>
                     <input class="form-control" type="password" name="pass" placeholder="ادخل كلمة المرور" required>
                 </div>
                 <button class="btn btn-primary w-100">تسجيل الدخول</button>
@@ -406,6 +408,7 @@ try {
     </div>
     <script>
         // Login Page Theme Switcher
+        // Note: Uses localStorage since user is not authenticated yet (no database access)
         (function() {
             var themeToggle = document.getElementById('loginThemeToggle');
             var body = document.body;

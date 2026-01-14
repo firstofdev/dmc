@@ -36,3 +36,4 @@ resources/fontawesome/webfonts/*.woff*
 resources/fontawesome/webfonts/*.ttf
 resources/fontawesome/webfonts/*.eot
 resources/fontawesome/webfonts/*.svg
+theme-demo.html
