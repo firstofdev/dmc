@@ -213,10 +213,10 @@ try {
             <tr>
                 <td style="font-weight:bold">#<?= $contract['id'] ?></td>
                 <td><?= htmlspecialchars($contract['tenant_name']) ?><br>
-                    <small style="color:#888"><?= htmlspecialchars($contract['phone']) ?></small>
+                    <small style="color:var(--muted)"><?= htmlspecialchars($contract['phone']) ?></small>
                 </td>
                 <td><?= htmlspecialchars($contract['property_name']) ?><br>
-                    <small style="color:#888"><?= htmlspecialchars($contract['unit_name']) ?></small>
+                    <small style="color:var(--muted)"><?= htmlspecialchars($contract['unit_name']) ?></small>
                 </td>
                 <td><?= format_date($contract['end_date']) ?></td>
                 <td>
@@ -258,10 +258,10 @@ try {
             <tr>
                 <td style="font-weight:bold">#<?= $contract['id'] ?></td>
                 <td><?= htmlspecialchars($contract['tenant_name']) ?><br>
-                    <small style="color:#888"><?= htmlspecialchars($contract['phone']) ?></small>
+                    <small style="color:var(--muted)"><?= htmlspecialchars($contract['phone']) ?></small>
                 </td>
                 <td><?= htmlspecialchars($contract['property_name']) ?><br>
-                    <small style="color:#888"><?= htmlspecialchars($contract['unit_name']) ?></small>
+                    <small style="color:var(--muted)"><?= htmlspecialchars($contract['unit_name']) ?></small>
                 </td>
                 <td><?= format_date($contract['end_date']) ?></td>
                 <td>
@@ -303,10 +303,10 @@ try {
             <tr>
                 <td style="font-weight:bold">#<?= $contract['id'] ?></td>
                 <td><?= htmlspecialchars($contract['tenant_name']) ?><br>
-                    <small style="color:#888"><?= htmlspecialchars($contract['phone']) ?></small>
+                    <small style="color:var(--muted)"><?= htmlspecialchars($contract['phone']) ?></small>
                 </td>
                 <td><?= htmlspecialchars($contract['property_name']) ?><br>
-                    <small style="color:#888"><?= htmlspecialchars($contract['unit_name']) ?></small>
+                    <small style="color:var(--muted)"><?= htmlspecialchars($contract['unit_name']) ?></small>
                 </td>
                 <td><?= format_date($contract['end_date']) ?></td>
                 <td>

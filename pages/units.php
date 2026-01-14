@@ -214,13 +214,13 @@ $properties = $pdo->query("SELECT id, name FROM properties ORDER BY name")->fetc
             <div style="margin-bottom:15px">
                 <label style="display:block; margin-bottom:5px; color:#aaa">اسم المحل (اختياري)</label>
                 <input type="text" name="shop_name" id="u_shop_name" class="inp" style="width:100%; padding:10px; background:#333; border:1px solid #444; color:white; border-radius:5px;">
-                <small style="color:#888; font-size:12px;">يظهر بدلاً من اسم الوحدة في البطاقة</small>
+                <small style="color:var(--muted); font-size:12px;">يظهر بدلاً من اسم الوحدة في البطاقة</small>
             </div>
             
             <div style="margin-bottom:15px">
                 <label style="display:block; margin-bottom:5px; color:#aaa">شعار المحل (اختياري)</label>
                 <input type="file" name="shop_logo" id="u_shop_logo" accept="image/*" class="inp" style="width:100%; padding:8px; background:#333; border:1px solid #444; color:white; border-radius:5px;">
-                <small style="color:#888; font-size:12px;">يظهر في بطاقة الوحدة</small>
+                <small style="color:var(--muted); font-size:12px;">يظهر في بطاقة الوحدة</small>
                 <div id="current_logo_preview" style="margin-top:10px; display:none;">
                     <img id="logo_preview_img" src="" style="max-width:100px; border-radius:8px; border:2px solid #444;">
                 </div>

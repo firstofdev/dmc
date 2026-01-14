@@ -1150,6 +1150,73 @@ $current_theme = $settingsMap['theme'] ?? 'dark';
         body.light-theme .maintenance-banner i {
             color:#dc2626;
         }
+        
+        /* Utility Classes for Theme-Aware Styling */
+        .theme-bg-card {
+            background:rgba(15,23,42,0.8);
+            color:#cbd5f5;
+        }
+        
+        body.light-theme .theme-bg-card {
+            background:rgba(241,245,249,0.9);
+            color:#334155;
+        }
+        
+        .theme-bg-section {
+            background:rgba(15,23,42,0.9);
+        }
+        
+        body.light-theme .theme-bg-section {
+            background:rgba(248,250,252,0.95);
+        }
+        
+        .theme-text-muted {
+            color:#888;
+        }
+        
+        body.light-theme .theme-text-muted {
+            color:#64748b;
+        }
+        
+        .theme-text-secondary {
+            color:#94a3b8;
+        }
+        
+        body.light-theme .theme-text-secondary {
+            color:#64748b;
+        }
+        
+        .theme-text-light {
+            color:#e2e8f0;
+        }
+        
+        body.light-theme .theme-text-light {
+            color:#1e293b;
+        }
+        
+        .theme-text-accent {
+            color:#a5b4fc;
+        }
+        
+        body.light-theme .theme-text-accent {
+            color:#4f46e5;
+        }
+        
+        .theme-border-primary {
+            border-color:rgba(99,102,241,0.2);
+        }
+        
+        body.light-theme .theme-border-primary {
+            border-color:rgba(99,102,241,0.3);
+        }
+        
+        .theme-border-danger {
+            border-color:rgba(239,68,68,0.2);
+        }
+        
+        body.light-theme .theme-border-danger {
+            border-color:rgba(239,68,68,0.3);
+        }
     </style>
 </head>
 <body data-page="<?= htmlspecialchars($page_key) ?>" class="<?= $current_theme === 'light' ? 'light-theme' : '' ?>">
