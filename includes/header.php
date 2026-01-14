@@ -17,6 +17,7 @@ $page_titles = [
     'users' => 'المستخدمين',
     'settings' => 'الإعدادات',
     'smart_center' => 'مركز التمكين الذكي',
+    'reports' => 'التقارير المالية',
 ];
 $page_key = array_key_exists($p, $page_titles) ? $p : 'dashboard';
 $page_title = $page_titles[$page_key] ?? 'لوحة القيادة';
@@ -197,6 +198,7 @@ $company_name_safe = htmlspecialchars($company_name);
         <a href="index.php?p=alerts" class="nav-link <?= $p=='alerts'?'active':'' ?>"><i class="fa-solid fa-bell-concierge"></i> <span>التنبيهات</span></a>
         <a href="index.php?p=maintenance" class="nav-link <?= $p=='maintenance'?'active':'' ?>"><i class="fa-solid fa-toolbox"></i> <span>الصيانة</span></a>
         <a href="index.php?p=vendors" class="nav-link <?= $p=='vendors'?'active':'' ?>"><i class="fa-solid fa-people-carry-box"></i> <span>المقاولين</span></a>
+        <a href="index.php?p=reports" class="nav-link <?= $p=='reports'?'active':'' ?>"><i class="fa-solid fa-file-invoice-dollar"></i> <span>التقارير المالية</span></a>
         <a href="index.php?p=smart_center" class="nav-link <?= $p=='smart_center'?'active':'' ?>"><i class="fa-solid fa-microchip"></i> <span>التمكين الذكي</span></a>
         <?php if($role === 'admin'): ?>
         <a href="index.php?p=users" class="nav-link <?= $p=='users'?'active':'' ?>"><i class="fa-solid fa-user-shield"></i> <span>المستخدمين</span></a>

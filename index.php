@@ -10,7 +10,7 @@ $p = $_GET['p'] ?? 'dashboard';
 $allowed = [
     'dashboard', 'properties', 'units', 'tenants', 'tenant_view',
     'contracts', 'contract_view', 'maintenance', 'vendors', 'alerts', 
-    'settings', 'users', 'smart_center'
+    'settings', 'users', 'smart_center', 'reports'
 ];
 
 include 'includes/header.php';
