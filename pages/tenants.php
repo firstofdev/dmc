@@ -59,14 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['scan_id'])) {
             if ($ocrResult['success'] && !empty($ocrResult['data'])) {
                 $response['success'] = true;
                 $response['data'] = $ocrResult['data'];
-                // حفظ البيانات المستخرجة
-                if (!empty($_POST['temp_tenant_id'])) {
-                    $documentData = json_encode($ocrResult['data'], JSON_UNESCAPED_UNICODE);
-                    $pdo->prepare("UPDATE tenants SET document_data=? WHERE id=?")->execute([
-                        $documentData,
-                        $_POST['temp_tenant_id']
-                    ]);
-                }
+                // حفظ البيانات المستخرجة - تم إزالة temp_tenant_id لأسباب أمنية
+                // يمكن حفظ البيانات فقط عند إنشاء المستأجر فعلياً
             } else {
                 $response['error'] = $ocrResult['error'] ?? 'فشل في قراءة البيانات من الهوية';
             }

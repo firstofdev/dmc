@@ -177,7 +177,7 @@ INSERT INTO `settings` (`k`, `v`) VALUES
 ('payment_portal_url', ''),
 ('phone', ''),
 ('reporting_email', ''),
-('smart_features_mode', 'force'),
+('smart_features_mode', 'real'),
 ('support_email', ''),
 ('support_phone', ''),
 ('target_collection', '95'),

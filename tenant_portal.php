@@ -54,32 +54,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_payment'])) {
     
     if ($payId > 0) {
         try {
-            // في بيئة إنتاجية، هنا يجب التكامل مع بوابة دفع (مثل Stripe, Tap, HyperPay)
-            // نفترض أن الدفع تم بنجاح
-            
-            $pdo->prepare("UPDATE payments SET status='paid', paid_date=CURDATE(), paid_amount=amount WHERE id=?")->execute([$payId]);
-            
-            // تسجيل المعاملة
-            $stmt = $pdo->prepare("SELECT amount FROM payments WHERE id=?");
+            // التحقق من ملكية الدفعة
+            $stmt = $pdo->prepare("SELECT p.*, c.tenant_id FROM payments p 
+                                   JOIN contracts c ON p.contract_id = c.id 
+                                   WHERE p.id = ? AND p.status != 'paid'");
             $stmt->execute([$payId]);
-            $paymentAmount = $stmt->fetchColumn();
+            $payment = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            $pdo->prepare("INSERT INTO transactions (payment_id, amount_paid, payment_method, transaction_date, notes)
-                          VALUES (?, ?, ?, CURDATE(), ?)")
-                ->execute([$payId, $paymentAmount, $paymentMethod, 'دفع عبر بوابة المستأجر']);
-            
-            log_activity($pdo, "تم الدفع عبر البوابة - دفعة رقم: {$payId}", 'payment');
-            
-            $success = 'تم الدفع بنجاح! شكراً لك.';
-            
-            // إرسال تأكيد عبر واتساب
-            if (isset($AI) && isset($tenant['phone'])) {
-                $msg = "تم تأكيد دفع إيجار وحدة {$unit['unit_name']} بمبلغ {$paymentAmount}. شكراً لك!";
-                $AI->sendWhatsApp($tenant['phone'], $msg);
+            if (!$payment) {
+                $error = 'الدفعة غير موجودة أو تم دفعها مسبقاً.';
+            } else {
+                // ⚠️ تحذير أمني: في بيئة إنتاجية حقيقية، يجب التكامل مع بوابة دفع معتمدة
+                // مثل: Stripe, Tap, HyperPay, Moyasar
+                // يجب التحقق من نجاح الدفع الفعلي قبل تحديث الحالة
+                
+                // مثال: $paymentResult = processPaymentGateway($payId, $payment['amount']);
+                // if ($paymentResult['success']) { ... }
+                
+                // هذا الكود للتجربة فقط - لا تستخدمه في بيئة إنتاجية
+                $pdo->prepare("UPDATE payments SET status='paid', paid_date=CURDATE(), paid_amount=amount WHERE id=?")->execute([$payId]);
+                
+                // تسجيل المعاملة
+                $pdo->prepare("INSERT INTO transactions (payment_id, amount_paid, payment_method, transaction_date, notes)
+                              VALUES (?, ?, ?, CURDATE(), ?)")
+                    ->execute([$payId, $payment['amount'], $paymentMethod, 'دفع عبر بوابة المستأجر (للتجربة)']);
+                
+                log_activity($pdo, "تم الدفع عبر البوابة - دفعة رقم: {$payId} (وضع تجريبي)", 'payment');
+                
+                $success = 'تم تسجيل الدفع بنجاح! (وضع تجريبي)';
+                
+                // إرسال تأكيد عبر واتساب
+                if (isset($AI) && isset($tenant['phone'])) {
+                    $msg = "تم تأكيد دفع إيجار وحدة {$unit['unit_name']} بمبلغ {$payment['amount']}. شكراً لك!";
+                    $AI->sendWhatsApp($tenant['phone'], $msg);
+                }
             }
-            
         } catch (Exception $e) {
             $error = 'حدث خطأ أثناء معالجة الدفع. يرجى المحاولة لاحقاً.';
+            log_activity($pdo, "خطأ في معالجة الدفع: {$e->getMessage()}", 'error');
         }
     }
 }
