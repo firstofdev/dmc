@@ -8,15 +8,25 @@
                 var isLight = body.classList.contains('light-theme');
                 var newTheme = isLight ? 'dark' : 'light';
                 
+                // Add animation class
+                themeToggle.classList.add('theme-switching');
+                setTimeout(function() {
+                    themeToggle.classList.remove('theme-switching');
+                }, 600);
+                
                 if (isLight) {
                     body.classList.remove('light-theme');
                 } else {
                     body.classList.add('light-theme');
                 }
                 
-                // Update icon
+                // Update icon with smooth transition
                 var icon = themeToggle.querySelector('i');
-                icon.className = 'fa-solid fa-' + (isLight ? 'sun' : 'moon');
+                icon.style.opacity = '0';
+                setTimeout(function() {
+                    icon.className = 'fa-solid fa-' + (isLight ? 'sun' : 'moon');
+                    icon.style.opacity = '1';
+                }, 200);
                 
                 // Save to server
                 fetch('routes/toggle_theme.php', {

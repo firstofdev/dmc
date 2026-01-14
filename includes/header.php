@@ -139,6 +139,14 @@ $current_theme = $settingsMap['theme'] ?? 'dark';
             --glow-strong:0 0 30px rgba(99,102,241,0.25);
         }
         
+        /* Theme Transition Animations */
+        body, .sidebar::before, .card, .btn, .nav-link, .main, .modal-content, .inp, table td {
+            transition: background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
+                        color 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
         body.light-theme::before {
             background:
                 radial-gradient(circle at 15% 15%, rgba(99,102,241,0.08), transparent 35%),
@@ -788,6 +796,70 @@ $current_theme = $settingsMap['theme'] ?? 'dark';
             border-color:var(--primary); 
             background:rgba(99,102,241,0.15); 
             box-shadow: 0 8px 24px rgba(99,102,241,0.2);
+        }
+        
+        /* Enhanced Theme Toggle Button */
+        #themeToggle {
+            position: relative;
+            background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.15));
+            border: 2px solid rgba(99,102,241,0.4);
+            overflow: hidden;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #themeToggle::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.2), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        #themeToggle:hover::before {
+            opacity: 1;
+        }
+        #themeToggle:hover {
+            transform: scale(1.1) rotate(180deg);
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(99,102,241,0.6), 0 0 60px rgba(99,102,241,0.3), inset 0 0 20px rgba(99,102,241,0.2);
+            background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(168,85,247,0.3));
+        }
+        #themeToggle i {
+            font-size: 20px;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+        }
+        #themeToggle:hover i {
+            transform: scale(1.2);
+            filter: drop-shadow(0 4px 12px rgba(99,102,241,0.8)) drop-shadow(0 0 20px rgba(99,102,241,1));
+        }
+        #themeToggle.theme-switching {
+            animation: themeSwitchPulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #themeToggle.theme-switching i {
+            animation: iconSpinScale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes themeSwitchPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.15) rotate(90deg); }
+            50% { transform: scale(0.95) rotate(180deg); }
+            75% { transform: scale(1.1) rotate(270deg); }
+        }
+        @keyframes iconSpinScale {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(0.5) rotate(180deg); opacity: 0.3; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+        
+        body.light-theme #themeToggle {
+            background: linear-gradient(135deg, rgba(251,191,36,0.3), rgba(245,158,11,0.2));
+            border-color: rgba(251,191,36,0.5);
+        }
+        body.light-theme #themeToggle:hover {
+            background: linear-gradient(135deg, rgba(251,191,36,0.5), rgba(245,158,11,0.4));
+            box-shadow: 0 0 30px rgba(251,191,36,0.6), 0 0 60px rgba(251,191,36,0.3), inset 0 0 20px rgba(251,191,36,0.2);
         }
         .btn-sm { padding:8px 16px; font-size:12px; }
         .badge { 
