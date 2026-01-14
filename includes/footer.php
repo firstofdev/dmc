@@ -22,10 +22,11 @@
         var searchInput = document.getElementById('globalSearch');
         var resultLabel = document.getElementById('searchCount');
         var clearButton = document.getElementById('clearSearch');
-        var pageContext = (document.body && document.body.dataset.page) ? document.body.dataset.page : 'dashboard';
+        var pageContext = document.body.dataset.page || 'dashboard';
         var smartHintText = document.getElementById('smartHintText');
         var smartAssist = document.getElementById('smartAssist');
         var refreshHint = document.getElementById('refreshHint');
+        var PULSE_DURATION = 350;
         var smartHints = {
             dashboard: [
                 'راقب العقود المنتهية هذا الشهر وابدأ بتجديدها مبكراً.',
@@ -143,13 +144,15 @@
 
         function setSmartHint() {
             if (!smartHintText) return;
-            var list = smartHints[pageContext] || smartHints.default;
+            var list = smartHints[pageContext] || smartHints.default || [];
             if (!list.length) return;
-            smartHintText.textContent = list[hintIndex % list.length];
-            hintIndex++;
+            var idx = hintIndex % list.length;
+            smartHintText.textContent = list[idx];
+            var nextIndex = (hintIndex + 1) % list.length;
+            hintIndex = nextIndex;
             if (smartAssist) {
                 smartAssist.classList.add('pulse');
-                setTimeout(function(){ smartAssist.classList.remove('pulse'); }, 350);
+                setTimeout(function(){ smartAssist.classList.remove('pulse'); }, PULSE_DURATION);
             }
         }
         setSmartHint();

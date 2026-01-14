@@ -18,7 +18,8 @@ $page_titles = [
     'settings' => 'الإعدادات',
     'smart_center' => 'مركز التمكين الذكي',
 ];
-$page_title = $page_titles[$p] ?? 'لوحة القيادة';
+$page_key = array_key_exists($p, $page_titles) ? $p : 'dashboard';
+$page_title = $page_titles[$page_key] ?? 'لوحة القيادة';
 
 // جلب الشعار
 $settingsMap = [];
@@ -179,7 +180,7 @@ $company_name_safe = htmlspecialchars($company_name);
         @keyframes floatLogo { 0%, 100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
     </style>
 </head>
-<body data-page="<?= htmlspecialchars($p) ?>">
+<body data-page="<?= htmlspecialchars($page_key) ?>">
 
     <div class="sidebar">
     <div style="text-align:center; margin-bottom:30px">
@@ -233,7 +234,7 @@ $company_name_safe = htmlspecialchars($company_name);
     <div class="smart-toolbar">
         <div class="smart-search">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input id="globalSearch" type="search" placeholder="بحث ذكي داخل الصفحة والجداول..." autocomplete="off" aria-label="بحث ذكي">
+            <input id="globalSearch" type="search" placeholder="بحث ذكي داخل الصفحة والجداول..." autocomplete="off" aria-label="البحث في محتوى الصفحة والجداول">
             <button class="search-clear" type="button" id="clearSearch" title="مسح البحث">
                 <i class="fa-solid fa-xmark"></i>
             </button>
