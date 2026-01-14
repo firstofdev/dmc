@@ -112,7 +112,7 @@ $company_name_safe = htmlspecialchars($company_name);
             border-left:1px solid var(--border); 
             display:flex; 
             flex-direction:column; 
-            padding:25px; 
+            padding:30px 20px; 
             z-index:20; 
             box-shadow:var(--sidebar-shadow); 
             backdrop-filter: blur(18px); 
@@ -132,9 +132,9 @@ $company_name_safe = htmlspecialchars($company_name);
             50% { opacity:0.7; }
         }
         .logo-wrapper { 
-            width: 150px; 
-            height: 150px; 
-            margin: 0 auto 22px; 
+            width: 140px; 
+            height: 140px; 
+            margin: 0 auto 20px; 
             border-radius: 50%; 
             background: var(--logo-bg); 
             border: 2px solid var(--border); 
@@ -142,7 +142,7 @@ $company_name_safe = htmlspecialchars($company_name);
             align-items: center; 
             justify-content: center; 
             overflow: hidden; 
-            padding: 14px; 
+            padding: 15px; 
             transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
             animation:floatLogo 6s ease-in-out infinite; 
             position:relative;
@@ -182,10 +182,10 @@ $company_name_safe = htmlspecialchars($company_name);
         .nav-link { 
             display:flex; 
             align-items:center; 
-            gap:15px; 
-            padding:16px; 
-            margin-bottom:6px; 
-            border-radius:14px; 
+            gap:14px; 
+            padding:14px 16px; 
+            margin-bottom:8px; 
+            border-radius:12px; 
             color:var(--muted); 
             text-decoration:none; 
             font-weight:500; 
@@ -247,14 +247,15 @@ $company_name_safe = htmlspecialchars($company_name);
             box-shadow: 0 8px 24px rgba(99,102,241,0.2);
         }
         .nav-link i { 
-            width:40px; 
-            height:40px; 
+            width:36px; 
+            height:36px; 
+            min-width:36px;
             display:flex; 
             align-items:center; 
             justify-content:center; 
-            font-size:18px; 
+            font-size:16px; 
             background:linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.1)); 
-            border-radius:12px; 
+            border-radius:10px; 
             color:var(--primary); 
             position:relative; 
             z-index:1; 
@@ -274,6 +275,8 @@ $company_name_safe = htmlspecialchars($company_name);
             position:relative; 
             z-index:1;
             letter-spacing:0.3px;
+            font-size:14px;
+            line-height:1.4;
         }
 
         /* Main Content */
@@ -518,12 +521,22 @@ $company_name_safe = htmlspecialchars($company_name);
 
         .btn-icon { width:44px; height:44px; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; }
         .btn-small { padding:10px 14px; font-size:13px; border-radius:12px; }
+        
+        /* Sidebar Divider */
+        .nav-divider { 
+            height:1px; 
+            background:var(--border); 
+            margin:12px 0; 
+            opacity:0.5;
+            transition: opacity 0.3s ease;
+        }
 
         body.sidebar-collapsed .sidebar { width:90px; padding:20px 12px; }
-        body.sidebar-collapsed .sidebar .nav-link { justify-content:center; gap:0; }
+        body.sidebar-collapsed .sidebar .nav-link { justify-content:center; gap:0; padding:12px; }
         body.sidebar-collapsed .sidebar .nav-link span { display:none; }
-        body.sidebar-collapsed .sidebar .logo-wrapper { width:90px; height:90px; margin-bottom:16px; }
+        body.sidebar-collapsed .sidebar .logo-wrapper { width:70px; height:70px; margin-bottom:16px; padding:10px; }
         body.sidebar-collapsed .sidebar h4, body.sidebar-collapsed .sidebar .tagline { display:none; }
+        body.sidebar-collapsed .sidebar .nav-divider { margin:8px auto; width:40px; }
         body.sidebar-collapsed .main { padding:35px; }
         
         /* Enhanced Cards & Tables with Advanced Effects */
@@ -765,29 +778,40 @@ $company_name_safe = htmlspecialchars($company_name);
 <body data-page="<?= htmlspecialchars($page_key) ?>">
 
     <div class="sidebar">
-    <div style="text-align:center; margin-bottom:30px">
+    <div style="text-align:center; margin-bottom:25px">
         <div class="logo-wrapper"><img src="<?= $logo_src ?>" class="logo-img" alt="Logo"></div>
-        <h4 style="margin:10px 0 5px; font-weight:800"><?= $company_name_safe ?></h4>
-        <span class="tagline" style="font-size:12px; color:var(--primary); background:var(--tag-bg); padding:4px 10px; border-radius:20px">نظام الإدارة</span>
+        <h4 style="margin:12px 0 6px; font-weight:800; font-size:16px"><?= $company_name_safe ?></h4>
+        <span class="tagline" style="font-size:11px; color:var(--primary); background:var(--tag-bg); padding:5px 12px; border-radius:20px; display:inline-block">نظام الإدارة</span>
     </div>
-    <div style="flex:1; overflow-y:auto; padding-left:5px">
+    <div style="flex:1; overflow-y:auto; padding:0 2px">
         <a href="index.php?p=dashboard" class="nav-link <?= $p=='dashboard'?'active':'' ?>"><i class="fa-solid fa-gauge-high"></i> <span>لوحة القيادة</span></a>
         <a href="index.php?p=properties" class="nav-link <?= $p=='properties'?'active':'' ?>"><i class="fa-solid fa-building"></i> <span>العقارات</span></a>
         <a href="index.php?p=units" class="nav-link <?= $p=='units'?'active':'' ?>"><i class="fa-solid fa-house-circle-check"></i> <span>الوحدات</span></a>
         <a href="index.php?p=contracts" class="nav-link <?= $p=='contracts'?'active':'' ?>"><i class="fa-solid fa-file-contract"></i> <span>العقود</span></a>
         <a href="index.php?p=tenants" class="nav-link <?= $p=='tenants'?'active':'' ?>"><i class="fa-solid fa-users"></i> <span>المستأجرين</span></a>
         <a href="index.php?p=lease_calendar" class="nav-link <?= $p=='lease_calendar'?'active':'' ?>"><i class="fa-solid fa-calendar-days"></i> <span>تقويم العقود</span></a>
+        
+        <div style="height:1px; background:var(--border); margin:12px 0; opacity:0.5"></div>
+        
         <a href="index.php?p=alerts" class="nav-link <?= $p=='alerts'?'active':'' ?>"><i class="fa-solid fa-bell"></i> <span>التنبيهات</span></a>
         <a href="index.php?p=maintenance" class="nav-link <?= $p=='maintenance'?'active':'' ?>"><i class="fa-solid fa-wrench"></i> <span>الصيانة</span></a>
         <a href="index.php?p=vendors" class="nav-link <?= $p=='vendors'?'active':'' ?>"><i class="fa-solid fa-user-tie"></i> <span>المقاولين</span></a>
+        
+        <div style="height:1px; background:var(--border); margin:12px 0; opacity:0.5"></div>
+        
         <a href="index.php?p=reports" class="nav-link <?= $p=='reports'?'active':'' ?>"><i class="fa-solid fa-chart-line"></i> <span>التقارير المالية</span></a>
         <a href="index.php?p=smart_center" class="nav-link <?= $p=='smart_center'?'active':'' ?>"><i class="fa-solid fa-brain"></i> <span>التمكين الذكي</span></a>
+        
         <?php if($role === 'admin'): ?>
+        <div style="height:1px; background:var(--border); margin:12px 0; opacity:0.5"></div>
         <a href="index.php?p=users" class="nav-link <?= $p=='users'?'active':'' ?>"><i class="fa-solid fa-user-gear"></i> <span>المستخدمين</span></a>
         <?php endif; ?>
+        
         <a href="index.php?p=settings" class="nav-link <?= $p=='settings'?'active':'' ?>"><i class="fa-solid fa-sliders"></i> <span>الإعدادات</span></a>
     </div>
-    <a href="logout.php" class="nav-link" style="color:#ef4444; margin-top:10px"><i class="fa-solid fa-power-off"></i> <span>خروج</span></a>
+    <div style="padding-top:15px; border-top:1px solid var(--border); margin-top:15px">
+        <a href="logout.php" class="nav-link" style="color:#ef4444"><i class="fa-solid fa-power-off"></i> <span>خروج</span></a>
+    </div>
 </div>
 
 <div class="main">
