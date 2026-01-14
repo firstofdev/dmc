@@ -26,7 +26,7 @@ $page_title = $page_titles[$page_key] ?? 'لوحة القيادة';
 // جلب الشعار
 $settingsMap = [];
 try {
-    $stmt = $pdo->prepare("SELECT k, v FROM settings WHERE k IN ('logo','company_name','timezone','date_format','maintenance_mode','maintenance_message')");
+    $stmt = $pdo->prepare("SELECT k, v FROM settings WHERE k IN ('logo','company_name','timezone','date_format','maintenance_mode','maintenance_message','theme')");
     $stmt->execute();
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $settingsMap[$row['k']] = $row['v'];
@@ -45,6 +45,7 @@ $displayDate = date($dateFormat);
 $maintenanceEnabled = ($settingsMap['maintenance_mode'] ?? 'off') === 'on';
 $maintenanceMessage = $settingsMap['maintenance_message'] ?? 'النظام تحت صيانة مجدولة، قد تتأخر بعض الخدمات.';
 $company_name_safe = htmlspecialchars($company_name);
+$current_theme = $settingsMap['theme'] ?? 'dark';
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -106,6 +107,57 @@ $company_name_safe = htmlspecialchars($company_name);
             --tag-bg:rgba(99,102,241,0.12);
             --glow:0 0 25px rgba(99,102,241,0.25);
             --glow-strong:0 0 40px rgba(99,102,241,0.4);
+        }
+        
+        /* LIGHT THEME */
+        body.light-theme {
+            --bg:#f8fafc;
+            --card:#ffffff;
+            --border:#e2e8f0;
+            --text:#0f172a;
+            --muted:#64748b;
+            --sidebar-bg:#ffffff;
+            --sidebar-shadow:8px 0 40px rgba(0,0,0,0.08);
+            --logo-bg:radial-gradient(circle at center, rgba(99,102,241,0.1), rgba(255,255,255,0.9));
+            --nav-hover-bg:rgba(99,102,241,0.08);
+            --nav-hover-text:#0f172a;
+            --main-bg:linear-gradient(135deg, rgba(99,102,241,0.03), rgba(168,85,247,0.02));
+            --table-th:#475569;
+            --table-td-bg:#ffffff;
+            --table-td-border:#e2e8f0;
+            --btn-dark-bg:#f1f5f9;
+            --btn-dark-border:#cbd5e1;
+            --modal-overlay:rgba(0,0,0,0.4);
+            --modal-bg:#ffffff;
+            --modal-border:#e2e8f0;
+            --input-bg:#f8fafc;
+            --input-border:#cbd5e1;
+            --scrollbar:rgba(99,102,241,0.3);
+            --close-bg:rgba(239,68,68,0.1);
+            --tag-bg:rgba(99,102,241,0.1);
+            --glow:0 0 20px rgba(99,102,241,0.15);
+            --glow-strong:0 0 30px rgba(99,102,241,0.25);
+        }
+        
+        body.light-theme::before {
+            background:
+                radial-gradient(circle at 15% 15%, rgba(99,102,241,0.08), transparent 35%),
+                radial-gradient(circle at 85% 20%, rgba(168,85,247,0.08), transparent 35%),
+                radial-gradient(circle at 50% 80%, rgba(34,211,238,0.05), transparent 40%);
+        }
+        
+        body.light-theme .sidebar::before {
+            background:var(--sidebar-bg);
+            border:1px solid var(--border);
+        }
+        
+        body.light-theme .nav-link i {
+            color:var(--muted);
+        }
+        
+        body.light-theme .nav-link:hover i,
+        body.light-theme .nav-link.active i {
+            color:var(--primary);
         }
         * { box-sizing:border-box; outline:none; }
         body { font-family:'Tajawal'; background:var(--bg); color:var(--text); margin:0; display:flex; height:100vh; overflow:hidden; position:relative; }
@@ -822,9 +874,19 @@ $company_name_safe = htmlspecialchars($company_name);
             50% { transform: scale(1.15) rotate(5deg); }
             75% { transform: scale(1.25) rotate(-5deg); }
         }
+        
+        /* Unit Card Styles */
+        .unit-card {
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .unit-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(99,102,241,0.3);
+            border-color: rgba(99,102,241,0.4);
+        }
     </style>
 </head>
-<body data-page="<?= htmlspecialchars($page_key) ?>">
+<body data-page="<?= htmlspecialchars($page_key) ?>" class="<?= $current_theme === 'light' ? 'light-theme' : '' ?>">
 
     <div class="sidebar">
     <div style="text-align:center; margin-bottom:25px">
@@ -882,6 +944,9 @@ $company_name_safe = htmlspecialchars($company_name);
             <div style="color:var(--muted); font-size:14px; margin-top:5px">إدارة الأملاك الذكية</div>
         </div>
         <div class="header-actions">
+            <button class="btn btn-dark btn-icon" id="themeToggle" type="button" title="تبديل المظهر">
+                <i class="fa-solid fa-<?= $current_theme === 'light' ? 'moon' : 'sun' ?>"></i>
+            </button>
             <button class="btn btn-dark btn-icon" id="sidebarToggle" type="button" title="طي/إظهار القائمة">
                 <i class="fa-solid fa-bars"></i>
             </button>
