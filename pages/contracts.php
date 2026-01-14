@@ -149,7 +149,7 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
             if (mode === 'with') {
                 if (taxPercent) { taxPercent.removeAttribute('disabled'); }
                 if (percent > 0) {
-                    tAmount = Math.round(base * percent) / 100;
+                    tAmount = Math.round(base * (percent / 100) * 100) / 100;
                 }
             } else {
                 tAmount = 0;
