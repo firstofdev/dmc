@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     $taxIncluded = $taxMode === 'with' ? 1 : 0;
     $taxPercentInput = $_POST['tax_percent'] ?? 0;
     $taxAmountInput = $_POST['tax_amount'] ?? 0;
+    $paymentFrequency = $_POST['payment_frequency'] ?? 'monthly';
 
     // أولوية الضريبة: النسبة أولاً، ثم المبلغ الثابت إن لم تُحدد النسبة
     $taxPercent = 0;
@@ -50,8 +51,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     
     // إدخال العقد
     if (table_has_column($pdo, 'contracts', 'tax_included')) {
-        $stmt = $pdo->prepare("INSERT INTO contracts (tenant_id, unit_id, start_date, end_date, total_amount, tax_included, tax_percent, tax_amount, status) VALUES (?,?,?,?,?,?,?,?,?)");
-        $stmt->execute([$tenantId, $unitId, $start, $end, $totalAmount, $taxIncluded, $taxPercent, $taxAmount, $status]);
+        if (table_has_column($pdo, 'contracts', 'payment_frequency')) {
+            $stmt = $pdo->prepare("INSERT INTO contracts (tenant_id, unit_id, start_date, end_date, total_amount, tax_included, tax_percent, tax_amount, status, payment_frequency) VALUES (?,?,?,?,?,?,?,?,?,?)");
+            $stmt->execute([$tenantId, $unitId, $start, $end, $totalAmount, $taxIncluded, $taxPercent, $taxAmount, $status, $paymentFrequency]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO contracts (tenant_id, unit_id, start_date, end_date, total_amount, tax_included, tax_percent, tax_amount, status) VALUES (?,?,?,?,?,?,?,?,?)");
+            $stmt->execute([$tenantId, $unitId, $start, $end, $totalAmount, $taxIncluded, $taxPercent, $taxAmount, $status]);
+        }
     } else {
         $stmt = $pdo->prepare("INSERT INTO contracts (tenant_id, unit_id, start_date, end_date, total_amount, status) VALUES (?,?,?,?,?, ?)");
         $stmt->execute([$tenantId, $unitId, $start, $end, $totalAmount, $status]);
@@ -232,8 +238,19 @@ $defaultVatPercent = (float) get_setting('vat_percent', 15);
             </div>
             
             <div style="margin-bottom:12px">
-                <label class="inp-label">قيمة العقد الأساسية (بدون ضريبة)</label>
+                <label class="inp-label">دورة الدفع</label>
+                <select name="payment_frequency" class="inp" required style="width:100%">
+                    <option value="monthly">شهري</option>
+                    <option value="quarterly">ربع سنوي (كل 3 أشهر)</option>
+                    <option value="semi_annual">نصف سنوي (كل 6 أشهر)</option>
+                    <option value="annual">سنوي</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom:12px">
+                <label class="inp-label">القيمة السنوية للإيجار (بدون ضريبة)</label>
                 <input type="number" name="amount" id="baseAmount" class="inp" step="0.01" min="0" required style="width:100%">
+                <small style="color:#999; font-size:12px;">هذا هو إيجار السنة كاملة قبل إضافة الضريبة</small>
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px">

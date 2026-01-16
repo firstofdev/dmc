@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_prop'])) {
             <tbody>
                 <?php while($r = $props->fetch()): ?>
                 <tr style="border-bottom:1px solid #333;">
-                    <td style="padding:10px; font-weight:bold; color:white"><?= $r['name'] ?></td>
+                    <td style="padding:10px; font-weight:bold; color:black"><?= $r['name'] ?></td>
                     <td style="padding:10px"><?= $r['address'] ?></td>
                     <td style="padding:10px"><?= $r['manager'] ?></td>
                     <td style="padding:10px; display:flex; gap:10px;">

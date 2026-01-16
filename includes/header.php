@@ -1232,6 +1232,7 @@ $current_theme = $settingsMap['theme'] ?? 'dark';
         <a href="index.php?p=properties" class="nav-link <?= $p=='properties'?'active':'' ?>"><i class="fa-solid fa-building"></i> <span>العقارات</span></a>
         <a href="index.php?p=units" class="nav-link <?= $p=='units'?'active':'' ?>"><i class="fa-solid fa-house-circle-check"></i> <span>الوحدات</span></a>
         <a href="index.php?p=contracts" class="nav-link <?= $p=='contracts'?'active':'' ?>"><i class="fa-solid fa-file-contract"></i> <span>العقود</span></a>
+        <a href="index.php?p=payments" class="nav-link <?= $p=='payments'?'active':'' ?>"><i class="fa-solid fa-money-bill-wave"></i> <span>الدفعات</span></a>
         <a href="index.php?p=tenants" class="nav-link <?= $p=='tenants'?'active':'' ?>"><i class="fa-solid fa-users"></i> <span>المستأجرين</span></a>
         <a href="index.php?p=lease_calendar" class="nav-link <?= $p=='lease_calendar'?'active':'' ?>"><i class="fa-solid fa-calendar-days"></i> <span>تقويم العقود</span></a>
         
