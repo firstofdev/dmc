@@ -64,6 +64,50 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     }
     $contract_id = $pdo->lastInsertId();
     
+    // Generate automatic payment schedule based on payment frequency
+    $startDate = new DateTime($start);
+    $endDate = new DateTime($end);
+    
+    // Calculate number of payments and amount per payment
+    $frequencyMonths = [
+        'monthly' => 1,
+        'quarterly' => 3,
+        'semi_annual' => 6,
+        'annual' => 12
+    ];
+    
+    $monthsInterval = $frequencyMonths[$paymentFrequency] ?? 12;
+    $paymentAmount = $totalAmount / (12 / $monthsInterval); // Calculate payment per period
+    
+    // Generate payment schedule
+    $currentDate = clone $startDate;
+    $paymentNumber = 1;
+    
+    while ($currentDate < $endDate) {
+        $dueDate = clone $currentDate;
+        
+        // Check if we're past the end date
+        if ($dueDate > $endDate) {
+            break;
+        }
+        
+        // Create payment record
+        $paymentTitle = "دفعة الإيجار #$paymentNumber - " . match($paymentFrequency) {
+            'monthly' => 'شهري',
+            'quarterly' => 'ربع سنوي',
+            'semi_annual' => 'نصف سنوي',
+            'annual' => 'سنوي',
+            default => 'دورية'
+        };
+        
+        $stmt = $pdo->prepare("INSERT INTO payments (contract_id, title, amount, due_date, status, original_amount, remaining_amount) VALUES (?, ?, ?, ?, 'pending', ?, ?)");
+        $stmt->execute([$contract_id, $paymentTitle, $paymentAmount, $dueDate->format('Y-m-d'), $paymentAmount, $paymentAmount]);
+        
+        // Move to next payment date
+        $currentDate->modify("+$monthsInterval months");
+        $paymentNumber++;
+    }
+    
     // تحديث حالة الوحدة إلى مؤجرة وتحديث اسم المستأجر
     $tenantNameColumn = tenant_name_column($pdo);
     $tenantData = $pdo->prepare("SELECT $tenantNameColumn AS name FROM tenants WHERE id=?");

@@ -360,6 +360,103 @@ if (empty($financeLabels)) {
 }
 </style>
 
+<!-- Late Payments Alert Section -->
+<?php 
+$overduePayments = $pdo->query("
+    SELECT p.*, c.id as contract_id, t.name as tenant_name, t.phone as tenant_phone,
+           u.unit_name, pr.name as property_name,
+           DATEDIFF(CURDATE(), p.due_date) as days_overdue
+    FROM payments p
+    JOIN contracts c ON p.contract_id = c.id
+    JOIN tenants t ON c.tenant_id = t.id
+    JOIN units u ON c.unit_id = u.id
+    JOIN properties pr ON u.property_id = pr.id
+    WHERE p.status != 'paid' AND p.due_date < CURDATE()
+    ORDER BY p.due_date ASC
+    LIMIT 10
+")->fetchAll();
+
+if (count($overduePayments) > 0):
+?>
+<div class="card" style="margin-bottom:30px; background:linear-gradient(135deg, rgba(239,68,68,0.1), rgba(220,38,38,0.05)); border-right:4px solid #ef4444;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h3 style="margin:0; display:flex; align-items:center; gap:10px; color:#ef4444;">
+            <i class="fa-solid fa-exclamation-triangle"></i> تنبيه: دفعات متأخرة (<?= count($overduePayments) ?>)
+        </h3>
+        <a href="index.php?p=payments&status=pending" class="btn btn-danger btn-sm">
+            <i class="fa-solid fa-eye"></i> عرض الكل
+        </a>
+    </div>
+    
+    <div style="display:grid; gap:12px;">
+        <?php foreach ($overduePayments as $op): 
+            $urgencyClass = $op['days_overdue'] > 30 ? 'critical' : ($op['days_overdue'] > 14 ? 'high' : 'medium');
+            $urgencyColor = $op['days_overdue'] > 30 ? '#dc2626' : ($op['days_overdue'] > 14 ? '#ea580c' : '#f59e0b');
+        ?>
+        <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; border-right:3px solid <?= $urgencyColor ?>;">
+            <div style="flex:1;">
+                <div style="font-weight:bold; font-size:15px; margin-bottom:5px;">
+                    <?= htmlspecialchars($op['tenant_name']) ?> - <?= htmlspecialchars($op['unit_name']) ?>
+                </div>
+                <div style="color:#94a3b8; font-size:13px; margin-bottom:5px;">
+                    <i class="fa-solid fa-building"></i> <?= htmlspecialchars($op['property_name']) ?>
+                </div>
+                <div style="display:flex; gap:15px; font-size:13px;">
+                    <span style="color:#fbbf24;">
+                        <i class="fa-solid fa-calendar-xmark"></i> متأخر <?= $op['days_overdue'] ?> يوم
+                    </span>
+                    <span style="color:#a78bfa;">
+                        <i class="fa-solid fa-money-bill"></i> <?= number_format($op['amount'], 2) ?> ر.س
+                    </span>
+                </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <?php if (!empty($op['tenant_phone']) && is_whatsapp_configured()): ?>
+                <button onclick="sendWhatsAppReminder(<?= $op['id'] ?>, '<?= htmlspecialchars($op['tenant_phone']) ?>', '<?= htmlspecialchars($op['tenant_name']) ?>', <?= $op['amount'] ?>)" 
+                        class="btn btn-success btn-sm" title="إرسال تذكير واتساب">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </button>
+                <?php endif; ?>
+                <a href="index.php?p=payments" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-dollar-sign"></i> دفع
+                </a>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<script>
+function sendWhatsAppReminder(paymentId, phone, tenantName, amount) {
+    if (confirm('هل تريد إرسال تذكير واتساب إلى ' + tenantName + '؟')) {
+        const message = `مرحباً ${tenantName},\n\nهذا تذكير بدفعة الإيجار المتأخرة:\n\nالمبلغ: ${amount.toFixed(2)} ر.س\n\nيرجى سداد المبلغ في أقرب وقت ممكن.\n\nشكراً لتعاونكم`;
+        
+        // Send via AJAX
+        fetch('routes/whatsapp_send.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                phone: phone,
+                message: message,
+                payment_id: paymentId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('تم إرسال التذكير بنجاح عبر واتساب');
+            } else {
+                alert('حدث خطأ: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('حدث خطأ في الإرسال');
+        });
+    }
+}
+</script>
+<?php endif; ?>
+
 <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:20px; margin-bottom:30px;">
     <div class="card" style="padding:20px; background:linear-gradient(135deg, rgba(99,102,241,0.05), rgba(168,85,247,0.03));">
         <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-wand-magic-sparkles" style="color:#a855f7;"></i> لوحة التحكم الذكية للمالك</h3>
