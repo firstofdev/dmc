@@ -240,7 +240,7 @@ $contracts = $contractsQuery->fetchAll();
                                     <i class="fa-solid fa-clock"></i> تأجيل
                                 </button>
                                 <?php endif; ?>
-                                <a href="invoice_print.php?payment_id=<?= $p['id'] ?>" target="_blank" class="btn btn-dark btn-sm">
+                                <a href="invoice_tax.php?payment_id=<?= $p['id'] ?>" target="_blank" class="btn btn-dark btn-sm">
                                     <i class="fa-solid fa-print"></i>
                                 </a>
                             </div>
