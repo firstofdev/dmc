@@ -9,7 +9,7 @@ if(!isset($_SESSION['uid'])) { header("Location: login.php"); exit; }
 $p = $_GET['p'] ?? 'dashboard';
 $allowed = [
     'dashboard', 'properties', 'units', 'tenants', 'tenant_view',
-    'contracts', 'contract_view', 'maintenance', 'vendors', 'alerts', 
+    'contracts', 'contract_view', 'payments', 'maintenance', 'vendors', 'alerts', 
     'settings', 'users', 'smart_center', 'reports', 'lease_calendar', 'help'
 ];
 

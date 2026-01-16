@@ -24,6 +24,63 @@ if (!$c) {
     die("<div class='alert alert-danger'>عفواً، العقد غير موجود أو تم حذفه. <a href='index.php?p=contracts'>عودة</a></div>");
 }
 
+// معالجة رفع PDF العقد
+if (isset($_POST['upload_contract_pdf']) && isset($_FILES['contract_pdf'])) {
+    $file = $_FILES['contract_pdf'];
+    if ($file['error'] === 0) {
+        $allowed = ['application/pdf'];
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($file['tmp_name']);
+        
+        $maxSize = (int) get_setting('max_pdf_size', 10485760); // Default 10MB
+        
+        if (in_array($mime, $allowed) && $file['size'] <= $maxSize) {
+            $filename = 'contract_' . $id . '_' . time() . '.pdf';
+            $destination = 'uploads/' . $filename;
+            
+            if (move_uploaded_file($file['tmp_name'], $destination)) {
+                // Delete old PDF if exists
+                if (!empty($c['contract_pdf']) && file_exists($c['contract_pdf'])) {
+                    unlink($c['contract_pdf']);
+                }
+                
+                $pdo->prepare("UPDATE contracts SET contract_pdf = ? WHERE id = ?")->execute([$destination, $id]);
+                echo "<script>alert('تم رفع ملف العقد بنجاح'); window.location.href='index.php?p=contract_view&id=$id';</script>";
+            }
+        } else {
+            echo "<script>alert('الملف يجب أن يكون PDF وأقل من 10 ميجابايت');</script>";
+        }
+    }
+}
+
+// معالجة إضافة خدمة
+if (isset($_POST['add_service'])) {
+    try {
+        $serviceType = $_POST['service_type'];
+        $serviceName = $_POST['service_name'] ?? '';
+        $amount = floatval($_POST['service_amount'] ?? 0);
+        $frequency = $_POST['service_frequency'] ?? 'monthly';
+        $notes = $_POST['service_notes'] ?? '';
+        
+        $stmt = $pdo->prepare("INSERT INTO contract_services (contract_id, service_type, service_name, amount, billing_frequency, notes) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$id, $serviceType, $serviceName, $amount, $frequency, $notes]);
+        echo "<script>window.location.href='index.php?p=contract_view&id=$id';</script>";
+    } catch (Exception $e) {
+        echo "<script>alert('خطأ في إضافة الخدمة: " . $e->getMessage() . "');</script>";
+    }
+}
+
+// معالجة حذف خدمة
+if (isset($_POST['delete_service'])) {
+    try {
+        $serviceId = intval($_POST['service_id']);
+        $pdo->prepare("DELETE FROM contract_services WHERE id = ? AND contract_id = ?")->execute([$serviceId, $id]);
+        echo "<script>window.location.href='index.php?p=contract_view&id=$id';</script>";
+    } catch (Exception $e) {
+        echo "<script>alert('خطأ في حذف الخدمة');</script>";
+    }
+}
+
 // معالجة حفظ التوقيع
 if (isset($_POST['save_sig'])) {
     $img = $_POST['sig_data'];
@@ -171,6 +228,8 @@ $currencyCode = get_setting('currency_code', 'ر.س');
     <button onclick="switchTab('in')" class="nav-btn" id="btn-in">📷 صور الاستلام (قبل)</button>
     <button onclick="switchTab('out')" class="nav-btn" id="btn-out">📸 صور التسليم (بعد)</button>
     <button onclick="switchTab('meters')" class="nav-btn" id="btn-meters">⚡ عدادات الكهرباء والماء</button>
+    <button onclick="switchTab('services')" class="nav-btn" id="btn-services">🔌 الخدمات الإضافية</button>
+    <button onclick="switchTab('pdf')" class="nav-btn" id="btn-pdf">📄 ملف العقد PDF</button>
 </div>
 
 <div id="tab-sig" style="display:block;">
@@ -394,6 +453,197 @@ $currencyCode = get_setting('currency_code', 'ر.س');
     </div>
 </div>
 
+<!-- Services Tab -->
+<div id="tab-services" style="display:none;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+        <div class="card">
+            <h4><i class="fa-solid fa-plus-circle"></i> إضافة خدمة جديدة</h4>
+            <form method="POST">
+                <input type="hidden" name="add_service" value="1">
+                
+                <div style="margin-bottom:12px;">
+                    <label class="inp-label">نوع الخدمة</label>
+                    <select name="service_type" class="inp" required>
+                        <option value="electricity">كهرباء</option>
+                        <option value="water">مياه</option>
+                        <option value="internet">إنترنت</option>
+                        <option value="gas">غاز</option>
+                        <option value="other">أخرى</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom:12px;">
+                    <label class="inp-label">اسم الخدمة (اختياري)</label>
+                    <input type="text" name="service_name" class="inp" placeholder="مثال: اشتراك الإنترنت - stc">
+                </div>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+                    <div>
+                        <label class="inp-label">المبلغ</label>
+                        <input type="number" name="service_amount" class="inp" step="0.01" min="0" required>
+                    </div>
+                    <div>
+                        <label class="inp-label">دورة الفوترة</label>
+                        <select name="service_frequency" class="inp" required>
+                            <option value="monthly">شهري</option>
+                            <option value="quarterly">ربع سنوي</option>
+                            <option value="semi_annual">نصف سنوي</option>
+                            <option value="annual">سنوي</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom:12px;">
+                    <label class="inp-label">ملاحظات</label>
+                    <textarea name="service_notes" class="inp" rows="3" placeholder="أي ملاحظات حول الخدمة"></textarea>
+                </div>
+                
+                <button class="btn btn-primary" style="width:100%; justify-content:center;">
+                    <i class="fa-solid fa-plus"></i> إضافة الخدمة
+                </button>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h4><i class="fa-solid fa-list"></i> الخدمات المضافة</h4>
+            <?php
+            try {
+                $servicesStmt = $pdo->prepare("SELECT * FROM contract_services WHERE contract_id = ? ORDER BY created_at DESC");
+                $servicesStmt->execute([$id]);
+                $services = $servicesStmt->fetchAll();
+                
+                if (count($services) > 0):
+            ?>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <?php foreach ($services as $service): 
+                        $serviceLabels = [
+                            'electricity' => ['اسم' => 'كهرباء', 'أيقونة' => '⚡'],
+                            'water' => ['اسم' => 'مياه', 'أيقونة' => '💧'],
+                            'internet' => ['اسم' => 'إنترنت', 'أيقونة' => '🌐'],
+                            'gas' => ['اسم' => 'غاز', 'أيقونة' => '🔥'],
+                            'other' => ['اسم' => 'أخرى', 'أيقونة' => '📋'],
+                        ];
+                        $label = $serviceLabels[$service['service_type']] ?? ['اسم' => 'أخرى', 'أيقونة' => '📋'];
+                        
+                        $freqLabels = [
+                            'monthly' => 'شهري',
+                            'quarterly' => 'ربع سنوي',
+                            'semi_annual' => 'نصف سنوي',
+                            'annual' => 'سنوي',
+                        ];
+                        $freqLabel = $freqLabels[$service['billing_frequency']] ?? 'شهري';
+                    ?>
+                    <div style="background:#1a1a1a; padding:15px; border-radius:10px; border:1px solid #333;">
+                        <div style="display:flex; justify-content:space-between; align-items:start;">
+                            <div>
+                                <div style="font-size:18px; margin-bottom:5px;">
+                                    <?= $label['أيقونة'] ?> <?= $label['اسم'] ?>
+                                    <?php if (!empty($service['service_name'])): ?>
+                                        <span style="color:#999; font-size:14px;">- <?= htmlspecialchars($service['service_name']) ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <div style="color:#a5b4fc; font-size:20px; font-weight:bold; margin-bottom:5px;">
+                                    <?= number_format($service['amount'], 2) ?> ر.س
+                                </div>
+                                <div style="color:#999; font-size:13px;">
+                                    الفوترة: <?= $freqLabel ?>
+                                </div>
+                                <?php if (!empty($service['notes'])): ?>
+                                <div style="color:#94a3b8; font-size:12px; margin-top:8px; padding-top:8px; border-top:1px solid #333;">
+                                    <?= htmlspecialchars($service['notes']) ?>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                            <form method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذه الخدمة؟');" style="margin:0;">
+                                <input type="hidden" name="delete_service" value="1">
+                                <input type="hidden" name="service_id" value="<?= $service['id'] ?>">
+                                <button class="btn btn-danger btn-sm">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div style="color:#94a3b8; text-align:center; padding:30px;">
+                    لا توجد خدمات مضافة بعد. أضف أول خدمة من النموذج.
+                </div>
+            <?php endif; ?>
+            <?php } catch (Exception $e) { ?>
+                <div style="color:#ef4444; padding:15px; background:#2d1a1a; border-radius:8px;">
+                    خطأ في تحميل الخدمات. تأكد من تشغيل ملف upgrade_requirements.php
+                </div>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+
+<!-- PDF Tab -->
+<div id="tab-pdf" style="display:none;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+        <div class="card">
+            <h4><i class="fa-solid fa-upload"></i> رفع ملف العقد PDF</h4>
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="upload_contract_pdf" value="1">
+                
+                <div style="margin-bottom:15px; padding:20px; background:#1a1a1a; border-radius:10px; border:2px dashed #444; text-align:center;">
+                    <i class="fa-solid fa-file-pdf" style="font-size:48px; color:#ef4444; margin-bottom:10px;"></i>
+                    <div style="margin-bottom:15px;">
+                        <label for="contract_pdf_file" class="btn btn-primary" style="cursor:pointer;">
+                            <i class="fa-solid fa-folder-open"></i> اختر ملف PDF
+                        </label>
+                        <input type="file" name="contract_pdf" id="contract_pdf_file" accept=".pdf" required style="display:none;" onchange="showFileName(this)">
+                    </div>
+                    <div id="file_name" style="color:#999; font-size:14px;">لم يتم اختيار ملف</div>
+                    <div style="color:#999; font-size:12px; margin-top:10px;">
+                        الحد الأقصى: 10 ميجابايت | الصيغة: PDF فقط
+                    </div>
+                </div>
+                
+                <button class="btn btn-success" style="width:100%; justify-content:center;">
+                    <i class="fa-solid fa-upload"></i> رفع الملف
+                </button>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h4><i class="fa-solid fa-file-pdf"></i> ملف العقد الحالي</h4>
+            <?php if (!empty($c['contract_pdf']) && file_exists($c['contract_pdf'])): ?>
+                <div style="background:#1a1a1a; padding:20px; border-radius:10px; text-align:center;">
+                    <i class="fa-solid fa-file-pdf" style="font-size:64px; color:#ef4444; margin-bottom:15px;"></i>
+                    <div style="color:#a5b4fc; font-size:16px; margin-bottom:15px;">
+                        ملف العقد موجود
+                    </div>
+                    <div style="color:#999; font-size:12px; margin-bottom:15px;">
+                        <?= basename($c['contract_pdf']) ?>
+                    </div>
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <a href="<?= $c['contract_pdf'] ?>" target="_blank" class="btn btn-primary">
+                            <i class="fa-solid fa-eye"></i> عرض الملف
+                        </a>
+                        <a href="<?= $c['contract_pdf'] ?>" download class="btn btn-dark">
+                            <i class="fa-solid fa-download"></i> تحميل
+                        </a>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div style="color:#94a3b8; text-align:center; padding:40px;">
+                    <i class="fa-solid fa-file-circle-xmark" style="font-size:48px; margin-bottom:15px; opacity:0.5;"></i>
+                    <div>لم يتم رفع ملف العقد بعد</div>
+                </div>
+            <?php endif; ?>
+            
+            <div style="margin-top:20px; padding:15px; background:#0f172a; border-radius:8px; border-right:4px solid #6366f1;">
+                <div style="font-weight:bold; margin-bottom:8px;">💡 فائدة:</div>
+                <div style="color:#94a3b8; font-size:13px; line-height:1.6;">
+                    يمكنك رفع نسخة موقعة من العقد بصيغة PDF لحفظها مع بيانات العقد. سيتم استبدال الملف القديم تلقائياً عند رفع ملف جديد.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <form id="photoForm" method="POST" style="display:none;">
     <input type="hidden" name="save_photo" value="1">
     <input type="hidden" name="photo_type" id="p-type-input">
@@ -402,6 +652,12 @@ $currencyCode = get_setting('currency_code', 'ر.س');
 
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 <script>
+    // File name display
+    function showFileName(input) {
+        const fileName = input.files[0]?.name || 'لم يتم اختيار ملف';
+        document.getElementById('file_name').textContent = fileName;
+    }
+    
     // 1. التحكم في التبويبات
     function switchTab(tabId) {
         // إخفاء الكل
@@ -409,12 +665,16 @@ $currencyCode = get_setting('currency_code', 'ر.س');
         document.getElementById('tab-in').style.display = 'none';
         document.getElementById('tab-out').style.display = 'none';
         document.getElementById('tab-meters').style.display = 'none';
+        document.getElementById('tab-services').style.display = 'none';
+        document.getElementById('tab-pdf').style.display = 'none';
         
         // إزالة الكلاس النشط
         document.getElementById('btn-sig').classList.remove('active');
         document.getElementById('btn-in').classList.remove('active');
         document.getElementById('btn-out').classList.remove('active');
         document.getElementById('btn-meters').classList.remove('active');
+        document.getElementById('btn-services').classList.remove('active');
+        document.getElementById('btn-pdf').classList.remove('active');
         
         // تفعيل المطلوب
         document.getElementById('tab-'+tabId).style.display = 'block';
