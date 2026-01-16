@@ -32,7 +32,9 @@ if (isset($_POST['upload_contract_pdf']) && isset($_FILES['contract_pdf'])) {
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->file($file['tmp_name']);
         
-        if (in_array($mime, $allowed) && $file['size'] <= 10 * 1024 * 1024) { // Max 10MB
+        $maxSize = (int) get_setting('max_pdf_size', 10485760); // Default 10MB
+        
+        if (in_array($mime, $allowed) && $file['size'] <= $maxSize) {
             $filename = 'contract_' . $id . '_' . time() . '.pdf';
             $destination = 'uploads/' . $filename;
             

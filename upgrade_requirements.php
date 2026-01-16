@@ -2,9 +2,25 @@
 /**
  * Database upgrade script for new requirements
  * This script adds necessary fields and tables for the new features
+ * 
+ * SECURITY: This file should be deleted after running
  */
 
+// Security check - only allow execution once per day to prevent repeated runs
+$lockFile = sys_get_temp_dir() . '/dmc_upgrade_lock.txt';
+if (file_exists($lockFile)) {
+    $lockTime = filemtime($lockFile);
+    if (time() - $lockTime < 86400) { // 24 hours
+        die("Error: Upgrade script was already run recently. Delete the lock file if you need to run again.");
+    }
+}
+
 require_once 'config.php';
+
+// Only allow admin access
+if (!isset($_SESSION['uid']) || ($_SESSION['role'] ?? '') !== 'admin') {
+    die("Error: Only administrators can run database upgrades.");
+}
 
 echo "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Database Upgrade</title></head><body>";
 echo "<h2>Upgrading Database Schema...</h2>";
@@ -144,6 +160,10 @@ foreach ($upgrades as $msg) {
     echo "<li style='padding: 8px; margin: 5px 0; background: white; border-left: 4px solid $color; border-radius: 4px;'>$msg</li>";
 }
 echo "</ul>";
+
+// Create lock file to prevent repeated runs
+file_put_contents($lockFile, date('Y-m-d H:i:s'));
+
 echo "<div style='margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;'>";
 echo "<strong>⚠️ Important:</strong> Delete this file (upgrade_requirements.php) after successful upgrade for security reasons.";
 echo "</div>";

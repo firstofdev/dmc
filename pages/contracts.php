@@ -77,7 +77,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_contract'])) {
     ];
     
     $monthsInterval = $frequencyMonths[$paymentFrequency] ?? 12;
-    $paymentAmount = $totalAmount / (12 / $monthsInterval); // Calculate payment per period
+    
+    // Calculate payment per period (avoid division issues)
+    if ($monthsInterval >= 12) {
+        $paymentAmount = $totalAmount; // Annual payment
+        $numberOfPayments = 1;
+    } else {
+        $numberOfPayments = 12 / $monthsInterval;
+        $paymentAmount = $totalAmount / $numberOfPayments;
+    }
     
     // Generate payment schedule
     $currentDate = clone $startDate;

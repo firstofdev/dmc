@@ -38,9 +38,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_payment'])) {
             WHERE id = ?");
         $stmt->execute([$paidDate, $paymentMethod, $notes, $status, $newRemaining, $paymentType, $paymentId]);
         
-        // Log transaction
-        $stmt = $pdo->prepare("INSERT INTO transactions (payment_id, amount_paid, payment_method, transaction_date, notes) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$paymentId, $amountPaid, $paymentMethod, $paidDate, $notes]);
+        // Log transaction if table exists
+        try {
+            if (table_has_column($pdo, 'transactions', 'payment_id')) {
+                $stmt = $pdo->prepare("INSERT INTO transactions (payment_id, amount_paid, payment_method, transaction_date, notes) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([$paymentId, $amountPaid, $paymentMethod, $paidDate, $notes]);
+            }
+        } catch (Exception $e) {
+            // Ignore if transactions table doesn't exist
+        }
         
         echo "<script>window.location='index.php?p=payments';</script>";
     }
